@@ -434,6 +434,14 @@ printOn: aStream
 	^ self subclassResponsibility.! !
 
 
+!Entero methodsFor: 'testing' stamp: 'Nip 4/15/2019 10:28:45'!
+errorIfOne
+	self subclassResponsibility.! !
+
+!Entero methodsFor: 'testing' stamp: 'Nip 4/15/2019 10:27:00'!
+errorIfZero
+	self subclassResponsibility.! !
+
 !Entero methodsFor: 'testing' stamp: 'Nip 4/14/2019 15:02:00'!
 isNegative
 	
@@ -603,6 +611,14 @@ printOn: aStream
 	aStream print: value ! !
 
 
+!EnteroGreaterThanOne methodsFor: 'testing' stamp: 'Nip 4/15/2019 10:28:52'!
+errorIfOne
+	^nil! !
+
+!EnteroGreaterThanOne methodsFor: 'testing' stamp: 'Nip 4/15/2019 10:28:33'!
+errorIfZero
+	^nil! !
+
 !EnteroGreaterThanOne methodsFor: 'testing' stamp: 'Nip 4/14/2019 14:48:41'!
 isNegative
 	
@@ -680,9 +696,8 @@ sumToEntero: anAdder
 	
 ! !
 
-!EnteroGreaterThanOne methodsFor: 'auxiliary operations' stamp: 'Nip 4/14/2019 14:45:50'!
+!EnteroGreaterThanOne methodsFor: 'auxiliary operations' stamp: 'Nip 4/15/2019 10:40:42'!
 sumToFraccion: anAdder
-		"^ anAdder class with: (self class with: value * anAdder denominator integerValue + anAdder numerator integerValue) over: anAdder denominator."
 		|newNumerator newDenominator|
 		
 		newNumerator := self * anAdder denominator + anAdder numerator.
@@ -778,6 +793,14 @@ printOn: aStream
 
 	aStream print: value ! !
 
+
+!EnteroLessThanZero methodsFor: 'testing' stamp: 'Nip 4/15/2019 10:29:09'!
+errorIfOne
+	^nil! !
+
+!EnteroLessThanZero methodsFor: 'testing' stamp: 'Nip 4/15/2019 10:29:06'!
+errorIfZero
+	^nil! !
 
 !EnteroLessThanZero methodsFor: 'testing' stamp: 'Nip 4/14/2019 14:51:30'!
 isNegative
@@ -997,6 +1020,14 @@ sumToFraccion: anAdder
 		^ anAdder class with: anAdder numerator + anAdder denominator over: anAdder denominator! !
 
 
+!One methodsFor: 'testing' stamp: 'Nip 4/15/2019 10:29:57'!
+errorIfOne
+	^ self error: 'una fraccion no puede tener denominador 1 porque sino es un entero'! !
+
+!One methodsFor: 'testing' stamp: 'Nip 4/15/2019 10:29:21'!
+errorIfZero
+	^nil! !
+
 !One methodsFor: 'testing' stamp: 'Nip 4/14/2019 14:05:34'!
 isNegative
 	
@@ -1144,6 +1175,14 @@ sumToFraccion: anAdder
 		^ anAdder! !
 
 
+!Zero methodsFor: 'testing' stamp: 'Nip 4/15/2019 10:30:09'!
+errorIfOne
+	^nil! !
+
+!Zero methodsFor: 'testing' stamp: 'Nip 4/15/2019 10:30:29'!
+errorIfZero
+	^self error: 'una fraccion no puede ser cero' ! !
+
 !Zero methodsFor: 'testing' stamp: 'Nip 4/14/2019 13:27:52'!
 isNegative
 	
@@ -1220,21 +1259,13 @@ numerator
 	^ numerator! !
 
 
-!Fraccion methodsFor: 'initialization' stamp: 'Nip 4/14/2019 15:18:37'!
+!Fraccion methodsFor: 'initialization' stamp: 'Nip 4/15/2019 10:31:20'!
 initializeWith: aNumerator over: aDenominator
 
 	"Estas precondiciones estan por si se comenten errores en la implementacion - Hernan"
-	aNumerator isZero ifTrue: [ self error: 'una fraccion no puede ser cero' ].
-	aDenominator isOne ifTrue: [ self error: 'una fraccion no puede tener denominador 1 porque sino es un entero' ].
 	
-	"
-	Podríamos crear para sacar los ifs de las dos anteriores precondiciones mensajes del estilo 'errorIfZero' o 'errorIfOne' que tengan las cuatro subclases de Entero.
-	Si EnteroGreaterThanOne o EnteroLessThanZero o One reciben el mensaje 'errorIfZero', sus métodos devolverían nil.
-	En cambio, si Zero recibe el mensaje 'errorIfZero' devolvería self error: 'una fraccion no puede ser cero'.
-	De forma análoga con errorIfOne.
-	
-	Luego, sólo bastaría con hacer aNumerator errorIfZero. aDenominator errorIfOne.
-	"
+	aNumerator errorIfZero.
+	aDenominator errorIfOne.
 	
 	numerator := aNumerator.
 	denominator := aDenominator ! !
@@ -1359,7 +1390,7 @@ printOn: aStream
 Fraccion class
 	instanceVariableNames: ''!
 
-!Fraccion class methodsFor: 'intance creation' stamp: 'Nip 4/14/2019 15:22:53'!
+!Fraccion class methodsFor: 'intance creation' stamp: 'Nip 4/15/2019 10:25:34'!
 with: aDividend over: aDivisor
 
 	| greatestCommonDivisor numerator denominator |
@@ -1376,11 +1407,4 @@ with: aDividend over: aDivisor
 	denominator isOne ifTrue: [ ^numerator ].
 
 	^self new initializeWith: numerator over: denominator
-	
-	"No se me ocurre cómo sacar estos ifs. El primero es fácil ya que puedo hacer aDivisor errorIfZero.
-	Pero para los otros no se cómo hacer, dado que si bien podríamos hacer mensajes como 'returnZeroIfIsZero' para el segundo if, 
-		tendríamos que lograr que en el caso de que ese mensaje sea recibido por Zero, además de retornar '^Zero new initalizeWith: 0'
-		al mensaje 'returnZeroIfIsZero', también tendría que retornar eso en el mensaje with:over: (o sea, cortar 
-		la ejecución del método de with:over).
-	"
 	! !
