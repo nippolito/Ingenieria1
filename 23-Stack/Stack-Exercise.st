@@ -139,12 +139,12 @@ test10CanNotTopWhenThereAreNoObjectsInTheStack
 
 !classDefinition: #SentenceFinderByPrefixTest category: #'Stack-Exercise'!
 TestCase subclass: #SentenceFinderByPrefixTest
-	instanceVariableNames: 'ourSentences ourFinder'
+	instanceVariableNames: 'ourSentences ourOtherSentences ourFinder'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!SentenceFinderByPrefixTest methodsFor: 'setup' stamp: 'asd 4/19/2019 11:51:25'!
+!SentenceFinderByPrefixTest methodsFor: 'setup' stamp: 'Nipo 4/22/2019 15:15:07'!
 setUp
 
 	ourSentences := OOStack new.
@@ -153,7 +153,10 @@ setUp
 	ourSentences push: 'The winds of Winter'.
 	ourSentences push: 'Winter is here'.
 	
-	ourFinder := SentenceFinderByPrefix with: ourSentences.! !
+	ourFinder := SentenceFinderByPrefix with: ourSentences.
+	
+	ourOtherSentences := OOStack new.
+	ourOtherSentences push: 'primera'.! !
 
 
 !SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'asd 4/19/2019 11:52:05'!
@@ -174,8 +177,16 @@ test02PrefixShouldNotContainEmptySpaces
 	withExceptionDo: [ :anError |
 		self assert: anError messageText = 'El prefijo tiene al menos un espacio vacío' ]! !
 
-!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'asd 4/19/2019 14:38:37'!
-test03FinderSentencesShouldNotChangeAfterExecution
+!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'Nipo 4/22/2019 15:13:02'!
+test03PrefixShouldBeText
+	self
+	should: [ ourFinder find: 27]
+	raise: Error - MessageNotUnderstood 
+	withExceptionDo: [ :anError |
+		self assert: anError messageText = 'El prefijo no es texto' ]! !
+
+!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'Nipo 4/22/2019 15:12:55'!
+test04FinderSentencesShouldNotChangeAfterExecution
 	|oldSentences newSentences topsEqual|
 	
 	oldSentences := ourFinder sentences copy.
@@ -192,24 +203,21 @@ test03FinderSentencesShouldNotChangeAfterExecution
 	self assert: topsEqual = true.	
 	! !
 
-!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'asd 4/19/2019 11:54:24'!
-test04FinderIsCaseSensitive
-	|someSentences aFinder resultFound|
-
-	someSentences := OOStack new.
-	someSentences push: 'winter is coming'.
+!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'Nipo 4/22/2019 15:21:54'!
+test05FinderIsCaseSensitive
+	|resultFound aFinder|
 	
-	aFinder := SentenceFinderByPrefix with: someSentences.
-	
-	resultFound := aFinder find: 'Winter'.
+	aFinder := SentenceFinderByPrefix with: ourOtherSentences.
+	resultFound := aFinder find: 'Pri'.
 	
 	self assert: resultFound isEmpty.
 	
 	
+	
 	! !
 
-!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'asd 4/19/2019 14:39:07'!
-test05ResultIsEmptyWhenSentencesAreEmpty
+!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'Nipo 4/22/2019 15:12:41'!
+test06ResultIsEmptyWhenSentencesAreEmpty
 	|someSentences resultFound aFinder|
 		
 	someSentences := OOStack new.
@@ -221,8 +229,8 @@ test05ResultIsEmptyWhenSentencesAreEmpty
 	self assert: resultFound isEmpty.
 	! !
 
-!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'asd 4/19/2019 11:56:00'!
-test06CatedraExampleWorksWell
+!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'Nipo 4/22/2019 15:12:36'!
+test07CatedraExampleWorksWell
 	|resultFound|
 
 	resultFound := ourFinder find: 'Wint'.
@@ -230,8 +238,8 @@ test06CatedraExampleWorksWell
 	self assert: resultFound size = 1.
 	self assert: resultFound first = 'Winter is here'.! !
 
-!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'asd 4/19/2019 11:57:21'!
-test07CatedraExampleWithDifferentSentenceOrderWorksWell
+!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'Nipo 4/22/2019 15:12:30'!
+test08CatedraExampleWithDifferentSentenceOrderWorksWell
 	|someSentences aFinder resultFound|
 
 	someSentences := OOStack new.
@@ -247,15 +255,14 @@ test07CatedraExampleWithDifferentSentenceOrderWorksWell
 	self assert: resultFound size = 1.
 	self assert: resultFound first = 'Winter is here'.! !
 
-!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'asd 4/19/2019 16:38:38'!
-test08FinderWorksWellWhenSentencesHaveStrangeCharacters
-	|aStack aFinder resultFound|
+!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'Nipo 4/22/2019 16:09:08'!
+test09FinderWorksWellWhenSentencesHaveStrangeCharacters
+	|aFinder resultFound|
 	
-	aStack := OOStack new.
-	aStack push: '//'.
-	aStack push: '$%x&)('.
-	aStack push: '*^*]{}"·!!ºª'.
-	aFinder := SentenceFinderByPrefix with: aStack.
+	ourOtherSentences push: '//'.
+	ourOtherSentences push: '$%x&)('.
+	ourOtherSentences push: '*^*]{}"·!!ºª'.
+	aFinder := SentenceFinderByPrefix with: ourOtherSentences.
 
 	resultFound := aFinder find: '*^'.
 	
@@ -263,8 +270,8 @@ test08FinderWorksWellWhenSentencesHaveStrangeCharacters
 	self assert: resultFound first = '*^*]{}"·!!ºª'.
 	! !
 
-!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'asd 4/19/2019 16:47:05'!
-test09FinderCanReturnMoreThanOneSentence
+!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'Nipo 4/22/2019 15:12:15'!
+test10FinderCanReturnMoreThanOneSentence
 	|resultFound|
 
 	resultFound := ourFinder find: 'win'.
@@ -272,6 +279,16 @@ test09FinderCanReturnMoreThanOneSentence
 	self assert: resultFound size = 2.
 	self assert: (resultFound find: 'winter is coming') > 0. 
 	self assert: (resultFound find: 'winning is everything') > 0.! !
+
+!SentenceFinderByPrefixTest methodsFor: 'test' stamp: 'Nipo 4/22/2019 16:06:17'!
+test11FinderSentencesShouldBeText
+	ourOtherSentences push: 47.
+	self
+	should: [ SentenceFinderByPrefix with: ourOtherSentences]
+	raise: Error - MessageNotUnderstood 
+	withExceptionDo: [ :anError |
+		self assert: anError messageText = 'Alguna oración no es texto' ]
+		! !
 
 
 !classDefinition: #OOStack category: #'Stack-Exercise'!
@@ -281,12 +298,10 @@ Object subclass: #OOStack
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!OOStack methodsFor: 'methods' stamp: 'Nipo 4/22/2019 14:24:36'!
+!OOStack methodsFor: 'methods' stamp: 'Nipo 4/22/2019 14:47:10'!
 initialize
 	lastElement := Base new.
 	size := 0.
-	"^self."
-	
 	
 	! !
 
@@ -395,6 +410,17 @@ Object subclass: #SentenceFinderByPrefix
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
+!SentenceFinderByPrefix methodsFor: 'methods - private' stamp: 'Nipo 4/22/2019 16:11:51'!
+checkThatSentencesAreReallySentences: somePossibleSentences
+	|actualSentence someSentencesBackup|
+		
+	someSentencesBackup := somePossibleSentences copy.
+	
+	someSentencesBackup size timesRepeat: [
+		actualSentence := someSentencesBackup pop.
+		actualSentence isString ifFalse: [self error: 'Alguna oración no es texto']
+	].! !
+
 !SentenceFinderByPrefix methodsFor: 'methods - private' stamp: 'Nipo 4/22/2019 10:33:06'!
 sentencesAsOrderedCollection
 	|sentencesOC sentencesBackup|
@@ -411,11 +437,12 @@ sentencesAsOrderedCollection
 	^sentencesOC! !
 
 
-!SentenceFinderByPrefix methodsFor: 'methods' stamp: 'Nipo 4/22/2019 10:33:53'!
+!SentenceFinderByPrefix methodsFor: 'methods' stamp: 'Nipo 4/22/2019 15:08:39'!
 find: aPrefix
 
 	|sentencesThatMatch sentencesAsOC|
 	
+	aPrefix isString ifFalse: [self error: 'El prefijo no es texto'].
 	aPrefix isEmpty ifTrue: [self error: 'El prefijo está vacío'].
 	(aPrefix select: [:a | a asString = ' ']) isEmpty ifFalse: [self error: 'El prefijo tiene al menos un espacio vacío'].	
 
@@ -430,8 +457,9 @@ sentences
 	^sentences! !
 
 
-!SentenceFinderByPrefix methodsFor: 'initialization' stamp: 'asd 4/19/2019 11:41:49'!
+!SentenceFinderByPrefix methodsFor: 'initialization' stamp: 'Nipo 4/22/2019 15:49:41'!
 initializeWith: someSentences
+	self checkThatSentencesAreReallySentences: someSentences.
 	sentences := someSentences.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
@@ -440,6 +468,6 @@ initializeWith: someSentences
 SentenceFinderByPrefix class
 	instanceVariableNames: ''!
 
-!SentenceFinderByPrefix class methodsFor: 'instance creation' stamp: 'asd 4/19/2019 11:47:29'!
+!SentenceFinderByPrefix class methodsFor: 'instance creation' stamp: 'Nipo 4/22/2019 16:02:54'!
 with: someSentences
 	^ self new initializeWith: someSentences.! !
