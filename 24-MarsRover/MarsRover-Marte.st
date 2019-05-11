@@ -1,131 +1,93 @@
 !classDefinition: #MarsRoverTest category: #'MarsRover-Marte'!
 TestCase subclass: #MarsRoverTest
-	instanceVariableNames: ''
+	instanceVariableNames: 'ourMarsRover'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'MarsRover-Marte'!
 
-!MarsRoverTest methodsFor: 'test' stamp: 'JIG 5/10/2019 17:53:42'!
+!MarsRoverTest methodsFor: 'test' stamp: 'Nip 5/11/2019 17:21:28'!
+setUp
+	ourMarsRover := MarsRover at: 0@0 pointing: #North.
+! !
+
+!MarsRoverTest methodsFor: 'test' stamp: 'Nip 5/11/2019 17:22:17'!
 test01ProcessingAnEmptyStringDoesNothing
 	"Estamos testeando que la secuencia vacia no tome efecto"
-	| aMarsRover aSequenceOfCommands |
-	
-	aMarsRover := MarsRover at: 0@0 pointing: #North.
+	| aSequenceOfCommands |
 	aSequenceOfCommands := ''.
 	
-	aMarsRover process: aSequenceOfCommands.
-	
-	self assert: (aMarsRover isAt: (0@0) pointing: #North).
-	
+	ourMarsRover process: aSequenceOfCommands.
+	self assert: (ourMarsRover isAt: (0@0) pointing: #North).
 ! !
 
-!MarsRoverTest methodsFor: 'test' stamp: 'JIG 5/10/2019 17:53:46'!
+!MarsRoverTest methodsFor: 'test' stamp: 'Nip 5/11/2019 17:23:05'!
 test02MovesForwardWhenProcessingForwardCommand
 	"Estamos testeando avanzar adelante mirando hacia el norte una vez"
-	| aMarsRover aSequenceOfCommands |
-	
-	aMarsRover := MarsRover at: 0@0 pointing: #North.
+	| aSequenceOfCommands |
 	aSequenceOfCommands := 'f'.
-	
-	aMarsRover process: aSequenceOfCommands.
-	
-	self deny: (aMarsRover isAt: (0@0) pointing: #North).
-	self assert: (aMarsRover isAt: (0@1) pointing: #North).
-	
+	ourMarsRover process: aSequenceOfCommands.
+	self deny: (ourMarsRover isAt: (0@0) pointing: #North).
+	self assert: (ourMarsRover isAt: (0@1) pointing: #North).
 ! !
 
-!MarsRoverTest methodsFor: 'test' stamp: 'JIG 5/10/2019 17:53:49'!
+!MarsRoverTest methodsFor: 'test' stamp: 'Nip 5/11/2019 17:23:47'!
 test03MovesForwardMoreThanOneTimeWhenProcessingManyForwardCommands
 	"Estamos testeando avanzar adelante yendo al norte mas de una vez"
-	| aMarsRover aSequenceOfCommands |
-	
-	aMarsRover := MarsRover at: 0@0 pointing: #North.
+	| aSequenceOfCommands |
 	aSequenceOfCommands := 'ff'.
+	ourMarsRover process: aSequenceOfCommands.
 	
-	aMarsRover process: aSequenceOfCommands.
-	
-	self assert: (aMarsRover isAt: (0@2) pointing: #North).
-	
+	self assert: (ourMarsRover isAt: (0@2) pointing: #North).
 ! !
 
-!MarsRoverTest methodsFor: 'test' stamp: 'JIG 5/10/2019 17:53:55'!
+!MarsRoverTest methodsFor: 'test' stamp: 'Nip 5/11/2019 17:24:11'!
 test04MovesBackwardWhenProcessingBackwardCommand
 	"Estamos testeando retroceder mirando al norte una vez"
-	| aMarsRover aSequenceOfCommands |
-	
-	aMarsRover := MarsRover at: 0@0 pointing: #North.
+	| aSequenceOfCommands |
 	aSequenceOfCommands := 'b'.
-	
-	aMarsRover process: aSequenceOfCommands.
-	
-	self assert: (aMarsRover isAt: (0@-1) pointing: #North).
-	
+	ourMarsRover process: aSequenceOfCommands.
+	self assert: (ourMarsRover isAt: (0@-1) pointing: #North).
 ! !
 
-!MarsRoverTest methodsFor: 'test' stamp: 'JIG 5/10/2019 17:54:20'!
+!MarsRoverTest methodsFor: 'test' stamp: 'Nip 5/11/2019 17:24:40'!
 test05RotatesLeftWhenProcessingLeftCommand
 	"Estamos testeando rotar a la izquierda una vez mirando inicialmente al norte"
-	| aMarsRover aSequenceOfCommands |
-	
-	aMarsRover := MarsRover at: 0@0 pointing: #North.
+	| aSequenceOfCommands |
 	aSequenceOfCommands := 'l'.
-	
-	aMarsRover process: aSequenceOfCommands.
-	
-	self assert: (aMarsRover isAt: (0@0) pointing: #West).! !
+	ourMarsRover process: aSequenceOfCommands.
+	self assert: (ourMarsRover isAt: (0@0) pointing: #West).! !
 
-!MarsRoverTest methodsFor: 'test' stamp: 'JIG 5/10/2019 17:54:33'!
+!MarsRoverTest methodsFor: 'test' stamp: 'Nip 5/11/2019 17:25:02'!
 test06RotatesRightWhenProcessingRightCommand
 	"Estamos testeando rotar a la derecha una vez mirando inicialmente al norte"
-	| aMarsRover aSequenceOfCommands |
-	
-	aMarsRover := MarsRover at: 0@0 pointing: #North.
+	| aSequenceOfCommands |
 	aSequenceOfCommands := 'r'.
-	
-	aMarsRover process: aSequenceOfCommands.
-	
-	self deny: (aMarsRover isAt: (0@0) pointing: #North).
-	self assert: (aMarsRover isAt: (0@0) pointing: #East).! !
+	ourMarsRover process: aSequenceOfCommands.
+	self deny: (ourMarsRover isAt: (0@0) pointing: #North).
+	self assert: (ourMarsRover isAt: (0@0) pointing: #East).! !
 
-!MarsRoverTest methodsFor: 'test' stamp: 'JIG 5/10/2019 18:15:35'!
+!MarsRoverTest methodsFor: 'test' stamp: 'Nip 5/11/2019 17:25:34'!
 test07DoesntProcessAnInvalidCommand
 	"Estamos testeando que avanzar y luego tener un comando invalido nos devuelva una excepcion pero que se quede fijo"
-	| aMarsRover aSequenceOfCommands |
-	
-	aMarsRover := MarsRover at: 0@0 pointing: #North.
+	| aSequenceOfCommands |
 	aSequenceOfCommands := 'x'.
-	
-	self should: [ aMarsRover process: aSequenceOfCommands. ] 
-		raise: Error 
-		withExceptionDo: [ :anError |
-			self assert: MarsRover cannotProcessInvalidCommand = anError messageText.
-			self assert: (aMarsRover isAt: (0@0) pointing: #North).
-			].! !
+	self should: [ ourMarsRover process: aSequenceOfCommands. ] 		raise: Error 		withExceptionDo: [ :anError |			self assert: MarsRover cannotProcessInvalidCommand = anError messageText.			self assert: (ourMarsRover isAt: (0@0) pointing: #North).			].! !
 
-!MarsRoverTest methodsFor: 'test' stamp: 'JIG 5/10/2019 18:15:48'!
+!MarsRoverTest methodsFor: 'test' stamp: 'Nip 5/11/2019 17:26:03'!
 test08KeepsProcessingUntilAnInvalidCommandComesIn
 	"Estamos testeando que avanzar y luego tener un comando invalido nos devuelva una excepcion pero que haya avanzado una UNICA vez"
-	| aMarsRover aSequenceOfCommands |
-	
-	aMarsRover := MarsRover at: 0@0 pointing: #North.
-	aSequenceOfCommands := 'fxf'.
-	
-	self should: [ aMarsRover process: aSequenceOfCommands. ] 
-		raise: Error 
-		withExceptionDo: [:anError | 
-			self assert: MarsRover cannotProcessInvalidCommand = anError messageText.
-			self assert: (aMarsRover isAt: (0@1) pointing: #North).].! !
+	| aSequenceOfCommands |
 
-!MarsRoverTest methodsFor: 'test' stamp: 'JIG 5/10/2019 18:04:49'!
+	aSequenceOfCommands := 'fxf'.
+	self should: [ ourMarsRover process: aSequenceOfCommands. ] 		raise: Error 		withExceptionDo: [:anError | 			self assert: MarsRover cannotProcessInvalidCommand = anError messageText.			self assert: (ourMarsRover isAt: (0@1) pointing: #North).].! !
+
+!MarsRoverTest methodsFor: 'test' stamp: 'Nip 5/11/2019 17:26:24'!
 test09CanRotateLeftManyTimes
 	"Estamos testeando que rotar realizar 4 rotaciones hacia la izquierda nos da correctamente las 4 orientaciones (y se mantiene fija la coordenada)."
-	| aMarsRover aSequenceOfCommands |
-	
-	aMarsRover := MarsRover at: 0@0 pointing: #North.
+	| aSequenceOfCommands |
 	aSequenceOfCommands := 'lllll'.
-	aMarsRover process: aSequenceOfCommands.
-	self assert: (aMarsRover isAt: (0@0) pointing: #West).
-	
+	ourMarsRover process: aSequenceOfCommands.
+	self assert: (ourMarsRover isAt: (0@0) pointing: #West).
 	"
 	aMarsRover process: aSequenceOfCommands.
 	self assert: (aMarsRover isAt: (0@0) pointing: #West).
@@ -140,16 +102,13 @@ test09CanRotateLeftManyTimes
 	self assert: (aMarsRover isAt: (0@0) pointing: #North).
 	"! !
 
-!MarsRoverTest methodsFor: 'test' stamp: 'JIG 5/10/2019 18:05:29'!
+!MarsRoverTest methodsFor: 'test' stamp: 'Nip 5/11/2019 17:26:44'!
 test10CanRotateRightManyTimes
 	"Estamos testeando que rotar realizar 4 rotaciones hacia la derecha nos da correctamente las 4 orientaciones (y se mantiene fija la coordenada)."
-	| aMarsRover aSequenceOfCommands |
-	
-	aMarsRover := MarsRover at: 0@0 pointing: #North.
+	| aSequenceOfCommands |
 	aSequenceOfCommands := 'rrrrr'.
-	aMarsRover process: aSequenceOfCommands.
-	self assert: (aMarsRover isAt: (0@0) pointing: #East).
-	
+	ourMarsRover process: aSequenceOfCommands.
+	self assert: (ourMarsRover isAt: (0@0) pointing: #East).
 	"
 	aMarsRover process: aSequenceOfCommands.
 	self assert: (aMarsRover isAt: (0@0) pointing: #East).
@@ -164,26 +123,19 @@ test10CanRotateRightManyTimes
 	self assert: (aMarsRover isAt: (0@0) pointing: #North).
 	"! !
 
-!MarsRoverTest methodsFor: 'test' stamp: 'JIG 5/10/2019 18:35:15'!
+!MarsRoverTest methodsFor: 'test' stamp: 'Nip 5/11/2019 17:27:46'!
 test11MovesForwardInAnyOrientation
 	"Estamos testeando que rotar izquierda y luego avanzar, debe considerar hacia que direccion debe avanzar"
-	| aMarsRover aSequenceOfCommands |
-	
-	aMarsRover := MarsRover at: 0@0 pointing: #North.
+	| aSequenceOfCommands |
 	aSequenceOfCommands := 'lf'.
-	
-	aMarsRover process: aSequenceOfCommands.
-	self assert: (aMarsRover isAt: (-1@0) pointing: #West).
-	
-	aMarsRover process: aSequenceOfCommands.
-	self assert: (aMarsRover isAt: (-1@-1) pointing: #South).
-	
-	aMarsRover process: aSequenceOfCommands.
-	self assert: (aMarsRover isAt: (0@-1) pointing: #East).
-	
-	aMarsRover process: aSequenceOfCommands.
-	self assert: (aMarsRover isAt: (0@0) pointing: #North).
-	
+	ourMarsRover process: aSequenceOfCommands.
+	self assert: (ourMarsRover isAt: (-1@0) pointing: #West).
+	ourMarsRover process: aSequenceOfCommands.
+	self assert: (ourMarsRover isAt: (-1@-1) pointing: #South).
+	ourMarsRover process: aSequenceOfCommands.
+	self assert: (ourMarsRover isAt: (0@-1) pointing: #East).
+	ourMarsRover process: aSequenceOfCommands.
+	self assert: (ourMarsRover isAt: (0@0) pointing: #North).
 	"	| aMarsRover aSequenceOfCommands |
 	
 	aMarsRover := MarsRover at: 0@0 pointing: #North.
@@ -201,37 +153,28 @@ test11MovesForwardInAnyOrientation
 	aMarsRover process: aSequenceOfCommands.
 	self assert: (aMarsRover isAt: (0@0) pointing: #North)."! !
 
-!MarsRoverTest methodsFor: 'test' stamp: 'JIG 5/10/2019 18:35:38'!
+!MarsRoverTest methodsFor: 'test' stamp: 'Nip 5/11/2019 17:29:04'!
 test12MovesBackwardsInAnyOrientation
 	"Estamos testeando que rotar derecha y luego retroceder, debe considerar hacia que direccion debe retroceder"
-	| aMarsRover aSequenceOfCommands |
-	
-	aMarsRover := MarsRover at: 0@0 pointing: #North.
+	| aSequenceOfCommands |
 	aSequenceOfCommands := 'rb'.
-	
-	aMarsRover process: aSequenceOfCommands.
-	self assert: (aMarsRover isAt: (-1@0) pointing: #East).
-	
-	aMarsRover process: aSequenceOfCommands.
-	self assert: (aMarsRover isAt: (-1@1) pointing: #South).
-	
-	aMarsRover process: aSequenceOfCommands.
-	self assert: (aMarsRover isAt: (0@1) pointing: #West).
-	
-	aMarsRover process: aSequenceOfCommands.
-	self assert: (aMarsRover isAt: (0@0) pointing: #North).! !
+	ourMarsRover process: aSequenceOfCommands.
+	self assert: (ourMarsRover isAt: (-1@0) pointing: #East).
+	ourMarsRover process: aSequenceOfCommands.
+	self assert: (ourMarsRover isAt: (-1@1) pointing: #South).
+	ourMarsRover process: aSequenceOfCommands.
+	self assert: (ourMarsRover isAt: (0@1) pointing: #West).
+	ourMarsRover process: aSequenceOfCommands.
+	self assert: (ourMarsRover isAt: (0@0) pointing: #North).! !
 
-!MarsRoverTest methodsFor: 'test' stamp: 'JIG 5/10/2019 18:36:53'!
+!MarsRoverTest methodsFor: 'test' stamp: 'Nip 5/11/2019 17:29:30'!
 test13AnyInvalidCommandShouldStopTheProcessing
 	"Estamos testeando que cualquier comando invalido deje de ejecutar en el ?"
-	| aMarsRover aSequenceOfCommands |
-	
-	aMarsRover := MarsRover at: 0@0 pointing: #North.
+	| aSequenceOfCommands |
 	aSequenceOfCommands := 'ffffbfr?ffrfb'.
-	
-	self should: [ aMarsRover process: aSequenceOfCommands. ] 
+	self should: [ ourMarsRover process: aSequenceOfCommands. ] 
 		raise: Error 
-		withExceptionDo: [:anException | self assert: (aMarsRover isAt: (0@4) pointing: #East).].! !
+		withExceptionDo: [:anException | self assert: (ourMarsRover isAt: (0@4) pointing: #East).].! !
 
 
 !classDefinition: #MarsRover category: #'MarsRover-Marte'!
