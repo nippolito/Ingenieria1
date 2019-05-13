@@ -191,14 +191,6 @@ rotateRight
 isValidCommand: aCommand
 	^ #($r $l $f $b) includes: aCommand.! !
 
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:37:05'!
-moveBackwardsWhenEastOrientation
-	location := location - (1@0).! !
-
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:37:20'!
-moveBackwardsWhenNorthOrientation
-	location := location - (0@1).! !
-
 !MarsRover methodsFor: 'private' stamp: 'Nip 5/13/2019 10:26:00'!
 moveBackwardsWhenPointingEast
 	location := location - (1@0).! !
@@ -215,25 +207,13 @@ moveBackwardsWhenPointingSouth
 moveBackwardsWhenPointingWest
 	location := location - (-1@0).! !
 
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:37:31'!
-moveBackwardsWhenSouthOrientation
-	location := location - (0@-1).! !
-
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:37:41'!
-moveBackwardsWhenWestOrientation
-	location := location - (-1@0).! !
-
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:34:51'!
-moveForwardWhenEastOrientation
-	location := location + (1@0).! !
-
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:35:01'!
-moveForwardWhenNorthOrientation
-	location := location + (0@1).! !
-
 !MarsRover methodsFor: 'private' stamp: 'Nip 5/13/2019 10:26:30'!
 moveForwardWhenPointingEast
 	location := location + (1@0).! !
+
+!MarsRover methodsFor: 'private' stamp: 'Nipo 5/13/2019 15:33:06'!
+moveForwardWhenPointingNorth
+	location := location + (0@1).! !
 
 !MarsRover methodsFor: 'private' stamp: 'Nip 5/13/2019 10:26:38'!
 moveForwardWhenPointingSouth
@@ -241,14 +221,6 @@ moveForwardWhenPointingSouth
 
 !MarsRover methodsFor: 'private' stamp: 'Nip 5/13/2019 10:26:44'!
 moveForwardWhenPointingWest
-	location := location + (-1@0).! !
-
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:35:18'!
-moveForwardWhenSouthOrientation
-	location := location + (0@-1).! !
-
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:35:10'!
-moveForwardWhenWestOrientation
 	location := location + (-1@0).! !
 
 !MarsRover methodsFor: 'private' stamp: 'Nip 5/12/2019 15:39:35'!
@@ -296,46 +268,6 @@ rotateRightWhenPointingSouth
 rotateRightWhenPointingWest
 	state := MarsRoverPointingNorthState new initializeWith: self.! !
 
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:27:55'!
-turnLeftWhenEastOrientation
-	direction := #North.
-	state := MarsRoverNorthOrientationState new initializeWith: self.! !
-
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:28:15'!
-turnLeftWhenNorthOrientation
-	direction := #West.
-	state := MarsRoverWestOrientationState new initializeWith: self.! !
-
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:30:19'!
-turnLeftWhenSouthOrientation
-	direction := #East.
-	state := MarsRoverEastOrientationState new initializeWith: self.! !
-
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:29:09'!
-turnLeftWhenWestOrientation
-	direction := #South.
-	state := MarsRoverSouthOrientationState new initializeWith: self.! !
-
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:32:21'!
-turnRightWhenEastOrientation
-	direction := #South.
-	state := MarsRoverSouthOrientationState new initializeWith: self.! !
-
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:32:47'!
-turnRightWhenNorthOrientation
-	direction := #East.
-	state := MarsRoverEastOrientationState new initializeWith: self.! !
-
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:32:32'!
-turnRightWhenSouthOrientation
-	direction := #West.
-	state := MarsRoverWestOrientationState new initializeWith: self.! !
-
-!MarsRover methodsFor: 'private' stamp: 'JIG 5/10/2019 17:32:40'!
-turnRightWhenWestOrientation
-	direction := #North.
-	state := MarsRoverNorthOrientationState new initializeWith: self.! !
-
 
 !MarsRover methodsFor: 'initialization' stamp: 'Nip 5/13/2019 10:25:35'!
 initializeAt: aPoint pointing: aDirection 
@@ -357,10 +289,6 @@ isAt: aPoint pointing: aDirection
 !classDefinition: 'MarsRover class' category: #'MarsRover-Marte'!
 MarsRover class
 	instanceVariableNames: ''!
-
-!MarsRover class methodsFor: 'error messages' stamp: 'JIG 5/10/2019 18:12:21'!
-cannotProcessInvalidCommand
-	^'Comando Invalido'.! !
 
 !MarsRover class methodsFor: 'error messages' stamp: 'Nip 5/13/2019 10:21:35'!
 cannotProcessInvalidCommandErrorDescription
@@ -415,54 +343,6 @@ pointingTo
 	^self subclassResponsibility.! !
 
 
-!classDefinition: #MarsRoverEastOrientationState category: #'MarsRover-Marte'!
-MarsRoverState subclass: #MarsRoverEastOrientationState
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'MarsRover-Marte'!
-
-!MarsRoverEastOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:36:15'!
-moveBackwards
-	marsRover moveBackwardsWhenEastOrientation.! !
-
-!MarsRoverEastOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:33:50'!
-moveForward
-	marsRover moveForwardWhenEastOrientation.! !
-
-!MarsRoverEastOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:26:20'!
-turnLeft
-	marsRover turnLeftWhenEastOrientation.! !
-
-!MarsRoverEastOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:31:31'!
-turnRight
-	marsRover turnRightWhenEastOrientation.! !
-
-
-!classDefinition: #MarsRoverNorthOrientationState category: #'MarsRover-Marte'!
-MarsRoverState subclass: #MarsRoverNorthOrientationState
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'MarsRover-Marte'!
-
-!MarsRoverNorthOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:36:29'!
-moveBackwards
-	marsRover moveBackwardsWhenNorthOrientation.! !
-
-!MarsRoverNorthOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:34:02'!
-moveForward
-	marsRover moveForwardWhenNorthOrientation.! !
-
-!MarsRoverNorthOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:26:41'!
-turnLeft
-	marsRover turnLeftWhenNorthOrientation.! !
-
-!MarsRoverNorthOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:31:42'!
-turnRight
-	marsRover turnRightWhenNorthOrientation.! !
-
-
 !classDefinition: #MarsRoverPointingEastState category: #'MarsRover-Marte'!
 MarsRoverState subclass: #MarsRoverPointingEastState
 	instanceVariableNames: ''
@@ -508,9 +388,9 @@ pointingTo
 moveBackwards
 	marsRover moveBackwardsWhenPointingNorth.! !
 
-!MarsRoverPointingNorthState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:34:02'!
+!MarsRoverPointingNorthState methodsFor: 'marsRover operations' stamp: 'Nipo 5/13/2019 15:33:19'!
 moveForward
-	marsRover moveForwardWhenNorthOrientation.! !
+	marsRover moveForwardWhenPointingNorth! !
 
 !MarsRoverPointingNorthState methodsFor: 'marsRover operations' stamp: 'Nip 5/13/2019 10:27:01'!
 rotateLeft
@@ -577,51 +457,3 @@ rotateLeft
 !MarsRoverPointingWestState methodsFor: 'marsRover operations' stamp: 'Nip 5/13/2019 10:27:40'!
 rotateRight
 	marsRover rotateRightWhenPointingWest.! !
-
-
-!classDefinition: #MarsRoverSouthOrientationState category: #'MarsRover-Marte'!
-MarsRoverState subclass: #MarsRoverSouthOrientationState
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'MarsRover-Marte'!
-
-!MarsRoverSouthOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:36:36'!
-moveBackwards
-	marsRover moveBackwardsWhenSouthOrientation.! !
-
-!MarsRoverSouthOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:34:10'!
-moveForward
-	marsRover moveForwardWhenSouthOrientation.! !
-
-!MarsRoverSouthOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:26:50'!
-turnLeft
-	marsRover turnLeftWhenSouthOrientation.! !
-
-!MarsRoverSouthOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:31:52'!
-turnRight
-	marsRover turnRightWhenSouthOrientation.! !
-
-
-!classDefinition: #MarsRoverWestOrientationState category: #'MarsRover-Marte'!
-MarsRoverState subclass: #MarsRoverWestOrientationState
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'MarsRover-Marte'!
-
-!MarsRoverWestOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:36:42'!
-moveBackwards
-	marsRover moveBackwardsWhenWestOrientation.! !
-
-!MarsRoverWestOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:34:17'!
-moveForward
-	marsRover moveForwardWhenWestOrientation.! !
-
-!MarsRoverWestOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:26:58'!
-turnLeft
-	marsRover turnLeftWhenWestOrientation.! !
-
-!MarsRoverWestOrientationState methodsFor: 'marsRover operations' stamp: 'JIG 5/10/2019 17:32:03'!
-turnRight
-	marsRover turnRightWhenWestOrientation.! !
