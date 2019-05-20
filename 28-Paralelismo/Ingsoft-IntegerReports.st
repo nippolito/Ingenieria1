@@ -319,6 +319,6 @@ then: aBlockToRun
 Promise class
 	instanceVariableNames: ''!
 
-!Promise class methodsFor: 'as yet unclassified' stamp: 'Nip 5/17/2019 14:40:50'!
+!Promise class methodsFor: 'initialization' stamp: 'Nip 5/17/2019 14:40:50'!
 resolve: aBlockToRun
 	^ self new initializeWith: aBlockToRun.! !
