@@ -135,6 +135,16 @@ wait
 	(Delay forSeconds: 1) wait.
 ! !
 
+
+!IntegerReport methodsFor: 'private' stamp: 'Nipo 5/20/2019 16:06:48'!
+execute: aClosureToRun inParallelWith: aClosureToRunInParallel andAfter: aClosureToRunAfter
+
+	|aPromise|
+	
+	aPromise := Promise resolve: aClosureToRun.
+	aClosureToRunInParallel value.
+	aPromise then: aClosureToRunAfter.! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'IntegerReport class' category: #'Ingsoft-IntegerReports'!
@@ -165,16 +175,6 @@ value
 		lines addAll: basicPropertiesLines] inParallelWith: [complexPropertiesLines := (ComplexIntegerPropertiesReport for: integerToAnalize) value]
 		andAfter: [lines addAll: complexPropertiesLines. ^lines].! !
 
-
-!CombinedIntegerPropertiesReport methodsFor: 'private' stamp: 'Nipo 5/20/2019 14:46:30'!
-execute: aClosureToRun inParallelWith: aClosureToRunInParallel andAfter: aClosureToRunAfter
-
-	|aPromise|
-	
-	aPromise := Promise resolve: aClosureToRun.
-	aClosureToRunInParallel value.
-	aPromise then: aClosureToRunAfter.! !
-
 
 !classDefinition: #CompleteIntegerReport category: #'Ingsoft-IntegerReports'!
 IntegerReport subclass: #CompleteIntegerReport
@@ -194,16 +194,6 @@ value
 		lines addAll: combinedPropertiesLines] inParallelWith: [differentBasesLines := (IntegerOnDifferentBasesReport for: integerToAnalize) value.]
 		andAfter: [lines addAll: differentBasesLines. ^lines.].
 	! !
-
-
-!CompleteIntegerReport methodsFor: 'private' stamp: 'Nipo 5/20/2019 14:46:38'!
-execute: aClosureToRun inParallelWith: aClosureToRunInParallel andAfter: aClosureToRunAfter
-
-	|aPromise|
-	
-	aPromise := Promise resolve: aClosureToRun.
-	aClosureToRunInParallel value.
-	aPromise then: aClosureToRunAfter.! !
 
 
 !classDefinition: #IntegerOnDifferentBasesReport category: #'Ingsoft-IntegerReports'!
