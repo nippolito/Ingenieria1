@@ -29,3 +29,4 @@ solución 3. Recuerden que la mejor solución es la que implica tocar
 menos código existente.
 
  
+NO se pueden comentar los 'self wait'

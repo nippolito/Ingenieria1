@@ -154,19 +154,26 @@ IntegerReport subclass: #CombinedIntegerPropertiesReport
 	poolDictionaries: ''
 	category: 'Ingsoft-IntegerReports'!
 
-!CombinedIntegerPropertiesReport methodsFor: 'reporting' stamp: 'sad 5/16/2019 20:09:23'!
+!CombinedIntegerPropertiesReport methodsFor: 'reporting' stamp: 'Nipo 5/20/2019 14:34:09'!
 value
-	| basicPropertiesLines complexPropertiesLines lines aSemaphore |
-	lines := OrderedCollection new.	aSemaphore := Semaphore new.
 
-	[basicPropertiesLines := (BasicIntegerPropertiesReport for: integerToAnalize) value.
-		lines addAll: basicPropertiesLines.
-		aSemaphore signal] fork.
-	complexPropertiesLines := (ComplexIntegerPropertiesReport for: integerToAnalize) value.
-	aSemaphore wait.
-	lines addAll: complexPropertiesLines.
+	|lines basicPropertiesLines complexPropertiesLines|
 	
-	^lines! !
+	lines := OrderedCollection new.
+	
+	self execute: [basicPropertiesLines := (BasicIntegerPropertiesReport for: integerToAnalize) value.
+		lines addAll: basicPropertiesLines] inParallelWith: [complexPropertiesLines := (ComplexIntegerPropertiesReport for: integerToAnalize) value]
+		andAfter: [lines addAll: complexPropertiesLines. ^lines].! !
+
+
+!CombinedIntegerPropertiesReport methodsFor: 'private' stamp: 'Nipo 5/20/2019 14:46:30'!
+execute: aClosureToRun inParallelWith: aClosureToRunInParallel andAfter: aClosureToRunAfter
+
+	|aPromise|
+	
+	aPromise := Promise resolve: aClosureToRun.
+	aClosureToRunInParallel value.
+	aPromise then: aClosureToRunAfter.! !
 
 
 !classDefinition: #CompleteIntegerReport category: #'Ingsoft-IntegerReports'!
@@ -176,20 +183,27 @@ IntegerReport subclass: #CompleteIntegerReport
 	poolDictionaries: ''
 	category: 'Ingsoft-IntegerReports'!
 
-!CompleteIntegerReport methodsFor: 'reporting' stamp: 'sad 5/16/2019 20:10:45'!
+!CompleteIntegerReport methodsFor: 'reporting' stamp: 'Nipo 5/20/2019 14:35:38'!
 value
 
-	| combinedPropertiesLines differentBasesLines lines aSemaphore|
-	lines := OrderedCollection new.	
-	aSemaphore := Semaphore new.
+	| combinedPropertiesLines differentBasesLines lines|
 	
-	[combinedPropertiesLines := (CombinedIntegerPropertiesReport for: integerToAnalize) value.
-		lines addAll: combinedPropertiesLines.
-		aSemaphore signal.] fork.
-	differentBasesLines := (IntegerOnDifferentBasesReport for: integerToAnalize) value.
-	aSemaphore wait.
-	lines addAll: differentBasesLines.
-	^lines! !
+	lines := OrderedCollection new.
+	
+	self execute: [combinedPropertiesLines := (CombinedIntegerPropertiesReport for: integerToAnalize) value.
+		lines addAll: combinedPropertiesLines] inParallelWith: [differentBasesLines := (IntegerOnDifferentBasesReport for: integerToAnalize) value.]
+		andAfter: [lines addAll: differentBasesLines. ^lines.].
+	! !
+
+
+!CompleteIntegerReport methodsFor: 'private' stamp: 'Nipo 5/20/2019 14:46:38'!
+execute: aClosureToRun inParallelWith: aClosureToRunInParallel andAfter: aClosureToRunAfter
+
+	|aPromise|
+	
+	aPromise := Promise resolve: aClosureToRun.
+	aClosureToRunInParallel value.
+	aPromise then: aClosureToRunAfter.! !
 
 
 !classDefinition: #IntegerOnDifferentBasesReport category: #'Ingsoft-IntegerReports'!
@@ -207,13 +221,15 @@ addNumberInBase: aBase to: lines title: aTitle
 	! !
 
 
-!IntegerOnDifferentBasesReport methodsFor: 'reporting' stamp: 'sad 5/16/2019 19:47:07'!
+!IntegerOnDifferentBasesReport methodsFor: 'reporting' stamp: 'Nip 5/17/2019 13:41:59'!
 value
 
 	| lines |
 	
 	self wait.
+	
 	lines := OrderedCollection new.
+	
 	self 
 		addNumberInBase: 2 to: lines title: 'Binary';
 		addNumberInBase: 8 to: lines title: 'Octal';
@@ -277,3 +293,32 @@ value
 		addLineTo: lines title: 'Sqrt' with: [ integerToAnalize sqrt ].
 		
 	^lines! !
+
+
+!classDefinition: #Promise category: #'Ingsoft-IntegerReports'!
+Object subclass: #Promise
+	instanceVariableNames: 'semaphore'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Ingsoft-IntegerReports'!
+
+!Promise methodsFor: 'initialization' stamp: 'Nip 5/17/2019 14:36:40'!
+initializeWith: aBlockToRun
+	semaphore := Semaphore new.
+	[aBlockToRun value. semaphore signal] fork.! !
+
+
+!Promise methodsFor: 'operations' stamp: 'Nip 5/17/2019 14:35:33'!
+then: aBlockToRun
+	semaphore wait.
+	aBlockToRun value.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Promise class' category: #'Ingsoft-IntegerReports'!
+Promise class
+	instanceVariableNames: ''!
+
+!Promise class methodsFor: 'as yet unclassified' stamp: 'Nip 5/17/2019 14:40:50'!
+resolve: aBlockToRun
+	^ self new initializeWith: aBlockToRun.! !
