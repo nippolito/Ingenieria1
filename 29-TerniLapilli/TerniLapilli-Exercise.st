@@ -5,8 +5,8 @@ TestCase subclass: #TerniLapilliTest
 	poolDictionaries: ''
 	category: 'TerniLapilli-Exercise'!
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/20/2019 19:29:03'!
-test01
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 18:54:20'!
+test01AfterFirstCrossACircleShouldBePlacedNext
 	|miTerniLapilli|
 	
 	miTerniLapilli := TerniLapilli startWithCrossOn: (2@2).
@@ -15,90 +15,90 @@ test01
 	self assert: miTerniLapilli isOver not.
 	self assert: miTerniLapilli nextPieceToBePlaced = #Circle.! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'JIG 5/21/2019 15:18:50'!
-test02
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 18:53:14'!
+test02CannotPutCrossesTwiceInARow
 	|miTerniLapilli|
 	
 	miTerniLapilli := TerniLapilli startWithCrossOn: (2@2).
 	
 	self assert: miTerniLapilli isOver not.
-	self should: [ miTerniLapilli putPiece: #Cross on: (2@1)] 
+	self should: [ miTerniLapilli putCrossOn: (2@1)] 
 	raise: Error 
 	withExceptionDo: [:anError | 
 			self assert: TerniLapilli cannotPutTheSamePieceTwiceErrorDescription = anError messageText].! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'JIG 5/21/2019 15:18:50'!
-test03
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 18:53:31'!
+test03CannotPutCirclesTwiceInARow
 	|miTerniLapilli|
 	
 	miTerniLapilli := TerniLapilli startWithCrossOn: (2@2).
 	
-	miTerniLapilli putPiece: #Circle on: (2@1).
+	miTerniLapilli putCircleOn: (2@1).
 		
 	self assert: miTerniLapilli isOver not.
-	self should: [ miTerniLapilli putPiece: #Circle on: (2@3)] 
+	self should: [ miTerniLapilli putCircleOn: (2@3)] 
 	raise: Error 
 	withExceptionDo: [:anError | 
 			self assert: TerniLapilli cannotPutTheSamePieceTwiceErrorDescription = anError messageText].! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'JIG 5/21/2019 14:48:38'!
-test04
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 18:54:06'!
+test04AfterFirstCircleACrossShouldBePlacedNext
 	|miTerniLapilli|
 	
 	miTerniLapilli := TerniLapilli startWithCrossOn: (2@2).
 	
-	miTerniLapilli putPiece: #Circle on: (1@2).
+	miTerniLapilli putCircleOn: (1@2).
 	
 	self assert: miTerniLapilli isOver not.
 	self assert: miTerniLapilli nextPieceToBePlaced = #Cross.! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'JIG 5/21/2019 15:23:52'!
-test05
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 18:55:34'!
+test05CannotPutMoreThanThreeCrosses
 	|miTerniLapilli|
 	
 	miTerniLapilli := TerniLapilli startWithCrossOn: (2@2).
 	
-	miTerniLapilli putPiece: #Circle on: (3@2).
-	miTerniLapilli putPiece: #Cross on: (1@2).
-	miTerniLapilli putPiece: #Circle on: (3@3).
-	miTerniLapilli putPiece: #Cross on: (2@3).
-	miTerniLapilli putPiece: #Circle on: (2@1).
+	miTerniLapilli putCircleOn: (3@2).
+	miTerniLapilli putCrossOn: (1@2).
+	miTerniLapilli putCircleOn: (3@3).
+	miTerniLapilli putCrossOn: (2@3).
+	miTerniLapilli putCircleOn: (2@1).
 	
 	self assert: miTerniLapilli isOver not.
-	self should: [ miTerniLapilli putPiece: #Cross on: (1@1)] 
+	self should: [ miTerniLapilli putCrossOn: (1@1)] 
 	raise: Error 
 	withExceptionDo: [:anError | 
 			self assert: TerniLapilli cannotPutMoreThanThreeOfTheSamePieceErrorDescription = anError messageText].! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'JIG 5/21/2019 15:18:40'!
-test07
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 18:58:08'!
+test07CannotPutACircleOnAnOccupiedPosition
 	"Arrancamos con el tablero"
 	|miTerniLapilli|
 	
 	miTerniLapilli := TerniLapilli startWithCrossOn: (2@2).
 	
-	self should: [ miTerniLapilli putPiece: #Circle on: (2@2)] 
+	self should: [ miTerniLapilli putCircleOn: (2@2)] 
 	raise: Error 
 	withExceptionDo: [:anError | 
 			self assert: TerniLapilli cannotPutPieceOnAnOcuppiedPositionErrorDescription = anError messageText].
 	! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'JIG 5/21/2019 15:18:40'!
-test08
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 18:58:20'!
+test08CannotPutACrossOnAnOccupiedPosition
 	|miTerniLapilli|
 	
 	miTerniLapilli := TerniLapilli startWithCrossOn: (2@2).
 	
-	miTerniLapilli putPiece: #Circle on: (2@1).
+	miTerniLapilli putCircleOn: (2@1).
 	
-	self should: [ miTerniLapilli putPiece: #Cross on: (2@1)] 
+	self should: [ miTerniLapilli putCrossOn: (2@1)] 
 	raise: Error 
 	withExceptionDo: [:anError | 
 			self assert: TerniLapilli cannotPutPieceOnAnOcuppiedPositionErrorDescription = anError messageText].
 	! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'JIG 5/21/2019 14:52:30'!
-test09
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 18:59:48'!
+test09ComplettingFirstHorizontalLineWithSamePieceFinishesGameWithThatPieceAsWinner
 	"Empezamos con cómo ganar, chequeamos horizontal"
 	"Debiéramos chequear solo la primer linea, y en realidad en test10 chequear la segunda linea (simulando que después hicimos el refactor y ahí nos dimos cuenta que es el mismo chequeo. Ya para vertical y diagonal nos dimos cuenta, entonces sólo hacemos un test para vertical y un test para diagonal. Tenemos que modificar esto."
 	
@@ -106,17 +106,17 @@ test09
 	
 	miTerniLapilli := TerniLapilli startWithCrossOn: (1@2).
 	
-	miTerniLapilli putPiece: #Circle on: (2@2).
-	miTerniLapilli putPiece: #Cross on: (1@1).
-	miTerniLapilli putPiece: #Circle on: (3@2).
-	miTerniLapilli putPiece: #Cross on: (1@3).
+	miTerniLapilli putCircleOn: (2@2).
+	miTerniLapilli putCrossOn: (1@1).
+	miTerniLapilli putCircleOn: (3@2).
+	miTerniLapilli putCrossOn: (1@3).
 	
 	self assert: miTerniLapilli isOver.
 	self assert: miTerniLapilli winner = #Cross.
 	! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'JIG 5/21/2019 14:54:43'!
-test10
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 19:00:09'!
+test10ComplettingOtherHorizontalLineWithSamePieceFinishesGameWithThatPieceAsWinner
 	"Empezamos con cómo ganar, chequeamos segunda linea horizontal"
 	"Debiéramos chequear solo la primer linea, y en realidad en test10 chequear la segunda linea (simulando que después hicimos el refactor y ahí nos dimos cuenta que es el mismo chequeo. Ya para vertical y diagonal nos dimos cuenta, entonces sólo hacemos un test para vertical y un test para diagonal. Tenemos que modificar esto."
 	
@@ -124,27 +124,27 @@ test10
 	
 	miTerniLapilli := TerniLapilli startWithCrossOn: (2@1).
 	
-	miTerniLapilli putPiece: #Circle on: (1@1).
-	miTerniLapilli putPiece: #Cross on: (2@2).
-	miTerniLapilli putPiece: #Circle on: (1@2).
-	miTerniLapilli putPiece: #Cross on: (2@3).
+	miTerniLapilli putCircleOn: (1@1).
+	miTerniLapilli putCrossOn: (2@2).
+	miTerniLapilli putCircleOn: (1@2).
+	miTerniLapilli putCrossOn: (2@3).
 	
 	self assert: miTerniLapilli isOver.
 	self assert: miTerniLapilli winner = #Cross.
 	! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'JIG 5/21/2019 16:04:21'!
-test11
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 19:00:23'!
+test11ComplettingAVerticalLineWithSamePieceFinishesGameWithThatPieceAsWinner
 	"Empezamos con cómo ganar, chequeamos vertical"
 	
 	|miTerniLapilli|
 	
 	miTerniLapilli := TerniLapilli startWithCrossOn: (2@2).
 	
-	miTerniLapilli putPiece: #Circle on: (1@1).
-	miTerniLapilli putPiece: #Cross on: (1@2).
-	miTerniLapilli putPiece: #Circle on: (3@3).
-	miTerniLapilli putPiece: #Cross on: (3@2).
+	miTerniLapilli putCircleOn: (1@1).
+	miTerniLapilli putCrossOn: (1@2).
+	miTerniLapilli putCircleOn: (3@3).
+	miTerniLapilli putCrossOn: (3@2).
 	
 	self assert: miTerniLapilli isOver.
 	self assert: miTerniLapilli winner = #Cross.
@@ -170,39 +170,38 @@ test11
 		Y el último tip sobre sliding: en negativa hay que chequear: que no se pueda slidex cuando estás en playing X (error) - no podés slidex cuando haces slideO (o sea, chequear el orden de los slides) - no slide posiciones vacías o tomadas - etc"
 	! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'JIG 5/21/2019 15:06:05'!
-test12
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 19:00:35'!
+test12ComplettingADiagonalLineWithSamePieceFinishesGameWithThatPieceAsWinner
 	"Empezamos con cómo ganar, chequeamos diagonal"
 	
 	|miTerniLapilli|
 	
 	miTerniLapilli := TerniLapilli startWithCrossOn: (1@2).
 	
-	miTerniLapilli putPiece: #Circle on: (1@1).
-	miTerniLapilli putPiece: #Cross on: (1@3).
-	miTerniLapilli putPiece: #Circle on: (2@2).
-	miTerniLapilli putPiece: #Cross on: (3@2).
-	miTerniLapilli putPiece: #Circle on: (3@3).
+	miTerniLapilli putCircleOn: (1@1).
+	miTerniLapilli putCrossOn: (1@3).
+	miTerniLapilli putCircleOn: (2@2).
+	miTerniLapilli putCrossOn: (3@2).
+	miTerniLapilli putCircleOn: (3@3).
 	
 	self assert: miTerniLapilli isOver.
 	self assert: miTerniLapilli winner = #Circle.
 	! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'JIG 5/21/2019 15:49:41'!
-test13
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 19:01:20'!
+test13CannotPlaceAPieceIfGameIsOver
 	"Chequeamos que no se puede colocar una pieza cuando el juego esta terminado"
 	
 	|miTerniLapilli|
 	
 	miTerniLapilli := TerniLapilli startWithCrossOn: (2@2).
 	
-	miTerniLapilli putPiece: #Circle on: (1@1).
-	miTerniLapilli putPiece: #Cross on: (1@2).
-	miTerniLapilli putPiece: #Circle on: (3@3).
-	miTerniLapilli putPiece: #Cross on: (3@2).
+	miTerniLapilli putCircleOn: (1@1).
+	miTerniLapilli putCrossOn: (1@2).
+	miTerniLapilli putCircleOn: (3@3).
+	miTerniLapilli putCrossOn: (3@2).
 	
-	
-	self should: [miTerniLapilli putPiece: #Circle on: (2@1).] 
+	self should: [miTerniLapilli putCircleOn: (2@1).] 
 	raise: Error  
 	withExceptionDo: [:anError|
 			self assert: anError messageText = TerniLapilli cannotPlacePieceWhenTheGameIsOverErrorDescription.
@@ -212,14 +211,14 @@ test13
 
 	! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'JIG 5/21/2019 15:58:00'!
-test14
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 19:01:12'!
+test14CannotPlaceAPieceOutsideOfBoardRange
 	"Chequeamos que no se puede colocar una pieza fuera del rango del tablero"
 	
 	|miTerniLapilli|
 	miTerniLapilli := TerniLapilli startWithCrossOn: (2@2).
 	
-	self should: [miTerniLapilli putPiece: #Circle on: (50@50).] 
+	self should: [miTerniLapilli putCircleOn: (50@50).] 
 	raise: Error  
 	withExceptionDo: [:anError|
 			self assert: anError messageText = TerniLapilli cannotPlacePieceOnAnInvalidPositionErrorDescription.
@@ -227,61 +226,61 @@ test14
 
 	! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'JIG 5/21/2019 16:17:24'!
-test15
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 19:01:38'!
+test15CanSlideHorizontally
 	"Una vez colocadas las piezas, probamos que se pueda deslizar HORIZONTALMENTE una pieza hacia una posicion correcta"
 	
 	|miTerniLapilli|
 	
 	miTerniLapilli := TerniLapilli startWithCrossOn: (1@2).
 	
-	miTerniLapilli putPiece: #Circle on: (1@1).
-	miTerniLapilli putPiece: #Cross on: (1@3).
-	miTerniLapilli putPiece: #Circle on: (2@2).
-	miTerniLapilli putPiece: #Cross on: (3@2).
-	miTerniLapilli putPiece: #Circle on: (2@3).
+	miTerniLapilli putCircleOn: (1@1).
+	miTerniLapilli putCrossOn: (1@3).
+	miTerniLapilli putCircleOn: (2@2).
+	miTerniLapilli putCrossOn: (3@2).
+	miTerniLapilli putCircleOn: (2@3).
 	
-	miTerniLapilli slidePiece: #Cross from: (3@2) towards: (3@1).	
+	miTerniLapilli slideCrossFrom: (3@2) towards: (3@1).	
 	
 	self assert: miTerniLapilli isOver not.
 	self assert: ((miTerniLapilli at: (3@1)) = #Cross).
 	self assert: ((miTerniLapilli at: (3@2)) = #Empty).! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'JIG 5/21/2019 16:18:36'!
-test16
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 19:01:46'!
+test16CanSlideVertically
 	"Una vez colocadas las piezas, probamos que se pueda deslizar VERTICALMENTE una pieza hacia una posicion correcta"
 	
 	|miTerniLapilli|
 	
 	miTerniLapilli := TerniLapilli startWithCrossOn: (1@2).
 	
-	miTerniLapilli putPiece: #Circle on: (1@1).
-	miTerniLapilli putPiece: #Cross on: (1@3).
-	miTerniLapilli putPiece: #Circle on: (2@2).
-	miTerniLapilli putPiece: #Cross on: (3@1).
-	miTerniLapilli putPiece: #Circle on: (2@3).
+	miTerniLapilli putCircleOn: (1@1).
+	miTerniLapilli putCrossOn: (1@3).
+	miTerniLapilli putCircleOn: (2@2).
+	miTerniLapilli putCrossOn: (3@1).
+	miTerniLapilli putCircleOn: (2@3).
 	
-	miTerniLapilli slidePiece: #Cross from: (3@1) towards: (2@1).
+	miTerniLapilli slideCrossFrom: (3@1) towards: (2@1).
 	
 	self assert: miTerniLapilli isOver not.
 	self assert: ((miTerniLapilli at: (2@1)) = #Cross).
 	self assert: ((miTerniLapilli at: (3@1)) = #Empty).! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'JIG 5/21/2019 16:25:49'!
-test17
+!TerniLapilliTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 19:01:54'!
+test17CanSlideDiagonally
 	"Una vez colocadas las piezas, probamos que se pueda deslizar DIAGONALMENTE una pieza hacia una posicion correcta"
 	
 	|miTerniLapilli|
 	
 	miTerniLapilli := TerniLapilli startWithCrossOn: (1@2).
 	
-	miTerniLapilli putPiece: #Circle on: (1@1).
-	miTerniLapilli putPiece: #Cross on: (1@3).
-	miTerniLapilli putPiece: #Circle on: (2@2).
-	miTerniLapilli putPiece: #Cross on: (3@1).
-	miTerniLapilli putPiece: #Circle on: (2@3).
+	miTerniLapilli putCircleOn: (1@1).
+	miTerniLapilli putCrossOn: (1@3).
+	miTerniLapilli putCircleOn: (2@2).
+	miTerniLapilli putCrossOn: (3@1).
+	miTerniLapilli putCircleOn: (2@3).
 	
-	miTerniLapilli slidePiece: #Cross from: (1@2) towards: (2@1).
+	miTerniLapilli slideCrossFrom: (1@2) towards: (2@1).
 	
 	self assert: miTerniLapilli isOver not.
 	self assert: ((miTerniLapilli at: (2@1)) = #Cross).
@@ -302,24 +301,27 @@ changeGameStateIfFinished
 	self changeGameStateIfFinishedByDiagonalLine.
 ! !
 
-!TerniLapilli methodsFor: 'operations' stamp: 'JIG 5/21/2019 15:55:29'!
-putPiece: aPiece on: aPosition
-	self errorIfPlacingAPieceOnAnInvalidPosition: aPosition.
-	self errorIfPlacingAPieceWhenGameIsOver.
-	self errorIfPositionIsOccupied: aPosition.
-	self errorIfAPieceIsPlacedTwiceInARow: aPiece.	
-	self errorIfMoreThanThreeOfTheSamePieceArePlaced: aPiece.
-	
-	lastPiecePlaced := aPiece.
-	self placePieceOnBoard: aPiece at: aPosition.
-	self changeGameStateIfFinished.
+!TerniLapilli methodsFor: 'operations' stamp: 'Nipo 5/23/2019 18:38:51'!
+putCircleOn: aPosition
+	self putPiece: #Circle on: aPosition.
 
 	! !
 
-!TerniLapilli methodsFor: 'operations' stamp: 'JIG 5/21/2019 16:24:27'!
-slidePiece: aPiece from: aPosition towards: anotherPosition 
-	self placePieceOnBoard: aPiece at: anotherPosition.
-	board at: (aPosition x - 1 * 3 + aPosition y) put: #Empty.
+!TerniLapilli methodsFor: 'operations' stamp: 'Nipo 5/23/2019 18:37:05'!
+putCrossOn: aPosition
+	self putPiece: #Cross on: aPosition.
+
+	! !
+
+!TerniLapilli methodsFor: 'operations' stamp: 'Nipo 5/23/2019 18:47:26'!
+slideCircleFrom: aPosition towards: anotherPosition
+	self slidePiece: #Circle from: aPosition towards: anotherPosition.
+
+! !
+
+!TerniLapilli methodsFor: 'operations' stamp: 'Nipo 5/23/2019 18:47:18'!
+slideCrossFrom: aPosition towards: anotherPosition
+	self slidePiece: #Cross from: aPosition towards: anotherPosition.
 
 ! !
 
@@ -329,12 +331,12 @@ createBoard
 	board := OrderedCollection new. 
 	board addAll: #(#Empty #Empty #Empty #Empty #Empty #Empty #Empty #Empty #Empty).! !
 
-!TerniLapilli methodsFor: 'initialization' stamp: 'JIG 5/21/2019 15:36:37'!
+!TerniLapilli methodsFor: 'initialization' stamp: 'Nipo 5/23/2019 18:39:40'!
 initializeWithCrossOn: aPosition
 	self initializePieceCount.
 	finished := false.
 	self createBoard.
-	self putPiece: #Cross on: aPosition.! !
+	self putCrossOn: aPosition.! !
 
 
 !TerniLapilli methodsFor: 'private' stamp: 'JIG 5/21/2019 15:02:32'!
@@ -443,6 +445,27 @@ placePieceOnBoard: aPiece at: aPosition
 	board at: (aPosition x - 1 * 3 + aPosition y) put: aPiece. 
 
 	! !
+
+!TerniLapilli methodsFor: 'private' stamp: 'JIG 5/21/2019 15:55:29'!
+putPiece: aPiece on: aPosition
+	self errorIfPlacingAPieceOnAnInvalidPosition: aPosition.
+	self errorIfPlacingAPieceWhenGameIsOver.
+	self errorIfPositionIsOccupied: aPosition.
+	self errorIfAPieceIsPlacedTwiceInARow: aPiece.	
+	self errorIfMoreThanThreeOfTheSamePieceArePlaced: aPiece.
+	
+	lastPiecePlaced := aPiece.
+	self placePieceOnBoard: aPiece at: aPosition.
+	self changeGameStateIfFinished.
+
+	! !
+
+!TerniLapilli methodsFor: 'private' stamp: 'JIG 5/21/2019 16:24:27'!
+slidePiece: aPiece from: aPosition towards: anotherPosition 
+	self placePieceOnBoard: aPiece at: anotherPosition.
+	board at: (aPosition x - 1 * 3 + aPosition y) put: #Empty.
+
+! !
 
 
 !TerniLapilli methodsFor: 'accessing' stamp: 'Nipo 5/20/2019 20:56:41'!
