@@ -15,49 +15,62 @@ test00CannotCreateEmptyPortfolio
 			self assert: Portfolio cannotCreateEmptyPortfolioErrorDescription = anError messageText].
 ! !
 
-!PortfolioTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 21:22:58'!
+!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/24/2019 16:59:03'!
 test01PortfolioCreatedWithOneAccountHasExactlyOneAccount
-	|ourPortfolio ourAccount|
+	|ourPortfolio ourAccount ourAccountList|
 	
 	ourAccount := ReceptiveAccount new.
 	Deposit register: 100 on: ourAccount.
 	
-	ourPortfolio := Portfolio for: ourAccount.
+	ourAccountList := OrderedCollection new.
+	ourAccountList add: ourAccount.
+	
+	ourPortfolio := Portfolio for: ourAccountList.
 	
 	self assert: ourPortfolio accountsAmount = 1.! !
 
-!PortfolioTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 21:23:45'!
+!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/24/2019 16:59:38'!
 test02BalanceOfAPortfolioWithOnlyOneAccountEqualsToBalanceOfThatAccount
-	|ourPortfolio ourAccount|
+	|ourPortfolio ourAccount ourAccountList|
 	
 	ourAccount := ReceptiveAccount new.
 	Deposit register: 100 on: ourAccount.
 	
-	ourPortfolio := Portfolio for: ourAccount.
+	ourAccountList := OrderedCollection new.
+	ourAccountList add: ourAccount.
+	
+	ourPortfolio := Portfolio for: ourAccountList.
 	
 	self assert: ourPortfolio balance = ourAccount balance.! !
 
-!PortfolioTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 21:26:26'!
+!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/24/2019 17:00:17'!
 test03TransactionsOfAPortfolioWithOnlyOneAccountEqualsToTransactionsOfThatAccount
-	|ourPortfolio ourAccount|
+	|ourPortfolio ourAccount ourAccountList |
 	
 	ourAccount := ReceptiveAccount new.
 	Deposit register: 100 on: ourAccount.
 	
-	ourPortfolio := Portfolio for: ourAccount.
+	ourAccountList := OrderedCollection new.
+	ourAccountList add: ourAccount.
+	
+	ourPortfolio := Portfolio for: ourAccountList.
+	
 	
 	self assert: ourPortfolio transactions = ourAccount transactions.! !
 
-!PortfolioTest methodsFor: 'test' stamp: 'Nipo 5/23/2019 21:30:22'!
+!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/24/2019 17:02:05'!
 test04APortfolioWithOnlyOneAccountHasRegisteredTransactionsOfThatAccount
-	|ourPortfolio ourAccount aTransaction anotherTransaction|
+	|ourPortfolio ourAccount anotherTransaction ourAccountList |
 	
 	ourAccount := ReceptiveAccount new.
-	aTransaction := Deposit register: 100 on: ourAccount.
+	Deposit register: 100 on: ourAccount.
 	
 	anotherTransaction := Deposit register: 120 on: ourAccount.
 	
-	ourPortfolio := Portfolio for: ourAccount.
+	ourAccountList := OrderedCollection new.
+	ourAccountList add: ourAccount.
+	
+	ourPortfolio := Portfolio for: ourAccountList.
 	
 	self assert: (ourPortfolio hasRegistered: anotherTransaction) = (ourAccount hasRegistered: anotherTransaction).! !
 
@@ -76,6 +89,24 @@ test05APortfolioWithManyAccountsHasTheBalanceOfTheirAccountsSummed
 	ourPortfolio := Portfolio for: someAccounts.
 	
 	self assert: ourPortfolio balance = (anAccount balance + anotherAccount balance).! !
+
+!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/24/2019 17:10:04'!
+test06APortfolioWithManyAccountsKeepAllTheTransactions
+	"|ourPortfolio anAccount anotherAccount someAccounts|
+	
+	anAccount := ReceptiveAccount new.
+	Deposit register: 100 on: anAccount.
+	
+	anotherAccount := ReceptiveAccount new.
+	Withdraw register: 25 on: anotherAccount.
+	
+	someAccounts := OrderedCollection with: anAccount with: anotherAccount.
+	
+	ourPortfolio := Portfolio for: someAccounts.
+	
+	self assert: ourPortfolio transactions includes: (anAccount transactions).
+	self assert: ourPortfolio transactions includes: (anotherAccount transactions).
+	self assert: ourPortfolio transactions size = 2."! !
 
 
 !classDefinition: #ReceptiveAccountTest category: #'Portfolio-Ejercicio'!
@@ -302,14 +333,14 @@ accountsAmount
 balance
 	^ accounts sum: [:anAccount | anAccount balance].! !
 
-!Portfolio methodsFor: 'balance' stamp: 'Nipo 5/23/2019 21:30:06'!
+!Portfolio methodsFor: 'balance' stamp: 'JIG 5/24/2019 17:02:27'!
 hasRegistered: aTransaction
-	^ account hasRegistered: aTransaction.! !
+	^ (account at: 1) hasRegistered: aTransaction.! !
 
 
-!Portfolio methodsFor: 'transactions' stamp: 'Nipo 5/23/2019 21:26:04'!
+!Portfolio methodsFor: 'transactions' stamp: 'JIG 5/24/2019 17:00:59'!
 transactions
-	^ account transactions.! !
+	^ ( account at: 1) transactions.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
