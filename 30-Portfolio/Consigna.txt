@@ -7,4 +7,8 @@ Por último, se espera que portfolios puedan formar parte de portfolios no únic
 
 Resolver este ejercicio por medio de TDD.
 
+1) Los portfolios se pueden modificar agregandoles cuentas o portfolios
+2) Una cuenta o portfolio puede estar en mas de un portfolio
+3) Como es una estructura de arbol en donde no puede haber nodos repetidos, hay que estar seguros cuando se modifique un portfolio (agregar una cuenta o portfolio) siga siendo un arbol sin nodos repetidos. Esto implica que un portfolio debe conocer a todos los portfolios a los que pertenece
+
 Se entrega el lunes 03
