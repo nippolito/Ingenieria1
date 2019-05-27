@@ -478,9 +478,8 @@ addFinancialAssetParent: aFinancialAsset
  	parentFinancialAssets add: aFinancialAsset.
 	! !
 
-!Portfolio methodsFor: 'private' stamp: 'Nipo 5/27/2019 15:40:13'!
-checkIfNotDuplicateInformationWith: aFinancialAsset
-	(parentFinancialAssets = aFinancialAsset) ifTrue: [^true].	
+!Portfolio methodsFor: 'private' stamp: 'Nipo 5/27/2019 16:04:16'!
+checkIfNotDuplicateInformationWith: aFinancialAsset	
 	((parentFinancialAssets at: 1) = self) 
 		ifTrue: [^self containsFinancialAsset: aFinancialAsset] 
 		ifFalse: [
@@ -571,10 +570,6 @@ accountAmounts
 !ReceptiveAccount methodsFor: 'private' stamp: 'Nipo 5/27/2019 15:39:08'!
 addFinancialAssetParent: aFinancialAsset
 	parentFinancialAssets add: aFinancialAsset! !
-
-!ReceptiveAccount methodsFor: 'private' stamp: 'Nipo 5/27/2019 15:38:01'!
-checkIfNotDuplicateInformationWith: someFinancialAssets
-	^ someFinancialAssets anySatisfy: [:aFinancialAsset | aFinancialAsset hasFinancialAsset: self].! !
 
 !ReceptiveAccount methodsFor: 'private' stamp: 'Nipo 5/27/2019 15:38:43'!
 hasFinancialAsset: aFinancialAsset
