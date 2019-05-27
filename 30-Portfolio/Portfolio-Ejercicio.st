@@ -15,7 +15,7 @@ test00CannotCreateEmptyPortfolio
 			self assert: Portfolio cannotCreateEmptyPortfolioErrorDescription = anError messageText].
 ! !
 
-!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/24/2019 16:59:03'!
+!PortfolioTest methodsFor: 'test' stamp: 'NI 5/26/2019 19:54:59'!
 test01PortfolioCreatedWithOneAccountHasExactlyOneAccount
 	|ourPortfolio ourAccount ourAccountList|
 	
@@ -27,7 +27,7 @@ test01PortfolioCreatedWithOneAccountHasExactlyOneAccount
 	
 	ourPortfolio := Portfolio for: ourAccountList.
 	
-	self assert: ourPortfolio accountsAmount = 1.! !
+	self assert: ourPortfolio accountAmounts = 1.! !
 
 !PortfolioTest methodsFor: 'test' stamp: 'JIG 5/24/2019 16:59:38'!
 test02BalanceOfAPortfolioWithOnlyOneAccountEqualsToBalanceOfThatAccount
@@ -43,7 +43,7 @@ test02BalanceOfAPortfolioWithOnlyOneAccountEqualsToBalanceOfThatAccount
 	
 	self assert: ourPortfolio balance = ourAccount balance.! !
 
-!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/24/2019 17:00:17'!
+!PortfolioTest methodsFor: 'test' stamp: 'NI 5/26/2019 20:01:18'!
 test03TransactionsOfAPortfolioWithOnlyOneAccountEqualsToTransactionsOfThatAccount
 	|ourPortfolio ourAccount ourAccountList |
 	
@@ -55,8 +55,8 @@ test03TransactionsOfAPortfolioWithOnlyOneAccountEqualsToTransactionsOfThatAccoun
 	
 	ourPortfolio := Portfolio for: ourAccountList.
 	
-	
-	self assert: ourPortfolio transactions = ourAccount transactions.! !
+	self assert: (ourPortfolio transactions includesAllOf: ourAccount transactions).
+	self assert: ourPortfolio transactions size = 1.! !
 
 !PortfolioTest methodsFor: 'test' stamp: 'JIG 5/24/2019 17:02:05'!
 test04APortfolioWithOnlyOneAccountHasRegisteredTransactionsOfThatAccount
@@ -90,9 +90,9 @@ test05APortfolioWithManyAccountsHasTheBalanceOfTheirAccountsSummed
 	
 	self assert: ourPortfolio balance = (anAccount balance + anotherAccount balance).! !
 
-!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/24/2019 17:10:04'!
+!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/26/2019 19:07:32'!
 test06APortfolioWithManyAccountsKeepAllTheTransactions
-	"|ourPortfolio anAccount anotherAccount someAccounts|
+	|ourPortfolio anAccount anotherAccount someAccounts|
 	
 	anAccount := ReceptiveAccount new.
 	Deposit register: 100 on: anAccount.
@@ -104,9 +104,279 @@ test06APortfolioWithManyAccountsKeepAllTheTransactions
 	
 	ourPortfolio := Portfolio for: someAccounts.
 	
-	self assert: ourPortfolio transactions includes: (anAccount transactions).
-	self assert: ourPortfolio transactions includes: (anotherAccount transactions).
-	self assert: ourPortfolio transactions size = 2."! !
+	self assert: (ourPortfolio transactions includesAllOf: anAccount transactions).
+	self assert: (ourPortfolio transactions includesAllOf: (anotherAccount transactions)).
+	self assert: ourPortfolio transactions size = 2.! !
+
+!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/26/2019 18:18:09'!
+test07APortfolioWithManyAccountsHasRegisteredTransactionsOfThoseAccounts
+	|ourPortfolio anAccount anotherAccount someAccounts aDepositTransaction aWithdrawTransaction|
+	
+	anAccount := ReceptiveAccount new.
+	aDepositTransaction := Deposit register: 100 on: anAccount.
+	
+	anotherAccount := ReceptiveAccount new.
+	aWithdrawTransaction := Withdraw register: 25 on: anotherAccount.
+	
+	someAccounts := OrderedCollection with: anAccount with: anotherAccount.
+	
+	ourPortfolio := Portfolio for: someAccounts.
+	
+	self assert: (ourPortfolio hasRegistered: aDepositTransaction ) = (anAccount hasRegistered: aDepositTransaction ).
+	self assert: (ourPortfolio hasRegistered: aWithdrawTransaction ) = (anotherAccount hasRegistered: aWithdrawTransaction ).! !
+
+!PortfolioTest methodsFor: 'test' stamp: 'NI 5/26/2019 20:54:49'!
+test08APortfolioCanAddANewAccount
+	|ourPortfolio anAccount anotherAccount someAccounts aNewAccount |
+	
+	anAccount := ReceptiveAccount new.
+	Deposit register: 100 on: anAccount.
+	
+	anotherAccount := ReceptiveAccount new.
+	Withdraw register: 25 on: anotherAccount.
+	
+	someAccounts := OrderedCollection with: anAccount with: anotherAccount.
+	aNewAccount := ReceptiveAccount new.
+	
+	ourPortfolio := Portfolio for: someAccounts.
+	ourPortfolio add: aNewAccount.
+
+	self assert: ourPortfolio accountAmounts = 3.
+	self assert: (ourPortfolio bankingStuff includes: aNewAccount ).
+	
+	"
+	ourPortfolio
+		- anAccount
+		- anotherAccount
+	ourPortfolio add: aNewAccount
+	
+	"! !
+
+!PortfolioTest methodsFor: 'test' stamp: 'NI 5/26/2019 20:07:47'!
+test08APortfolioCreatedWithOnePortfolioHasThatPortfolioAccountsAndTransactions
+	|ourPortfolio anAccount anotherAccount someAccounts ourNewPortfolio portfolioOC |
+	
+	anAccount := ReceptiveAccount new.
+	Deposit register: 100 on: anAccount.
+	
+	anotherAccount := ReceptiveAccount new.
+	Withdraw register: 25 on: anotherAccount.
+	
+	someAccounts := OrderedCollection with: anAccount with: anotherAccount.
+	
+	ourPortfolio := Portfolio for: someAccounts.
+
+	portfolioOC := OrderedCollection with: ourPortfolio.
+	ourNewPortfolio := Portfolio for: portfolioOC.
+
+	self assert: ourNewPortfolio accountAmounts = ourPortfolio accountAmounts.
+	self assert: (ourNewPortfolio transactions includesAllOf: ourPortfolio transactions).
+	self assert: (ourPortfolio transactions includesAllOf: ourNewPortfolio transactions).! !
+
+!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/26/2019 19:50:42'!
+test09APortfolioWithManyAccountsCannotContainDuplicates
+	|ourPortfolio anAccount anotherAccount someAccounts |
+	
+	anAccount := ReceptiveAccount new.
+	Deposit register: 100 on: anAccount.
+	
+	anotherAccount := ReceptiveAccount new.
+	Withdraw register: 25 on: anotherAccount.
+	
+	someAccounts := OrderedCollection with: anAccount with: anotherAccount.
+	
+	ourPortfolio := Portfolio for: someAccounts.
+	
+	self should: [ourPortfolio add: anotherAccount] 
+	raise: Error  
+	withExceptionDo: [:anError|
+		Portfolio cannotContainDuplicatesErrorDescription = anError messageText ].
+	
+
+		
+	! !
+
+!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/26/2019 19:50:42'!
+test10AddingANewPortfolioToAnExistingPortfolioShouldKeepTheTotalBalance
+	|ourPortfolio anAccount anotherAccount someAccounts aThirdAccount anotherAccounts ourAnotherPortfolio portfolioCurrentBalance |
+	
+	anAccount := ReceptiveAccount new.
+	Deposit register: 100 on: anAccount.
+	anotherAccount := ReceptiveAccount new.
+	Withdraw register: 25 on: anotherAccount.
+	someAccounts := OrderedCollection with: anAccount with: anotherAccount.
+	ourPortfolio := Portfolio for: someAccounts.
+	portfolioCurrentBalance := ourPortfolio balance.
+	
+	aThirdAccount := ReceptiveAccount new.
+	Deposit register: 100 on: aThirdAccount.
+	anotherAccounts := OrderedCollection with: aThirdAccount.
+	ourAnotherPortfolio := Portfolio for: anotherAccounts.
+
+	"Exercise"
+	
+	ourPortfolio add: ourAnotherPortfolio.
+	
+	self assert: (ourPortfolio balance = (portfolioCurrentBalance + ourAnotherPortfolio balance)).
+	
+
+		
+	! !
+
+!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/26/2019 19:50:42'!
+test11AddingANewPortfolioToAnExistingPortfolioShouldKeepTheTotalTransactions
+	|ourPortfolio anAccount anotherAccount someAccounts aThirdAccount anotherAccounts ourAnotherPortfolio portfolioCurrentTransactions |
+	
+	anAccount := ReceptiveAccount new.
+	Deposit register: 100 on: anAccount.
+	anotherAccount := ReceptiveAccount new.
+	Withdraw register: 25 on: anotherAccount.
+	someAccounts := OrderedCollection with: anAccount with: anotherAccount.
+	
+	ourPortfolio := Portfolio for: someAccounts.
+	portfolioCurrentTransactions := ourPortfolio transactions.
+	
+	aThirdAccount := ReceptiveAccount new.
+	Deposit register: 100 on: aThirdAccount.
+	anotherAccounts := OrderedCollection with: aThirdAccount.
+	
+	ourAnotherPortfolio := Portfolio for: anotherAccounts.
+
+	"Exercise"
+	ourPortfolio add: ourAnotherPortfolio.
+	
+	self assert: (ourPortfolio transactions includesAllOf: anAccount transactions). 
+	self assert: (ourPortfolio transactions includesAllOf: anotherAccount transactions). 
+	self assert: (ourPortfolio transactions includesAllOf: ourAnotherPortfolio transactions ).
+	self assert: (ourPortfolio transactions size = (portfolioCurrentTransactions size + ourAnotherPortfolio transactions size)).
+
+		
+	! !
+
+!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/26/2019 19:50:42'!
+test12AddingANewPortfolioToAnExistingPortfolioShouldKnowWhatTransactionsWereRegistered
+	|ourPortfolio anAccount anotherAccount someAccounts aThirdAccount anotherAccounts ourAnotherPortfolio firstTransaction secondTransaction thirdTransaction |
+	
+	anAccount := ReceptiveAccount new.
+	firstTransaction := Deposit register: 100 on: anAccount.
+	anotherAccount := ReceptiveAccount new.
+	secondTransaction := Withdraw register: 25 on: anotherAccount.
+	someAccounts := OrderedCollection with: anAccount with: anotherAccount.
+	
+	ourPortfolio := Portfolio for: someAccounts.
+	
+	aThirdAccount := ReceptiveAccount new.
+	thirdTransaction := Deposit register: 100 on: aThirdAccount.
+	anotherAccounts := OrderedCollection with: aThirdAccount.
+	
+	ourAnotherPortfolio := Portfolio for: anotherAccounts.
+
+	"Exercise"
+	ourPortfolio add: ourAnotherPortfolio.
+	
+	self assert: (ourPortfolio hasRegistered: firstTransaction). 
+	self assert: (ourPortfolio hasRegistered: secondTransaction). 
+	self assert: (ourPortfolio hasRegistered: thirdTransaction).
+
+		
+	! !
+
+!PortfolioTest methodsFor: 'test' stamp: 'NI 5/26/2019 20:46:44'!
+test13APortfolioWithAccountsAndPortfolioCannotContainDuplicates
+	|ourPortfolio anAccount anotherAccount ourAnotherPortfolio |
+	
+	anAccount := ReceptiveAccount new.
+	anotherAccount := ReceptiveAccount new.
+	
+	ourPortfolio := Portfolio for: (OrderedCollection with: anAccount with: anotherAccount).
+	
+	ourAnotherPortfolio := Portfolio for: (OrderedCollection with: anAccount).
+
+	self should: [ourPortfolio add: ourAnotherPortfolio] 
+	raise: Error  
+	withExceptionDo: [:anError |
+		self assert: (anError messageText = Portfolio cannotContainDuplicatesErrorDescription)].
+	
+	"
+		- ourPortfolio
+			- anAccount
+			- anotherAccount
+		- ourAnotherPortfolio
+			- anAccount
+		ourPortfolio add: ourAnotherPortfolio
+	"
+	
+	
+		
+	! !
+
+!PortfolioTest methodsFor: 'test' stamp: 'NI 5/26/2019 20:44:19'!
+test14APortfolioWithAccountsAndPortfolioCannotContainDuplicatesWhenAddingAccountToInnerPortfolio
+	|ourPortfolio anAccount anotherAccount ourAnotherPortfolio accountCarlos |
+	
+	anAccount := ReceptiveAccount new.
+	Deposit register: 100 on: anAccount.
+	anotherAccount := ReceptiveAccount new.
+	Withdraw register: 25 on: anotherAccount.
+	
+	ourPortfolio := Portfolio for: (OrderedCollection with: anAccount with: anotherAccount).
+	
+	accountCarlos := ReceptiveAccount new.
+	ourAnotherPortfolio := Portfolio for: (OrderedCollection with: accountCarlos).
+	
+	ourPortfolio add: ourAnotherPortfolio.
+
+	self should: [ourPortfolio add: accountCarlos] 
+	raise: Error  
+	withExceptionDo: [:anError |
+		self assert: (anError messageText = Portfolio cannotContainDuplicatesErrorDescription)].
+	
+	"
+	- ourPortfolio
+		- anAccount
+		- anotherAccount
+		- ourAnotherPortfolio
+			- accountCarlos
+	ourPortfolio add: accountCarlos
+"
+		
+	! !
+
+!PortfolioTest methodsFor: 'test' stamp: 'NI 5/26/2019 20:49:48'!
+test15APortfolioThatIsInsideAnotherPortfolioCannotContainDuplicateInformationFromItsParent
+	|portfolioNico accountA accountB accountC portfolioJuanse portfolioCarlos portfolioB portfolioA |
+	
+	accountA := ReceptiveAccount new.
+	accountB := ReceptiveAccount new.
+	accountC := ReceptiveAccount new.
+	
+	portfolioNico := Portfolio for: (OrderedCollection with: accountA).
+	portfolioJuanse := Portfolio for: (OrderedCollection with: accountB).	
+	portfolioCarlos := Portfolio for: (OrderedCollection with: accountB with: accountC).
+	
+	portfolioB := Portfolio for: (OrderedCollection with: portfolioNico).
+	portfolioA := Portfolio for: (OrderedCollection with: portfolioNico with: portfolioCarlos).
+
+	self should: [portfolioNico add: (OrderedCollection with: accountC)] 
+	raise: Error  
+	withExceptionDo: [:anError |
+		self assert: (anError messageText = Portfolio cannotContainDuplicatesErrorDescription)].
+	
+	"
+		- PortfolioA
+			- PortfolioNico
+				- AccountA
+			- PortfolioCarlos
+				- AccountB
+				- AccountC
+		- PortfolioB
+			- PortfolioNico
+				- AccountA
+		- PortfolioJuanse
+			- Account B
+		PortfolioNico add: AccountC
+	"
+		! !
 
 
 !classDefinition: #ReceptiveAccountTest category: #'Portfolio-Ejercicio'!
@@ -311,36 +581,66 @@ for: aValue
 
 !classDefinition: #Portfolio category: #'Portfolio-Ejercicio'!
 Object subclass: #Portfolio
-	instanceVariableNames: 'transactions accountsAmount account accounts'
+	instanceVariableNames: 'bankingStuff fathers'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Portfolio-Ejercicio'!
 
-!Portfolio methodsFor: 'initialization' stamp: 'Nipo 5/23/2019 21:39:32'!
-initializeFor: someAccounts
-	someAccounts = nil ifTrue: [self error: self class cannotCreateEmptyPortfolioErrorDescription].
-	accountsAmount := 1.
-	account := someAccounts.
-	accounts := someAccounts.! !
+!Portfolio methodsFor: 'initialization' stamp: 'NI 5/26/2019 20:20:19'!
+initializeFor: someBankingStuff
+	someBankingStuff = nil ifTrue: [self error: self class cannotCreateEmptyPortfolioErrorDescription].
+	bankingStuff := someBankingStuff.
+	fathers := OrderedCollection with: self.
+	someBankingStuff do: [:aBankingStuff | aBankingStuff addFather: self]! !
 
 
-!Portfolio methodsFor: 'as yet unclassified' stamp: 'Nipo 5/23/2019 20:58:11'!
-accountsAmount
-	^accountsAmount! !
+!Portfolio methodsFor: 'as yet unclassified' stamp: 'NI 5/26/2019 19:56:49'!
+accountAmounts
+	^ bankingStuff inject: 0 into: [:accum :aBankingStuff | accum + aBankingStuff accountAmounts].! !
+
+!Portfolio methodsFor: 'as yet unclassified' stamp: 'NI 5/26/2019 21:19:07'!
+add: aBankingStuff
+	(fathers anySatisfy: [:oneBankingStuff | oneBankingStuff checkIfNotDuplicateInformationWith: aBankingStuff]) ifTrue: [ self error: self class cannotContainDuplicatesErrorDescription ].
+	bankingStuff add: aBankingStuff.
+	aBankingStuff addFather: self.! !
+
+!Portfolio methodsFor: 'as yet unclassified' stamp: 'NI 5/26/2019 20:17:57'!
+addFather: aBankingStuff
+	fathers add: aBankingStuff
+	! !
+
+!Portfolio methodsFor: 'as yet unclassified' stamp: 'JIG 5/26/2019 19:51:32'!
+bankingStuff
+	^bankingStuff! !
+
+!Portfolio methodsFor: 'as yet unclassified' stamp: 'NI 5/26/2019 21:06:56'!
+checkIfNotDuplicateInformationWith: aBankingStuff
+	"^(aBankingStuff includesAnyOf: bankingStuff)."
+	^ self bankingStuff anySatisfy: [:oneBankingStuff | oneBankingStuff hasBankingStuff: aBankingStuff]! !
+
+!Portfolio methodsFor: 'as yet unclassified' stamp: 'NI 5/26/2019 21:18:20'!
+hasBankingStuff: anAccount
+	^ bankingStuff anySatisfy: [:aBankingStuff | aBankingStuff hasBankingStuff: anAccount].! !
 
 
-!Portfolio methodsFor: 'balance' stamp: 'Nipo 5/23/2019 21:40:02'!
+!Portfolio methodsFor: 'balance' stamp: 'NI 5/26/2019 19:58:00'!
 balance
-	^ accounts sum: [:anAccount | anAccount balance].! !
+	^ bankingStuff sum: [:aBankingStuff | aBankingStuff balance].! !
 
-!Portfolio methodsFor: 'balance' stamp: 'JIG 5/24/2019 17:02:27'!
+!Portfolio methodsFor: 'balance' stamp: 'NI 5/26/2019 19:59:11'!
 hasRegistered: aTransaction
-	^ (account at: 1) hasRegistered: aTransaction.! !
+	^bankingStuff anySatisfy: [:aBankingStuff | aBankingStuff hasRegistered: aTransaction ] .
+	! !
 
 
-!Portfolio methodsFor: 'transactions' stamp: 'JIG 5/24/2019 17:00:59'!
+!Portfolio methodsFor: 'transactions' stamp: 'NI 5/26/2019 19:59:32'!
 transactions
-	^ ( account at: 1) transactions.! !
+	|transactionAccumulator|
+	transactionAccumulator := OrderedCollection new.
+	
+	bankingStuff do: [:aBankingStuff | transactionAccumulator addAllLast: aBankingStuff transactions ].
+	
+	^transactionAccumulator.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -348,10 +648,14 @@ transactions
 Portfolio class
 	instanceVariableNames: ''!
 
-!Portfolio class methodsFor: 'initialization' stamp: 'Nipo 5/23/2019 20:56:52'!
-for: someAccounts
-	^ self new initializeFor: someAccounts! !
+!Portfolio class methodsFor: 'initialization' stamp: 'NI 5/26/2019 20:00:18'!
+for: someBankingStuff
+	^ self new initializeFor: someBankingStuff! !
 
+
+!Portfolio class methodsFor: 'error descriptions' stamp: 'NI 5/26/2019 20:00:28'!
+cannotContainDuplicatesErrorDescription
+	^'El portfolio no puede contener información duplicada.'! !
 
 !Portfolio class methodsFor: 'error descriptions' stamp: 'Nipo 5/23/2019 21:12:10'!
 cannotCreateAPortfolioWithInvalidEntriesErrorDescription
@@ -364,16 +668,21 @@ cannotCreateEmptyPortfolioErrorDescription
 
 !classDefinition: #ReceptiveAccount category: #'Portfolio-Ejercicio'!
 Object subclass: #ReceptiveAccount
-	instanceVariableNames: 'transactions'
+	instanceVariableNames: 'transactions fathers'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Portfolio-Ejercicio'!
 
-!ReceptiveAccount methodsFor: 'initialization' stamp: 'HernanWilkinson 7/13/2011 18:35'!
+!ReceptiveAccount methodsFor: 'initialization' stamp: 'JIG 5/26/2019 19:51:32'!
+bankingStuff
+	^self.! !
+
+!ReceptiveAccount methodsFor: 'initialization' stamp: 'NI 5/26/2019 20:16:10'!
 initialize
 
 	super initialize.
-	transactions := OrderedCollection new.! !
+	transactions := OrderedCollection new.
+	fathers := OrderedCollection with: self.! !
 
 
 !ReceptiveAccount methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 18:37'!
@@ -399,3 +708,20 @@ hasRegistered: aTransaction
 
 	^ transactions includes: aTransaction 
 ! !
+
+
+!ReceptiveAccount methodsFor: 'as yet unclassified' stamp: 'NI 5/26/2019 19:57:28'!
+accountAmounts
+	^1! !
+
+!ReceptiveAccount methodsFor: 'as yet unclassified' stamp: 'NI 5/26/2019 20:18:08'!
+addFather: aBankingStuff
+	fathers add: aBankingStuff! !
+
+!ReceptiveAccount methodsFor: 'as yet unclassified' stamp: 'NI 5/26/2019 21:07:34'!
+checkIfNotDuplicateInformationWith: someBankingStuff
+	^ someBankingStuff anySatisfy: [:aBankingStuff | aBankingStuff hasBankingStuff: self].! !
+
+!ReceptiveAccount methodsFor: 'as yet unclassified' stamp: 'NI 5/26/2019 21:07:34'!
+hasBankingStuff: anAccount
+	^ self = anAccount! !
