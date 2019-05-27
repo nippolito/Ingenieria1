@@ -468,6 +468,15 @@ hasPlayerCircleWon
 hasPlayerCrossWon
 	^ self winner = #Cross! !
 
+!TerniLapilli methodsFor: 'assertions' stamp: 'Nipo 5/27/2019 14:21:01'!
+isDiagonalASlideFrom: aSourcePosition to: aDestinyPosition 
+	^((aSourcePosition x - aDestinyPosition x) abs + (aSourcePosition y - aDestinyPosition y) abs) > 1! !
+
+!TerniLapilli methodsFor: 'assertions' stamp: 'Nipo 5/27/2019 14:26:10'!
+isDistanceFrom: aSourcePosition LargerThanOneTo: aDestinyPosition
+	^(((aSourcePosition x) - (aDestinyPosition x)) abs > 1) or: [((aSourcePosition y) - (aDestinyPosition y)) abs > 1]
+	! !
+
 !TerniLapilli methodsFor: 'assertions' stamp: 'JIG 5/24/2019 16:16:49'!
 isOver
 	^phase isOver.! !
@@ -551,25 +560,25 @@ putCrossOn: aPosition
 	! !
 
 
-!TerniLapilli methodsFor: 'operations - sliding' stamp: 'Nipo 5/27/2019 14:11:05'!
-slideCircleFrom: aPosition towards: anotherPosition
+!TerniLapilli methodsFor: 'operations - sliding' stamp: 'Nipo 5/27/2019 14:21:34'!
+slideCircleFrom: aSourcePosition towards: aDestinyPosition
 	turn errorIfSlidingCircleWhenIsNotCircleTurn.
-	self ensureIsValidSlidingFrom: aPosition towards: anotherPosition.
-	self errorIfSlidingCircleFromAPositionThatIsNotCircle: aPosition.
-	self placeCircleOnBoardAt: anotherPosition.
-	self removeFromBoardPieceAt: aPosition.
+	self ensureIsValidSlidingFrom: aSourcePosition towards: aDestinyPosition.
+	self errorIfSlidingCircleFromAPositionThatIsNotCircle: aSourcePosition.
+	self placeCircleOnBoardAt: aDestinyPosition.
+	self removeFromBoardPieceAt: aSourcePosition.
 	self changeGameStateIfCircleCompletedALine.
 	turn := TerniLapilliCrossTurn new.
 
 ! !
 
-!TerniLapilli methodsFor: 'operations - sliding' stamp: 'Nipo 5/27/2019 14:11:09'!
-slideCrossFrom: aPosition towards: anotherPosition
+!TerniLapilli methodsFor: 'operations - sliding' stamp: 'Nipo 5/27/2019 14:21:45'!
+slideCrossFrom: aSourcePosition towards: aDestinyPosition
 	turn errorIfSlidingCrossWhenIsNotCrossTurn.
-	self ensureIsValidSlidingFrom: aPosition towards: anotherPosition.
-	self errorIfSlidingCrossFromAPositionThatIsNotCross: aPosition.
-	self placeCrossOnBoardAt: anotherPosition.
-	self removeFromBoardPieceAt: aPosition.
+	self ensureIsValidSlidingFrom: aSourcePosition towards: aDestinyPosition.
+	self errorIfSlidingCrossFromAPositionThatIsNotCross: aSourcePosition.
+	self placeCrossOnBoardAt: aDestinyPosition.
+	self removeFromBoardPieceAt: aSourcePosition.
 	self changeGameStateIfCrossCompletedALine.
 	turn := TerniLapilliCircleTurn new.
 
@@ -710,13 +719,13 @@ errorIfSlidingCrossFromAPositionThatIsNotCross: aPosition
 	
 	! !
 
-!TerniLapilli methodsFor: 'private - errors' stamp: 'NI 5/26/2019 16:24:18'!
-errorIfSlidingDiagonalFrom: aPosition toAnInvalidPosition: anotherPosition.
-	((((aPosition x - anotherPosition x) abs + (aPosition y - anotherPosition y) abs) > 1) and: [(self isPositionThatCantSlideDiagonally: aPosition)]) ifTrue: [self error: self class cannotSlidePieceToAnInvalidPositionErrorDescription]! !
+!TerniLapilli methodsFor: 'private - errors' stamp: 'Nipo 5/27/2019 14:22:21'!
+errorIfSlidingDiagonalFrom: aSourcePosition toAnInvalidPosition: aDestinyPosition.
+	((self isDiagonalASlideFrom: aSourcePosition to: aDestinyPosition) and: [(self isPositionThatCantSlideDiagonally: aSourcePosition)]) ifTrue: [self error: self class cannotSlidePieceToAnInvalidPositionErrorDescription]! !
 
-!TerniLapilli methodsFor: 'private - errors' stamp: 'JIG 5/24/2019 14:43:54'!
-errorIfSlidingFrom: aPosition ToAnUnreachablePosition: anotherPosition
-	((((aPosition x) - (anotherPosition x)) abs > 1) or: [((aPosition y) - (anotherPosition y)) abs > 1])  ifTrue: [^self error: self class cannotSlideToAnUnreachablePositionErrorDescription ].
+!TerniLapilli methodsFor: 'private - errors' stamp: 'Nipo 5/27/2019 14:25:48'!
+errorIfSlidingFrom: aSourcePosition ToAnUnreachablePosition: aDestinyPosition
+	(self isDistanceFrom: aSourcePosition LargerThanOneTo: aDestinyPosition) ifTrue: [^self error: self class cannotSlideToAnUnreachablePositionErrorDescription ].
 	
 	! !
 
@@ -833,15 +842,15 @@ ensureIsValidPlacingOn: aPosition
 	self errorIfMoreThanThreeOfTheSamePieceArePlaced.
 ! !
 
-!TerniLapilli methodsFor: 'private - valid plays' stamp: 'NI 5/27/2019 11:04:22'!
-ensureIsValidSlidingFrom: aPosition towards: anotherPosition.
+!TerniLapilli methodsFor: 'private - valid plays' stamp: 'Nipo 5/27/2019 14:20:40'!
+ensureIsValidSlidingFrom: aSourcePosition towards: aDestinyPosition.
 	self errorIfSlidingWhenGameIsFinished.
 	self errorIfSlidingWhenNotAllPiecesArePlaced.
-	self errorIfSlidingAPieceFromAnInvalidPosition: aPosition.
-	self errorIfSlidingAPieceTowardsAnInvalidPosition: anotherPosition.
-	self errorIfSlidingOnAnOccupiedPosition: anotherPosition.
-	self errorIfSlidingFrom: aPosition ToAnUnreachablePosition: anotherPosition.
-	self errorIfSlidingDiagonalFrom: aPosition toAnInvalidPosition: anotherPosition.
+	self errorIfSlidingAPieceFromAnInvalidPosition: aSourcePosition.
+	self errorIfSlidingAPieceTowardsAnInvalidPosition: aDestinyPosition.
+	self errorIfSlidingOnAnOccupiedPosition: aDestinyPosition.
+	self errorIfSlidingFrom: aSourcePosition ToAnUnreachablePosition: aDestinyPosition.
+	self errorIfSlidingDiagonalFrom: aSourcePosition toAnInvalidPosition: aDestinyPosition.
 ! !
 
 
