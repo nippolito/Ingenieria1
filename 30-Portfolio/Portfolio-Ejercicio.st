@@ -125,7 +125,7 @@ test07APortfolioWithManyAccountsHasRegisteredTransactionsOfThoseAccounts
 	self assert: (ourPortfolio hasRegistered: aDepositTransaction ) = (anAccount hasRegistered: aDepositTransaction ).
 	self assert: (ourPortfolio hasRegistered: aWithdrawTransaction ) = (anotherAccount hasRegistered: aWithdrawTransaction ).! !
 
-!PortfolioTest methodsFor: 'test' stamp: 'NI 5/26/2019 20:54:49'!
+!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/27/2019 00:20:02'!
 test08APortfolioCanAddANewAccount
 	|ourPortfolio anAccount anotherAccount someAccounts aNewAccount |
 	
@@ -142,7 +142,7 @@ test08APortfolioCanAddANewAccount
 	ourPortfolio add: aNewAccount.
 
 	self assert: ourPortfolio accountAmounts = 3.
-	self assert: (ourPortfolio bankingStuff includes: aNewAccount ).
+	
 	
 	"
 	ourPortfolio
@@ -281,7 +281,7 @@ test12AddingANewPortfolioToAnExistingPortfolioShouldKnowWhatTransactionsWereRegi
 		
 	! !
 
-!PortfolioTest methodsFor: 'test' stamp: 'NI 5/26/2019 20:46:44'!
+!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/27/2019 00:30:31'!
 test13APortfolioWithAccountsAndPortfolioCannotContainDuplicates
 	|ourPortfolio anAccount anotherAccount ourAnotherPortfolio |
 	
@@ -342,7 +342,7 @@ test14APortfolioWithAccountsAndPortfolioCannotContainDuplicatesWhenAddingAccount
 		
 	! !
 
-!PortfolioTest methodsFor: 'test' stamp: 'NI 5/26/2019 20:49:48'!
+!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/27/2019 00:41:45'!
 test15APortfolioThatIsInsideAnotherPortfolioCannotContainDuplicateInformationFromItsParent
 	|portfolioNico accountA accountB accountC portfolioJuanse portfolioCarlos portfolioB portfolioA |
 	
@@ -357,7 +357,51 @@ test15APortfolioThatIsInsideAnotherPortfolioCannotContainDuplicateInformationFro
 	portfolioB := Portfolio for: (OrderedCollection with: portfolioNico).
 	portfolioA := Portfolio for: (OrderedCollection with: portfolioNico with: portfolioCarlos).
 
-	self should: [portfolioNico add: (OrderedCollection with: accountC)] 
+
+	
+	self should: [portfolioNico add: accountC] 
+	raise: Error  
+	withExceptionDo: [:anError |
+		self assert: (anError messageText = Portfolio cannotContainDuplicatesErrorDescription)].
+	
+	"
+		- PortfolioA
+			- PortfolioNico
+				- AccountA
+			- PortfolioCarlos
+				- AccountB
+				- AccountC
+		- PortfolioB
+			- PortfolioNico
+				- AccountA
+		- PortfolioJuanse
+			- Account B
+		PortfolioNico add: AccountC
+	"
+		! !
+
+!PortfolioTest methodsFor: 'test' stamp: 'JIG 5/27/2019 00:56:03'!
+test16TheImpossibleTest
+	|portfolioNico accountA accountB accountC portfolioJuanse portfolioCarlos portfolioB portfolioA accountH portfolioRicardo portfolioMi portfolioMiOtro |
+	
+	accountA := ReceptiveAccount new.
+	accountB := ReceptiveAccount new.
+	accountC := ReceptiveAccount new.
+	accountH := ReceptiveAccount new.
+
+	portfolioNico := Portfolio for: (OrderedCollection with: accountA).
+	portfolioJuanse := Portfolio for: (OrderedCollection with: accountB).	
+	portfolioCarlos := Portfolio for: (OrderedCollection with: accountC).
+	portfolioRicardo := Portfolio for: (OrderedCollection with: accountB with: accountH).
+	
+	portfolioB := Portfolio for: (OrderedCollection with: portfolioNico).
+	portfolioA := Portfolio for: (OrderedCollection with: portfolioNico with: portfolioCarlos).
+
+	portfolioMi := Portfolio for: (OrderedCollection with: portfolioA with: portfolioRicardo).
+	portfolioMiOtro := Portfolio for: (OrderedCollection with: portfolioB with: portfolioRicardo).
+
+	
+	self should: [portfolioNico add: portfolioJuanse] 
 	raise: Error  
 	withExceptionDo: [:anError |
 		self assert: (anError messageText = Portfolio cannotContainDuplicatesErrorDescription)].
@@ -604,19 +648,29 @@ add: aBankingStuff
 	bankingStuff add: aBankingStuff.
 	aBankingStuff addFather: self.! !
 
-!Portfolio methodsFor: 'as yet unclassified' stamp: 'NI 5/26/2019 20:17:57'!
+!Portfolio methodsFor: 'as yet unclassified' stamp: 'JIG 5/27/2019 00:39:16'!
 addFather: aBankingStuff
-	fathers add: aBankingStuff
+	(fathers at: 1) = self ifTrue: [fathers removeFirst].
+ 	fathers add: aBankingStuff.
 	! !
 
 !Portfolio methodsFor: 'as yet unclassified' stamp: 'JIG 5/26/2019 19:51:32'!
 bankingStuff
 	^bankingStuff! !
 
-!Portfolio methodsFor: 'as yet unclassified' stamp: 'NI 5/26/2019 21:06:56'!
+!Portfolio methodsFor: 'as yet unclassified' stamp: 'JIG 5/27/2019 00:55:54'!
 checkIfNotDuplicateInformationWith: aBankingStuff
 	"^(aBankingStuff includesAnyOf: bankingStuff)."
-	^ self bankingStuff anySatisfy: [:oneBankingStuff | oneBankingStuff hasBankingStuff: aBankingStuff]! !
+	(fathers = aBankingStuff) ifTrue: [^true].	
+	((fathers at: 1) = self) 
+		ifTrue: [^self containsBankingStuff: aBankingStuff] 
+		ifFalse: [
+			^fathers anySatisfy: [:aPortfolio | aPortfolio checkIfNotDuplicateInformationWith: aBankingStuff ]
+		].! !
+
+!Portfolio methodsFor: 'as yet unclassified' stamp: 'JIG 5/27/2019 00:14:52'!
+containsBankingStuff: aBankingStuff
+	^bankingStuff anySatisfy: [:aPersonalBankingStuff | aPersonalBankingStuff hasBankingStuff: aBankingStuff].! !
 
 !Portfolio methodsFor: 'as yet unclassified' stamp: 'NI 5/26/2019 21:18:20'!
 hasBankingStuff: anAccount
@@ -631,6 +685,14 @@ balance
 hasRegistered: aTransaction
 	^bankingStuff anySatisfy: [:aBankingStuff | aBankingStuff hasRegistered: aTransaction ] .
 	! !
+
+!Portfolio methodsFor: 'balance' stamp: 'JIG 5/27/2019 00:17:31'!
+includesOrEqualTo: aBankingStuff
+	^bankingStuff includesAnyOf: aBankingStuff.! !
+
+!Portfolio methodsFor: 'balance' stamp: 'JIG 5/27/2019 00:26:30'!
+includesOrEqualToAccount: aBankingStuff
+	^bankingStuff includes: aBankingStuff.! !
 
 
 !Portfolio methodsFor: 'transactions' stamp: 'NI 5/26/2019 19:59:32'!
@@ -722,6 +784,10 @@ addFather: aBankingStuff
 checkIfNotDuplicateInformationWith: someBankingStuff
 	^ someBankingStuff anySatisfy: [:aBankingStuff | aBankingStuff hasBankingStuff: self].! !
 
-!ReceptiveAccount methodsFor: 'as yet unclassified' stamp: 'NI 5/26/2019 21:07:34'!
-hasBankingStuff: anAccount
-	^ self = anAccount! !
+!ReceptiveAccount methodsFor: 'as yet unclassified' stamp: 'JIG 5/27/2019 00:17:36'!
+hasBankingStuff: aBankingStuff
+	^aBankingStuff includesOrEqualToAccount: self.! !
+
+!ReceptiveAccount methodsFor: 'as yet unclassified' stamp: 'JIG 5/27/2019 00:17:56'!
+includesOrEqualToAccount: anAccount
+	^self = anAccount.! !
