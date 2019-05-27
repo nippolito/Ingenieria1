@@ -521,37 +521,37 @@ createBoard
 	
 	board add: slot1; add: slot2; add: slot3;add: slot4; add: slot5; add: slot6;add: slot7; add: slot8; add: slot9.! !
 
-!TerniLapilli methodsFor: 'initialization' stamp: 'NI 5/27/2019 10:26:19'!
+!TerniLapilli methodsFor: 'initialization' stamp: 'Nipo 5/27/2019 14:10:47'!
 initializeWithCrossOn: aPosition
 	phase := PlacingFirstPiecesTerniLapilliPhase for: self.
 	self createBoard.
-	turn := TerniLapilliCrossTurn for: self.
+	turn := TerniLapilliCrossTurn new.
 	self putCrossOn: aPosition.! !
 
 
-!TerniLapilli methodsFor: 'operations - placing' stamp: 'NI 5/27/2019 11:29:22'!
+!TerniLapilli methodsFor: 'operations - placing' stamp: 'Nipo 5/27/2019 14:10:55'!
 putCircleOn: aPosition
 	turn errorIfACircleIsPlacedWhenIsNotCircleTurn.
 	self ensureIsValidPlacingOn: aPosition.
 	self placeCircleOnBoardAt: aPosition.
 	self changeGameStateIfCircleCompletedALine.
 	self changeGamePhase.
-	turn := TerniLapilliCrossTurn for: self.
+	turn := TerniLapilliCrossTurn new.
 
 	! !
 
-!TerniLapilli methodsFor: 'operations - placing' stamp: 'NI 5/27/2019 11:29:26'!
+!TerniLapilli methodsFor: 'operations - placing' stamp: 'Nipo 5/27/2019 14:11:00'!
 putCrossOn: aPosition
 	turn errorIfACrossIsPlacedWhenIsNotCrossTurn.
 	self ensureIsValidPlacingOn: aPosition. 
 	self placeCrossOnBoardAt: aPosition.
 	self changeGameStateIfCrossCompletedALine.
-	turn := TerniLapilliCircleTurn for: self.
+	turn := TerniLapilliCircleTurn new.
 
 	! !
 
 
-!TerniLapilli methodsFor: 'operations - sliding' stamp: 'NI 5/27/2019 11:29:34'!
+!TerniLapilli methodsFor: 'operations - sliding' stamp: 'Nipo 5/27/2019 14:11:05'!
 slideCircleFrom: aPosition towards: anotherPosition
 	turn errorIfSlidingCircleWhenIsNotCircleTurn.
 	self ensureIsValidSlidingFrom: aPosition towards: anotherPosition.
@@ -559,11 +559,11 @@ slideCircleFrom: aPosition towards: anotherPosition
 	self placeCircleOnBoardAt: anotherPosition.
 	self removeFromBoardPieceAt: aPosition.
 	self changeGameStateIfCircleCompletedALine.
-	turn := TerniLapilliCrossTurn for: self.
+	turn := TerniLapilliCrossTurn new.
 
 ! !
 
-!TerniLapilli methodsFor: 'operations - sliding' stamp: 'NI 5/27/2019 11:29:37'!
+!TerniLapilli methodsFor: 'operations - sliding' stamp: 'Nipo 5/27/2019 14:11:09'!
 slideCrossFrom: aPosition towards: anotherPosition
 	turn errorIfSlidingCrossWhenIsNotCrossTurn.
 	self ensureIsValidSlidingFrom: aPosition towards: anotherPosition.
@@ -571,7 +571,7 @@ slideCrossFrom: aPosition towards: anotherPosition
 	self placeCrossOnBoardAt: anotherPosition.
 	self removeFromBoardPieceAt: aPosition.
 	self changeGameStateIfCrossCompletedALine.
-	turn := TerniLapilliCircleTurn for: self.
+	turn := TerniLapilliCircleTurn new.
 
 ! !
 
@@ -807,15 +807,15 @@ changeGameStateIfCrossCompletedAVerticalLine
 		ifTrue: [self changeStateToFinishedWithWinner: #Cross].
 ! !
 
-!TerniLapilli methodsFor: 'private - game state' stamp: 'NI 5/26/2019 16:45:39'!
+!TerniLapilli methodsFor: 'private - game state' stamp: 'Nipo 5/27/2019 14:10:40'!
 changePhaseToPlacingSecondPieces
 	phase := PlacingSecondPiecesTerniLapilliPhase for: self.! !
 
-!TerniLapilli methodsFor: 'private - game state' stamp: 'NI 5/26/2019 16:45:48'!
+!TerniLapilli methodsFor: 'private - game state' stamp: 'Nipo 5/27/2019 14:10:36'!
 changePhaseToPlacingThirdPieces
 	phase := PlacingThirdPiecesTerniLapilliPhase for: self.! !
 
-!TerniLapilli methodsFor: 'private - game state' stamp: 'NI 5/26/2019 16:45:59'!
+!TerniLapilli methodsFor: 'private - game state' stamp: 'Nipo 5/27/2019 14:10:31'!
 changePhaseToSliding
 	phase := SlidingTerniLapilliPhase for: self.! !
 
@@ -1319,7 +1319,7 @@ winner
 
 !classDefinition: #TerniLapilliTurn category: #'TerniLapilli-Exercise'!
 Object subclass: #TerniLapilliTurn
-	instanceVariableNames: 'terniLapilli'
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TerniLapilli-Exercise'!
@@ -1341,24 +1341,10 @@ errorIfSlidingCrossWhenIsNotCrossTurn
 	^self subclassResponsibility.! !
 
 
-!TerniLapilliTurn methodsFor: 'initialization' stamp: 'JIG 5/24/2019 16:16:17'!
-initializeFor: aTerniLapilli
-	terniLapilli := aTerniLapilli.! !
-
 
 !TerniLapilliTurn methodsFor: 'nextPiece' stamp: 'Nip 5/24/2019 19:16:16'!
 nextPiece
 	^self subclassResponsibility.! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'TerniLapilliTurn class' category: #'TerniLapilli-Exercise'!
-TerniLapilliTurn class
-	instanceVariableNames: ''!
-
-!TerniLapilliTurn class methodsFor: 'initialization' stamp: 'JIG 5/24/2019 16:16:06'!
-for: aTerniLapilli
-	^self new initializeFor: aTerniLapilli.! !
 
 
 !classDefinition: #TerniLapilliCircleTurn category: #'TerniLapilli-Exercise'!
@@ -1371,16 +1357,16 @@ TerniLapilliTurn subclass: #TerniLapilliCircleTurn
 !TerniLapilliCircleTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:22'!
 errorIfACircleIsPlacedWhenIsNotCircleTurn! !
 
-!TerniLapilliCircleTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:38'!
+!TerniLapilliCircleTurn methodsFor: 'errors - testing' stamp: 'Nipo 5/27/2019 14:08:53'!
 errorIfACrossIsPlacedWhenIsNotCrossTurn
-	self error: terniLapilli class cannotPutTheSamePieceTwiceErrorDescription.! !
+	self error: TerniLapilli cannotPutTheSamePieceTwiceErrorDescription.! !
 
 !TerniLapilliCircleTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:45'!
 errorIfSlidingCircleWhenIsNotCircleTurn! !
 
-!TerniLapilliCircleTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:51'!
+!TerniLapilliCircleTurn methodsFor: 'errors - testing' stamp: 'Nipo 5/27/2019 14:09:07'!
 errorIfSlidingCrossWhenIsNotCrossTurn
-	self error: terniLapilli class cannotSlidePieceWhenIsNotYourTurnErrorDescription.! !
+	self error: TerniLapilli cannotSlidePieceWhenIsNotYourTurnErrorDescription.! !
 
 
 !TerniLapilliCircleTurn methodsFor: 'nextPiece' stamp: 'Nip 5/24/2019 19:16:16'!
@@ -1395,16 +1381,16 @@ TerniLapilliTurn subclass: #TerniLapilliCrossTurn
 	poolDictionaries: ''
 	category: 'TerniLapilli-Exercise'!
 
-!TerniLapilliCrossTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:22'!
+!TerniLapilliCrossTurn methodsFor: 'errors - testing' stamp: 'Nipo 5/27/2019 14:09:24'!
 errorIfACircleIsPlacedWhenIsNotCircleTurn
-	self error: terniLapilli class cannotPutTheSamePieceTwiceErrorDescription.! !
+	self error: TerniLapilli cannotPutTheSamePieceTwiceErrorDescription.! !
 
 !TerniLapilliCrossTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:38'!
 errorIfACrossIsPlacedWhenIsNotCrossTurn! !
 
-!TerniLapilliCrossTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:44'!
+!TerniLapilliCrossTurn methodsFor: 'errors - testing' stamp: 'Nipo 5/27/2019 14:09:31'!
 errorIfSlidingCircleWhenIsNotCircleTurn
-	self error: terniLapilli class cannotSlidePieceWhenIsNotYourTurnErrorDescription.! !
+	self error: TerniLapilli cannotSlidePieceWhenIsNotYourTurnErrorDescription.! !
 
 !TerniLapilliCrossTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:50'!
 errorIfSlidingCrossWhenIsNotCrossTurn
