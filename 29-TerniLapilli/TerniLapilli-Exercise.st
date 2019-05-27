@@ -105,7 +105,7 @@ test08CannotInitializeGamePlacingACrossOnAnInvalidPosition
 	withExceptionDo: [:anError | 
 			self assert: TerniLapilli cannotPlacePieceOnAnInvalidPositionErrorDescription = anError messageText].! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'NI 5/26/2019 15:57:01'!
+!TerniLapilliTest methodsFor: 'test' stamp: 'NI 5/27/2019 11:26:05'!
 test09CannotPutACircleOnAnOccupiedPosition
 	
 	self should: [ middleCrossTerniLapilli putCircleOn: (2@2)] 
@@ -480,17 +480,17 @@ isPlayingCircle
 isPlayingCross
 	^ self nextTurn = #Cross! !
 
-!TerniLapilli methodsFor: 'assertions' stamp: 'NI 5/26/2019 15:13:53'!
+!TerniLapilli methodsFor: 'assertions' stamp: 'NI 5/27/2019 11:20:03'!
 isPositionACircle: aPosition
-	^(self at: aPosition) = #Circle! !
+	^(self at: aPosition) isCircle.! !
 
-!TerniLapilli methodsFor: 'assertions' stamp: 'NI 5/26/2019 15:13:43'!
+!TerniLapilli methodsFor: 'assertions' stamp: 'NI 5/27/2019 11:20:07'!
 isPositionACross: aPosition
-	^(self at: aPosition) = #Cross! !
+	^(self at: aPosition) isCross! !
 
-!TerniLapilli methodsFor: 'assertions' stamp: 'NI 5/26/2019 15:14:39'!
+!TerniLapilli methodsFor: 'assertions' stamp: 'NI 5/27/2019 11:20:12'!
 isPositionEmpty: aPosition
-	^(self at: aPosition) = #Empty! !
+	^(self at: aPosition) isEmpty! !
 
 !TerniLapilli methodsFor: 'assertions' stamp: 'NI 5/26/2019 16:20:03'!
 isPositionThatCantSlideDiagonally: aPosition
@@ -504,56 +504,171 @@ isPositionValid: aPosition
 	^(aPosition x between: 1 and: 3) and: (aPosition y between: 1 and: 3).! !
 
 
-!TerniLapilli methodsFor: 'initialization' stamp: 'Nipo 5/20/2019 20:53:54'!
+!TerniLapilli methodsFor: 'initialization' stamp: 'NI 5/27/2019 11:29:15'!
 createBoard
+	|slot1 slot2 slot3 slot4 slot5 slot6 slot7 slot8 slot9|
 	board := OrderedCollection new. 
-	board addAll: #(#Empty #Empty #Empty #Empty #Empty #Empty #Empty #Empty #Empty).! !
+	
+	slot1 := TerniLapilliEmptyBoardSlot new.
+	slot2 := TerniLapilliEmptyBoardSlot new.
+	slot3 := TerniLapilliEmptyBoardSlot new.
+	slot4 := TerniLapilliEmptyBoardSlot new.
+	slot5 := TerniLapilliEmptyBoardSlot new.
+	slot6 := TerniLapilliEmptyBoardSlot new.
+	slot7 := TerniLapilliEmptyBoardSlot new.
+	slot8 := TerniLapilliEmptyBoardSlot new.
+	slot9 := TerniLapilliEmptyBoardSlot new.
+	
+	board add: slot1; add: slot2; add: slot3;add: slot4; add: slot5; add: slot6;add: slot7; add: slot8; add: slot9.! !
 
-!TerniLapilli methodsFor: 'initialization' stamp: 'NI 5/26/2019 17:00:06'!
+!TerniLapilli methodsFor: 'initialization' stamp: 'NI 5/27/2019 10:26:19'!
 initializeWithCrossOn: aPosition
 	phase := PlacingFirstPiecesTerniLapilliPhase for: self.
 	self createBoard.
-	turn := CrossTurn for: self.
+	turn := TerniLapilliCrossTurn for: self.
 	self putCrossOn: aPosition.! !
 
 
-!TerniLapilli methodsFor: 'operations - placing' stamp: 'NI 5/26/2019 16:40:22'!
+!TerniLapilli methodsFor: 'operations - placing' stamp: 'NI 5/27/2019 11:29:22'!
 putCircleOn: aPosition
 	turn errorIfACircleIsPlacedWhenIsNotCircleTurn.
-	self putPiece: #Circle on: aPosition.
+	self ensureIsValidPlacingOn: aPosition.
+	self placeCircleOnBoardAt: aPosition.
+	self changeGameStateIfCircleCompletedALine.
 	self changeGamePhase.
-	turn := CrossTurn for: self.
+	turn := TerniLapilliCrossTurn for: self.
 
 	! !
 
-!TerniLapilli methodsFor: 'operations - placing' stamp: 'NI 5/26/2019 16:31:38'!
+!TerniLapilli methodsFor: 'operations - placing' stamp: 'NI 5/27/2019 11:29:26'!
 putCrossOn: aPosition
 	turn errorIfACrossIsPlacedWhenIsNotCrossTurn.
-	self putPiece: #Cross on: aPosition.
-	turn := CircleTurn for: self.
+	self ensureIsValidPlacingOn: aPosition. 
+	self placeCrossOnBoardAt: aPosition.
+	self changeGameStateIfCrossCompletedALine.
+	turn := TerniLapilliCircleTurn for: self.
 
 	! !
 
 
-!TerniLapilli methodsFor: 'operations - sliding' stamp: 'NI 5/26/2019 16:31:45'!
+!TerniLapilli methodsFor: 'operations - sliding' stamp: 'NI 5/27/2019 11:29:34'!
 slideCircleFrom: aPosition towards: anotherPosition
 	turn errorIfSlidingCircleWhenIsNotCircleTurn.
-	self slidePiece: #Circle from: aPosition towards: anotherPosition.
-	turn := CrossTurn for: self.
+	self ensureIsValidSlidingFrom: aPosition towards: anotherPosition.
+	self errorIfSlidingCircleFromAPositionThatIsNotCircle: aPosition.
+	self placeCircleOnBoardAt: anotherPosition.
+	self removeFromBoardPieceAt: aPosition.
+	self changeGameStateIfCircleCompletedALine.
+	turn := TerniLapilliCrossTurn for: self.
 
 ! !
 
-!TerniLapilli methodsFor: 'operations - sliding' stamp: 'NI 5/26/2019 16:31:51'!
+!TerniLapilli methodsFor: 'operations - sliding' stamp: 'NI 5/27/2019 11:29:37'!
 slideCrossFrom: aPosition towards: anotherPosition
 	turn errorIfSlidingCrossWhenIsNotCrossTurn.
-	self slidePiece: #Cross from: aPosition towards: anotherPosition.
-	turn := CircleTurn for: self.
+	self ensureIsValidSlidingFrom: aPosition towards: anotherPosition.
+	self errorIfSlidingCrossFromAPositionThatIsNotCross: aPosition.
+	self placeCrossOnBoardAt: anotherPosition.
+	self removeFromBoardPieceAt: aPosition.
+	self changeGameStateIfCrossCompletedALine.
+	turn := TerniLapilliCircleTurn for: self.
 
 ! !
 
 
-!TerniLapilli methodsFor: 'private - errors' stamp: 'NI 5/26/2019 16:59:33'!
-errorIfMoreThanThreeOfTheSamePieceArePlaced: aPiece
+!TerniLapilli methodsFor: 'private - board' stamp: 'NI 5/26/2019 21:55:58'!
+firstDiagonal
+	| firstDiagonal|
+	
+	firstDiagonal := OrderedCollection new.
+	
+	firstDiagonal 
+		add: (board at: 1);
+		add: (board at: 5);
+ 		add: (board at: 9).
+
+	^ firstDiagonal! !
+
+!TerniLapilli methodsFor: 'private - board' stamp: 'NI 5/26/2019 21:56:40'!
+firstHorizontalLine
+	^ board copyFrom: 1 to: 3! !
+
+!TerniLapilli methodsFor: 'private - board' stamp: 'NI 5/26/2019 21:57:17'!
+firstVerticalLine
+	| firstColumn |
+	
+	firstColumn := OrderedCollection new.
+	firstColumn 
+		add: (board at: 1); 
+		add: (board at: 4); 
+		add: (board at: 7). 
+	
+	^ firstColumn! !
+
+!TerniLapilli methodsFor: 'private - board' stamp: 'NI 5/27/2019 10:43:01'!
+placeCircleOnBoardAt: aPosition
+	board at: (aPosition x - 1 * 3 + aPosition y) put: (TerniLapilliCircleBoardSlot new). 
+
+	! !
+
+!TerniLapilli methodsFor: 'private - board' stamp: 'NI 5/27/2019 10:42:49'!
+placeCrossOnBoardAt: aPosition
+	board at: (aPosition x - 1 * 3 + aPosition y) put: (TerniLapilliCrossBoardSlot new). 
+
+	! !
+
+!TerniLapilli methodsFor: 'private - board' stamp: 'NI 5/27/2019 11:11:13'!
+removeFromBoardPieceAt: aPosition
+	board at: (aPosition x - 1 * 3 + aPosition y) put: (TerniLapilliEmptyBoardSlot new).! !
+
+!TerniLapilli methodsFor: 'private - board' stamp: 'NI 5/26/2019 21:56:21'!
+secondDiagonal
+	| secondDiagonal|
+	
+	secondDiagonal := OrderedCollection new.
+	
+	secondDiagonal 
+		add: (board at: 3);
+		add: (board at: 5);
+ 		add: (board at: 7).
+
+	^ secondDiagonal! !
+
+!TerniLapilli methodsFor: 'private - board' stamp: 'NI 5/26/2019 21:56:54'!
+secondHorizontalLine
+	^ board copyFrom: 4 to: 6! !
+
+!TerniLapilli methodsFor: 'private - board' stamp: 'NI 5/26/2019 21:57:28'!
+secondVerticalLine
+	| secondColumn |
+	
+	secondColumn := OrderedCollection new.
+	secondColumn 
+		add: (board at: 2); 
+		add: (board at: 5); 
+		add: (board at: 8). 
+	
+	^ secondColumn! !
+
+!TerniLapilli methodsFor: 'private - board' stamp: 'NI 5/26/2019 21:57:06'!
+thirdHorizontalLine
+	^ board copyFrom: 7 to: 9! !
+
+!TerniLapilli methodsFor: 'private - board' stamp: 'NI 5/26/2019 21:57:41'!
+thirdVerticalLine
+	| thirdColumn |
+	
+	thirdColumn := OrderedCollection new.
+	thirdColumn 
+		add: (board at: 3); 
+		add: (board at: 6); 
+		add: (board at: 9). 
+	
+	^ thirdColumn! !
+
+
+!TerniLapilli methodsFor: 'private - errors' stamp: 'NI 5/27/2019 10:39:11'!
+errorIfMoreThanThreeOfTheSamePieceArePlaced
 	phase errorIfNotInPlacingPhase.
 	! !
 
@@ -567,10 +682,9 @@ errorIfPlacingAPieceWhenGameIsOver
 	^phase errorIfPlacingWhenIsOver.
 	! !
 
-!TerniLapilli methodsFor: 'private - errors' stamp: 'JIG 5/24/2019 14:25:26'!
+!TerniLapilli methodsFor: 'private - errors' stamp: 'NI 5/27/2019 11:31:19'!
 errorIfPlacingOnAnOccupiedPosition: aPosition
-	((self at: aPosition) = #Empty) ifFalse: [^self error: self class cannotPutPieceOnAnOcuppiedPositionErrorDescription].
-	
+	(self at: aPosition) errorIfPlacingOnAnOccupiedPosition.
 	! !
 
 !TerniLapilli methodsFor: 'private - errors' stamp: 'Nip 5/24/2019 20:30:09'!
@@ -584,6 +698,18 @@ errorIfSlidingAPieceTowardsAnInvalidPosition: aPosition
 	
 	! !
 
+!TerniLapilli methodsFor: 'private - errors' stamp: 'NI 5/27/2019 11:31:26'!
+errorIfSlidingCircleFromAPositionThatIsNotCircle: aPosition
+	(self at: aPosition) errorIfSlidingFromAPositionThatIsNotCircle.
+	
+	! !
+
+!TerniLapilli methodsFor: 'private - errors' stamp: 'NI 5/27/2019 11:31:30'!
+errorIfSlidingCrossFromAPositionThatIsNotCross: aPosition
+	(self at: aPosition) errorIfSlidingFromAPositionThatIsNotCross.
+	
+	! !
+
 !TerniLapilli methodsFor: 'private - errors' stamp: 'NI 5/26/2019 16:24:18'!
 errorIfSlidingDiagonalFrom: aPosition toAnInvalidPosition: anotherPosition.
 	((((aPosition x - anotherPosition x) abs + (aPosition y - anotherPosition y) abs) > 1) and: [(self isPositionThatCantSlideDiagonally: aPosition)]) ifTrue: [self error: self class cannotSlidePieceToAnInvalidPositionErrorDescription]! !
@@ -594,15 +720,9 @@ errorIfSlidingFrom: aPosition ToAnUnreachablePosition: anotherPosition
 	
 	! !
 
-!TerniLapilli methodsFor: 'private - errors' stamp: 'JIG 5/24/2019 14:31:36'!
-errorIfSlidingFromAPositionThatIsNotYours: aPosition playingAs: aPiece.
-	((self at: aPosition) = aPiece) ifFalse: [^self error: self class cannotSlidePieceThatIsNotYoursErrorDescription ].
-	
-	! !
-
-!TerniLapilli methodsFor: 'private - errors' stamp: 'NI 5/26/2019 16:07:14'!
+!TerniLapilli methodsFor: 'private - errors' stamp: 'NI 5/27/2019 11:31:07'!
 errorIfSlidingOnAnOccupiedPosition: aPosition
-	((self at: aPosition) = #Empty) ifFalse: [^self error: self class cannotSlidePieceToAnOcuppiedPositionErrorDescription ].
+	(self at: aPosition) errorIfSlidingOnAnOccupiedPosition.
 	
 	! !
 
@@ -625,55 +745,66 @@ changeGamePhase
 	phase changeGamePhase.
 ! !
 
-!TerniLapilli methodsFor: 'private - game state' stamp: 'Nip 5/24/2019 20:17:21'!
-changeGameStateIfAnyPlayerCompletedADiagonalLine	
+!TerniLapilli methodsFor: 'private - game state' stamp: 'NI 5/27/2019 10:50:01'!
+changeGameStateIfCircleCompletedADiagonalLine
 	
-	self changeGameStateIfPlayerCompletedADiagonalLine: #Cross.
-	self changeGameStateIfPlayerCompletedADiagonalLine: #Circle.
+	(self hasCircleCompletedFirstDiagonal or: 
+	self hasCircleCompletedSecondDiagonal)
+		ifTrue: [self changeStateToFinishedWithWinner: #Circle].
 ! !
 
-!TerniLapilli methodsFor: 'private - game state' stamp: 'Nip 5/24/2019 20:17:48'!
-changeGameStateIfAnyPlayerCompletedAHorizontalLine
-	self changeGameStateIfPlayerCompletedAHorizontalLine: #Cross.
-	self changeGameStateIfPlayerCompletedAHorizontalLine: #Circle.	
+!TerniLapilli methodsFor: 'private - game state' stamp: 'NI 5/27/2019 10:49:05'!
+changeGameStateIfCircleCompletedAHorizontalLine	
+	((self hasCircleCompletedFirstHorizontalLine or: 
+	self hasCircleCompletedSecondHorizontalLine) or:
+	self hasCircleCompletedThirdHorizontalLine)
+		ifTrue: [self changeStateToFinishedWithWinner: #Circle].! !
+
+!TerniLapilli methodsFor: 'private - game state' stamp: 'NI 5/27/2019 10:48:28'!
+changeGameStateIfCircleCompletedALine
+	self changeGameStateIfCircleCompletedAHorizontalLine.
+	self changeGameStateIfCircleCompletedAVerticalLine.
+	self changeGameStateIfCircleCompletedADiagonalLine.
 ! !
 
-!TerniLapilli methodsFor: 'private - game state' stamp: 'Nip 5/24/2019 20:16:56'!
-changeGameStateIfAnyPlayerCompletedALine
-	self changeGameStateIfAnyPlayerCompletedAHorizontalLine.
-	self changeGameStateIfAnyPlayerCompletedAVerticalLine.
-	self changeGameStateIfAnyPlayerCompletedADiagonalLine.
-! !
-
-!TerniLapilli methodsFor: 'private - game state' stamp: 'Nip 5/24/2019 20:18:09'!
-changeGameStateIfAnyPlayerCompletedAVerticalLine	
+!TerniLapilli methodsFor: 'private - game state' stamp: 'NI 5/27/2019 10:51:58'!
+changeGameStateIfCircleCompletedAVerticalLine	
 	
-	self changeGameStateIfPlayerCompletedAVerticalLine: #Cross.
-	self changeGameStateIfPlayerCompletedAVerticalLine: #Circle.
+	((self hasCircleCompletedFirstVerticalLine or: 
+	self hasCircleCompletedSecondVerticalLine) or:
+	self hasCircleCompletedThirdVerticalLine)
+		ifTrue: [self changeStateToFinishedWithWinner: #Circle].
 ! !
 
-!TerniLapilli methodsFor: 'private - game state' stamp: 'Nip 5/24/2019 20:17:21'!
-changeGameStateIfPlayerCompletedADiagonalLine: aPlayer	
+!TerniLapilli methodsFor: 'private - game state' stamp: 'NI 5/27/2019 10:50:44'!
+changeGameStateIfCrossCompletedADiagonalLine
 	
-	((self hasCompletedFirstDiagonal: aPlayer) or: 
-	(self hasCompletedSecondDiagonal: aPlayer))
-		ifTrue: [self changeStateToFinishedWithWinner: aPlayer].
+	(self hasCrossCompletedFirstDiagonal or: 
+	self hasCrossCompletedSecondDiagonal)
+		ifTrue: [self changeStateToFinishedWithWinner: #Cross].
 ! !
 
-!TerniLapilli methodsFor: 'private - game state' stamp: 'Nip 5/24/2019 20:17:48'!
-changeGameStateIfPlayerCompletedAHorizontalLine: aPlayer	
-	(((self hasCompletedFirstHorizontalLine: aPlayer) or: 
-	(self hasCompletedSecondHorizontalLine: aPlayer)) or:
-	(self hasCompletedThirdHorizontalLine: aPlayer))
-		ifTrue: [self changeStateToFinishedWithWinner: aPlayer].! !
+!TerniLapilli methodsFor: 'private - game state' stamp: 'NI 5/27/2019 10:47:24'!
+changeGameStateIfCrossCompletedAHorizontalLine	
+	((self hasCrossCompletedFirstHorizontalLine or: 
+	self hasCrossCompletedSecondHorizontalLine) or:
+	self hasCrossCompletedThirdHorizontalLine)
+		ifTrue: [self changeStateToFinishedWithWinner: #Cross].! !
 
-!TerniLapilli methodsFor: 'private - game state' stamp: 'Nip 5/24/2019 20:22:40'!
-changeGameStateIfPlayerCompletedAVerticalLine: aPlayer	
+!TerniLapilli methodsFor: 'private - game state' stamp: 'NI 5/27/2019 10:44:15'!
+changeGameStateIfCrossCompletedALine
+	self changeGameStateIfCrossCompletedAHorizontalLine.
+	self changeGameStateIfCrossCompletedAVerticalLine.
+	self changeGameStateIfCrossCompletedADiagonalLine.
+! !
+
+!TerniLapilli methodsFor: 'private - game state' stamp: 'NI 5/27/2019 10:48:10'!
+changeGameStateIfCrossCompletedAVerticalLine	
 	
-	(((self hasCompletedFirstVerticalLine: aPlayer) or: 
-	(self hasCompletedSecondVerticalLine: aPlayer)) or:
-	(self hasCompletedThirdVerticalLine: aPlayer))
-		ifTrue: [self changeStateToFinishedWithWinner: aPlayer].
+	((self hasCrossCompletedFirstVerticalLine or: 
+	self hasCrossCompletedSecondVerticalLine) or:
+	self hasCrossCompletedThirdVerticalLine)
+		ifTrue: [self changeStateToFinishedWithWinner: #Cross].
 ! !
 
 !TerniLapilli methodsFor: 'private - game state' stamp: 'NI 5/26/2019 16:45:39'!
@@ -694,114 +825,99 @@ changeStateToFinishedWithWinner: aPlayer
 	! !
 
 
-!TerniLapilli methodsFor: 'private - operations' stamp: 'JIG 5/21/2019 15:33:06'!
-placePieceOnBoard: aPiece at: aPosition
-	board at: (aPosition x - 1 * 3 + aPosition y) put: aPiece. 
-
-	! !
-
-!TerniLapilli methodsFor: 'private - operations' stamp: 'NI 5/26/2019 16:39:18'!
-putPiece: aPiece on: aPosition
+!TerniLapilli methodsFor: 'private - valid plays' stamp: 'NI 5/27/2019 10:40:38'!
+ensureIsValidPlacingOn: aPosition
 	self errorIfPlacingAPieceOnAnInvalidPosition: aPosition.
 	self errorIfPlacingAPieceWhenGameIsOver.
 	self errorIfPlacingOnAnOccupiedPosition: aPosition.
-	self errorIfMoreThanThreeOfTheSamePieceArePlaced: aPiece.
-	
-	self placePieceOnBoard: aPiece at: aPosition.
-	self changeGameStateIfAnyPlayerCompletedALine.
+	self errorIfMoreThanThreeOfTheSamePieceArePlaced.
+! !
 
-	! !
-
-!TerniLapilli methodsFor: 'private - operations' stamp: 'NI 5/26/2019 16:25:48'!
-slidePiece: aPiece from: aPosition towards: anotherPosition
+!TerniLapilli methodsFor: 'private - valid plays' stamp: 'NI 5/27/2019 11:04:22'!
+ensureIsValidSlidingFrom: aPosition towards: anotherPosition.
 	self errorIfSlidingWhenGameIsFinished.
 	self errorIfSlidingWhenNotAllPiecesArePlaced.
 	self errorIfSlidingAPieceFromAnInvalidPosition: aPosition.
 	self errorIfSlidingAPieceTowardsAnInvalidPosition: anotherPosition.
 	self errorIfSlidingOnAnOccupiedPosition: anotherPosition.
-	self errorIfSlidingFromAPositionThatIsNotYours: aPosition playingAs: aPiece.
 	self errorIfSlidingFrom: aPosition ToAnUnreachablePosition: anotherPosition.
 	self errorIfSlidingDiagonalFrom: aPosition toAnInvalidPosition: anotherPosition.
-	
-	self placePieceOnBoard: aPiece at: anotherPosition.
-	board at: (aPosition x - 1 * 3 + aPosition y) put: #Empty.
-	self changeGameStateIfAnyPlayerCompletedALine.
 ! !
 
 
-!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'Nip 5/24/2019 20:12:14'!
-hasCompletedFirstDiagonal: aPlayer
-	| firstDiagonal|
-	
-	firstDiagonal := OrderedCollection new.
-	
-	firstDiagonal 
-		add: (board at: 1);
-		add: (board at: 5);
- 		add: (board at: 9).
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:01:21'!
+hasCircleCompletedFirstDiagonal
 
-	^ (firstDiagonal occurrencesOf: aPlayer) = 3! !
+	^ self firstDiagonal allSatisfy: [:aPosition | aPosition isCircle]! !
 
-!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'Nip 5/24/2019 20:08:29'!
-hasCompletedFirstHorizontalLine: aPlayer
-	^ ((board copyFrom: 1 to: 3) occurrencesOf: aPlayer) = 3! !
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:02:16'!
+hasCircleCompletedFirstHorizontalLine
+	^ self firstHorizontalLine allSatisfy: [:aPosition | aPosition isCircle]! !
 
-!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'Nip 5/24/2019 20:22:25'!
-hasCompletedFirstVerticalLine: aPlayer
-	| firstColumn |
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:06:03'!
+hasCircleCompletedFirstVerticalLine
 	
-	firstColumn := OrderedCollection new.
-	firstColumn 
-		add: (board at: 1); 
-		add: (board at: 4); 
-		add: (board at: 7). 
-	
-	^ (firstColumn occurrencesOf: aPlayer) = 3! !
+	^ self firstVerticalLine allSatisfy: [:aPosition | aPosition isCircle]! !
 
-!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'Nip 5/24/2019 20:12:42'!
-hasCompletedSecondDiagonal: aPlayer
-	| secondDiagonal|
-	
-	secondDiagonal := OrderedCollection new.
-	
-	secondDiagonal 
-		add: (board at: 3);
-		add: (board at: 5);
- 		add: (board at: 7).
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:07:53'!
+hasCircleCompletedSecondDiagonal
 
-	^ (secondDiagonal occurrencesOf: aPlayer) = 3! !
+	^ self secondDiagonal allSatisfy: [:aPosition | aPosition isCircle]! !
 
-!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'Nip 5/24/2019 20:09:09'!
-hasCompletedSecondHorizontalLine: aPlayer
-	^ ((board copyFrom: 4 to: 6) occurrencesOf: aPlayer) = 3! !
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:07:29'!
+hasCircleCompletedSecondHorizontalLine
+	^ self secondHorizontalLine allSatisfy: [:aPosition | aPosition isCircle]! !
 
-!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'Nip 5/24/2019 20:22:19'!
-hasCompletedSecondVerticalLine: aPlayer
-	| secondColumn |
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:06:20'!
+hasCircleCompletedSecondVerticalLine
 	
-	secondColumn := OrderedCollection new.
-	secondColumn 
-		add: (board at: 2); 
-		add: (board at: 5); 
-		add: (board at: 8). 
-	
-	^ (secondColumn occurrencesOf: aPlayer) = 3! !
+	^ self secondVerticalLine allSatisfy: [:aPosition | aPosition isCircle]! !
 
-!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'Nip 5/24/2019 20:09:17'!
-hasCompletedThirdHorizontalLine: aPlayer
-	^ ((board copyFrom: 7 to: 9) occurrencesOf: aPlayer) = 3! !
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:07:19'!
+hasCircleCompletedThirdHorizontalLine
+	^ self thirdHorizontalLine allSatisfy: [:aPosition | aPosition isCircle]! !
 
-!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'Nip 5/24/2019 20:22:09'!
-hasCompletedThirdVerticalLine: aPlayer
-	| thirdColumn |
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:06:29'!
+hasCircleCompletedThirdVerticalLine
 	
-	thirdColumn := OrderedCollection new.
-	thirdColumn 
-		add: (board at: 3); 
-		add: (board at: 6); 
-		add: (board at: 9). 
+	^ self thirdVerticalLine allSatisfy: [:aPosition | aPosition isCircle]! !
+
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:00:38'!
+hasCrossCompletedFirstDiagonal
+
+	^ self firstDiagonal allSatisfy: [:aPosition | aPosition isCross]! !
+
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:02:09'!
+hasCrossCompletedFirstHorizontalLine
+	^ self firstHorizontalLine allSatisfy: [:aPosition | aPosition isCross]! !
+
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:05:58'!
+hasCrossCompletedFirstVerticalLine
 	
-	^ (thirdColumn occurrencesOf: aPlayer) = 3! !
+	^ self firstVerticalLine allSatisfy: [:aPosition | aPosition isCross]! !
+
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:08:11'!
+hasCrossCompletedSecondDiagonal
+
+	^ self secondDiagonal allSatisfy: [:aPosition | aPosition isCross]! !
+
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:07:00'!
+hasCrossCompletedSecondHorizontalLine
+	^ self secondHorizontalLine allSatisfy: [:aPosition | aPosition isCross]! !
+
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:06:43'!
+hasCrossCompletedSecondVerticalLine
+	
+	^ self secondVerticalLine allSatisfy: [:aPosition | aPosition isCross]! !
+
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:07:10'!
+hasCrossCompletedThirdHorizontalLine
+	^ self thirdHorizontalLine allSatisfy: [:aPosition | aPosition isCross]! !
+
+!TerniLapilli methodsFor: 'private - winning assertions' stamp: 'NI 5/26/2019 22:06:36'!
+hasCrossCompletedThirdVerticalLine
+	
+	^ self thirdVerticalLine allSatisfy: [:aPosition | aPosition isCross]! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -873,6 +989,127 @@ cannotSlidePieceWhenStillPlacingPiecesErrorDescription
 !TerniLapilli class methodsFor: 'error descriptions' stamp: 'NI 5/26/2019 16:34:13'!
 cannotSlideToAnUnreachablePositionErrorDescription
 	^'No se puede deslizar una pieza hacia una posición que no es lindante a tu posición'.! !
+
+
+!classDefinition: #TerniLapilliBoardSlot category: #'TerniLapilli-Exercise'!
+Object subclass: #TerniLapilliBoardSlot
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TerniLapilli-Exercise'!
+
+!TerniLapilliBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 10:57:12'!
+errorIfPlacingOnAnOccupiedPosition
+	self subclassResponsibility.! !
+
+!TerniLapilliBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 11:07:43'!
+errorIfSlidingFromAPositionThatIsNotCircle
+	self subclassResponsibility.! !
+
+!TerniLapilliBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 11:07:47'!
+errorIfSlidingFromAPositionThatIsNotCross
+	self subclassResponsibility.! !
+
+!TerniLapilliBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 10:59:12'!
+errorIfSlidingOnAnOccupiedPosition
+	self subclassResponsibility.! !
+
+
+!TerniLapilliBoardSlot methodsFor: 'assertions' stamp: 'NI 5/27/2019 10:28:02'!
+isCircle
+	^false! !
+
+!TerniLapilliBoardSlot methodsFor: 'assertions' stamp: 'NI 5/27/2019 10:28:05'!
+isCross
+	^false! !
+
+!TerniLapilliBoardSlot methodsFor: 'assertions' stamp: 'NI 5/27/2019 10:28:10'!
+isEmpty
+	^false! !
+
+
+!classDefinition: #TerniLapilliCircleBoardSlot category: #'TerniLapilli-Exercise'!
+TerniLapilliBoardSlot subclass: #TerniLapilliCircleBoardSlot
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TerniLapilli-Exercise'!
+
+!TerniLapilliCircleBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 11:25:23'!
+errorIfPlacingOnAnOccupiedPosition
+	^self error: TerniLapilli cannotPutPieceOnAnOcuppiedPositionErrorDescription! !
+
+!TerniLapilliCircleBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 11:07:25'!
+errorIfSlidingFromAPositionThatIsNotCircle
+	! !
+
+!TerniLapilliCircleBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 11:25:29'!
+errorIfSlidingFromAPositionThatIsNotCross
+	^self error: TerniLapilli cannotSlidePieceThatIsNotYoursErrorDescription.! !
+
+!TerniLapilliCircleBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 11:25:32'!
+errorIfSlidingOnAnOccupiedPosition
+	^self error: TerniLapilli cannotSlidePieceToAnOcuppiedPositionErrorDescription! !
+
+
+!TerniLapilliCircleBoardSlot methodsFor: 'assertions' stamp: 'NI 5/27/2019 10:28:23'!
+isCircle
+	^true! !
+
+
+!classDefinition: #TerniLapilliCrossBoardSlot category: #'TerniLapilli-Exercise'!
+TerniLapilliBoardSlot subclass: #TerniLapilliCrossBoardSlot
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TerniLapilli-Exercise'!
+
+!TerniLapilliCrossBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 11:25:37'!
+errorIfPlacingOnAnOccupiedPosition
+	^self error: TerniLapilli cannotPutPieceOnAnOcuppiedPositionErrorDescription! !
+
+!TerniLapilliCrossBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 11:25:42'!
+errorIfSlidingFromAPositionThatIsNotCircle
+	^self error: TerniLapilli cannotSlidePieceThatIsNotYoursErrorDescription.! !
+
+!TerniLapilliCrossBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 11:08:11'!
+errorIfSlidingFromAPositionThatIsNotCross! !
+
+!TerniLapilliCrossBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 11:25:46'!
+errorIfSlidingOnAnOccupiedPosition
+	^self error: TerniLapilli cannotSlidePieceToAnOcuppiedPositionErrorDescription! !
+
+
+!TerniLapilliCrossBoardSlot methodsFor: 'assertions' stamp: 'NI 5/27/2019 10:28:31'!
+isCross
+	^true! !
+
+
+!classDefinition: #TerniLapilliEmptyBoardSlot category: #'TerniLapilli-Exercise'!
+TerniLapilliBoardSlot subclass: #TerniLapilliEmptyBoardSlot
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TerniLapilli-Exercise'!
+
+!TerniLapilliEmptyBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 10:57:37'!
+errorIfPlacingOnAnOccupiedPosition! !
+
+!TerniLapilliEmptyBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 11:25:52'!
+errorIfSlidingFromAPositionThatIsNotCircle
+	^self error: TerniLapilli cannotSlidePieceThatIsNotYoursErrorDescription.! !
+
+!TerniLapilliEmptyBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 11:25:55'!
+errorIfSlidingFromAPositionThatIsNotCross
+	^self error: TerniLapilli cannotSlidePieceThatIsNotYoursErrorDescription.! !
+
+!TerniLapilliEmptyBoardSlot methodsFor: 'errors - testing' stamp: 'NI 5/27/2019 10:59:01'!
+errorIfSlidingOnAnOccupiedPosition! !
+
+
+!TerniLapilliEmptyBoardSlot methodsFor: 'assertions' stamp: 'NI 5/27/2019 10:28:40'!
+isEmpty
+	^true! !
 
 
 !classDefinition: #TerniLapilliPhase category: #'TerniLapilli-Exercise'!
@@ -1124,56 +1361,56 @@ for: aTerniLapilli
 	^self new initializeFor: aTerniLapilli.! !
 
 
-!classDefinition: #CircleTurn category: #'TerniLapilli-Exercise'!
-TerniLapilliTurn subclass: #CircleTurn
+!classDefinition: #TerniLapilliCircleTurn category: #'TerniLapilli-Exercise'!
+TerniLapilliTurn subclass: #TerniLapilliCircleTurn
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TerniLapilli-Exercise'!
 
-!CircleTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:22'!
+!TerniLapilliCircleTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:22'!
 errorIfACircleIsPlacedWhenIsNotCircleTurn! !
 
-!CircleTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:38'!
+!TerniLapilliCircleTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:38'!
 errorIfACrossIsPlacedWhenIsNotCrossTurn
 	self error: terniLapilli class cannotPutTheSamePieceTwiceErrorDescription.! !
 
-!CircleTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:45'!
+!TerniLapilliCircleTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:45'!
 errorIfSlidingCircleWhenIsNotCircleTurn! !
 
-!CircleTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:51'!
+!TerniLapilliCircleTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:51'!
 errorIfSlidingCrossWhenIsNotCrossTurn
 	self error: terniLapilli class cannotSlidePieceWhenIsNotYourTurnErrorDescription.! !
 
 
-!CircleTurn methodsFor: 'nextPiece' stamp: 'Nip 5/24/2019 19:16:16'!
+!TerniLapilliCircleTurn methodsFor: 'nextPiece' stamp: 'Nip 5/24/2019 19:16:16'!
 nextPiece
 	^#Circle.! !
 
 
-!classDefinition: #CrossTurn category: #'TerniLapilli-Exercise'!
-TerniLapilliTurn subclass: #CrossTurn
+!classDefinition: #TerniLapilliCrossTurn category: #'TerniLapilli-Exercise'!
+TerniLapilliTurn subclass: #TerniLapilliCrossTurn
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TerniLapilli-Exercise'!
 
-!CrossTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:22'!
+!TerniLapilliCrossTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:22'!
 errorIfACircleIsPlacedWhenIsNotCircleTurn
 	self error: terniLapilli class cannotPutTheSamePieceTwiceErrorDescription.! !
 
-!CrossTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:38'!
+!TerniLapilliCrossTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:38'!
 errorIfACrossIsPlacedWhenIsNotCrossTurn! !
 
-!CrossTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:44'!
+!TerniLapilliCrossTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:44'!
 errorIfSlidingCircleWhenIsNotCircleTurn
 	self error: terniLapilli class cannotSlidePieceWhenIsNotYourTurnErrorDescription.! !
 
-!CrossTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:50'!
+!TerniLapilliCrossTurn methodsFor: 'errors - testing' stamp: 'NI 5/26/2019 16:31:50'!
 errorIfSlidingCrossWhenIsNotCrossTurn
 	! !
 
 
-!CrossTurn methodsFor: 'nextPiece' stamp: 'Nip 5/24/2019 19:16:16'!
+!TerniLapilliCrossTurn methodsFor: 'nextPiece' stamp: 'Nip 5/24/2019 19:16:16'!
 nextPiece
 	^#Cross.! !
