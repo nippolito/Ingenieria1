@@ -196,11 +196,10 @@ test14ComposedPortfolioCanNotHaveAccountOfAnyRootParentRecursively
 			self assert: Portfolio canNotAddAccountErrorMessage equals: anError messageText.
 			self assert: portfolio accountsIsEmpty ]! !
 
-
 
 !classDefinition: #ReceptiveAccountTest category: #'PortfolioTreePrinter-Ejercicio'!
 TestCase subclass: #ReceptiveAccountTest
-	instanceVariableNames: ''
+	instanceVariableNames: 'accountWith100Deposit accountWithoutTransactions accountWith100DepositTransaction'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
@@ -288,19 +287,219 @@ test07AccountKnowsItsTransactions
 	self assert: (account1 transactions includes: deposit1).
 ! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'JIG 5/29/2019 02:33:20'!
-test08WireTransferMustAffectSourceAndDestinyAccountsBalances
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'NI 5/29/2019 12:42:22'!
+test08WireTransferMustAffectSourceAndDestinyAccountBalance
 
-	| sourceAccount destinyAccount aDepositTransactionOnSource transferTransaction |
+	| transferTransaction |
 	
-	sourceAccount := ReceptiveAccount new.
-	destinyAccount  := ReceptiveAccount new.
-	aDepositTransactionOnSource := Deposit register: 100 on: sourceAccount.
+	transferTransaction := WireTransfer register: 80 from: accountWith100Deposit to: accountWithoutTransactions.
 	
-	transferTransaction := WireTransfer register: 80 from: sourceAccount to: destinyAccount.
+	self assert: (accountWith100Deposit balance = (accountWith100DepositTransaction value - transferTransaction value)).
+	self assert: (accountWithoutTransactions balance = transferTransaction value).! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'NI 5/29/2019 12:40:47'!
+test09WireTransferMustAffectSourceAndDestinyAccountsTransactions
+
+	| transferTransaction |
 	
-	self assert: (sourceAccount balance = aDepositTransactionOnSource value - transferTransaction value).
-	self assert: (destinyAccount balance = transferTransaction balance).! !
+	transferTransaction := WireTransfer register: 80 from: accountWith100Deposit to: accountWithoutTransactions.
+	
+	self assert: (accountWith100Deposit transactions includes: transferTransaction withdrawLeg ).
+	self assert: (accountWithoutTransactions transactions includes: transferTransaction depositLeg)! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'NI 5/29/2019 12:45:30'!
+test10WireTransferSourceAndDestinyShouldHaveThatTransferRegistered
+
+	| transferTransaction |
+	
+	transferTransaction := WireTransfer register: 80 from: accountWith100Deposit to: accountWithoutTransactions.
+	
+	self assert: (accountWith100Deposit hasRegistered: transferTransaction withdrawLeg).
+	self assert: (accountWithoutTransactions hasRegistered: transferTransaction depositLeg)! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'NI 5/29/2019 12:50:48'!
+test11CantTransferNegativeMoney
+	
+	self 
+		should: [ WireTransfer register: -10 from: accountWith100Deposit to: accountWithoutTransactions ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError |
+			self assert:  WireTransfer cannotTransferNegativeMoneyErrorDescription equals: anError messageText.
+			]! !
+
+
+!ReceptiveAccountTest methodsFor: 'setup' stamp: 'NI 5/29/2019 12:30:21'!
+setUp
+	
+	accountWith100Deposit := ReceptiveAccount new.
+	accountWithoutTransactions  := ReceptiveAccount new.
+	accountWith100DepositTransaction := Deposit register: 100 on: accountWith100Deposit.! !
+
+
+!classDefinition: #ReportTest category: #'PortfolioTreePrinter-Ejercicio'!
+TestCase subclass: #ReportTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!ReportTest methodsFor: 'transaction strings' stamp: 'NI 5/29/2019 13:26:38'!
+balanceStringFor: aValue
+	^'Balance = ' , aValue asString , '.'.! !
+
+!ReportTest methodsFor: 'transaction strings' stamp: 'NI 5/29/2019 13:26:47'!
+depositStringFor: anAmmount
+	^ 'Depósito por ' , anAmmount asString , '.'! !
+
+!ReportTest methodsFor: 'transaction strings' stamp: 'NI 5/29/2019 13:28:05'!
+depositTransferStringFor: aValue
+	^'Entrada por transferencia de ' , aValue asString , '.'.! !
+
+!ReportTest methodsFor: 'transaction strings' stamp: 'NI 5/29/2019 13:29:15'!
+withdrawStringFor: aValue
+	^'Extracción por ' , aValue asString , '.'.! !
+
+!ReportTest methodsFor: 'transaction strings' stamp: 'NI 5/29/2019 13:28:28'!
+withdrawTransferStringFor: aValue
+	^'Salida por transferencia de ' , aValue asString , '.'.! !
+
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 5/29/2019 14:35:14'!
+test00EmptyTransactionsAccountSummaryReportShouldInformOnlyCeroBalance
+	
+	| anEmptyAccount aReport |
+	
+	anEmptyAccount := ReceptiveAccount new.
+	
+	aReport := Report generateAccountSummaryReportOf: anEmptyAccount.
+	
+	self assert: aReport size equals: 12.
+	self assert: aReport equals: (self balanceStringFor: anEmptyAccount balance)! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 5/29/2019 14:34:41'!
+test01AccountSummaryReportInformsDepositProperly
+	| anEmptyAccount aReport anAmmount |
+	
+	anAmmount := 25.
+	anEmptyAccount := ReceptiveAccount new.
+	Deposit register: anAmmount on: anEmptyAccount.
+	
+	aReport := Report generateAccountSummaryReportOf: anEmptyAccount.
+	
+	self assert: aReport size equals: 2.
+	self assert: (aReport at: 1) = (self depositStringFor: anAmmount)! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 5/29/2019 14:34:46'!
+test02AccountSummaryReportInformsWithdrawProperly
+	| anEmptyAccount aReport aWithdraw anAmmount |
+	
+	anAmmount := 25.
+	anEmptyAccount := ReceptiveAccount new.
+	aWithdraw := Withdraw register: anAmmount on: anEmptyAccount.
+	
+	aReport := Report generateAccountSummaryReportOf: anEmptyAccount.
+	
+	self assert: aReport size equals: 2.
+	self assert: (aReport at: 1) = (self withdrawStringFor: anAmmount)! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 5/29/2019 14:34:49'!
+test03AccountSummaryReportInformsWireWithdrawProperly
+	| anEmptyAccount aReport aWithdraw anAmmount anotherEmptyAccount |
+	
+	anAmmount := 25.
+	anEmptyAccount := ReceptiveAccount new.
+	anotherEmptyAccount := ReceptiveAccount new.
+	aWithdraw := WireTransfer register: anAmmount from: anEmptyAccount to: anotherEmptyAccount.
+	
+	aReport := Report generateAccountSummaryReportOf: anEmptyAccount.
+	
+	self assert: aReport size equals: 2.
+	self assert: (aReport at: 1) = (self withdrawTransferStringFor: anAmmount)! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 5/29/2019 15:20:08'!
+test04AccountSummaryReportInformsWireDepositProperly
+	| anEmptyAccount aReport aWithdraw anAmmount anotherEmptyAccount |
+	
+	anAmmount := 25.
+	anEmptyAccount := ReceptiveAccount new.
+	anotherEmptyAccount := ReceptiveAccount new.
+	aWithdraw := WireTransfer register: anAmmount from: anEmptyAccount to: anotherEmptyAccount.
+	
+	aReport := Report generateAccountSummaryReportOf: anotherEmptyAccount .
+	
+	"Para pasar este test tuve que agregarle el mensaje value a WireTransferDeposit que haga ^wireTransfer value"
+	
+	self assert: aReport size equals: 2.
+	self assert: (aReport includes: (self depositTransferStringFor: anAmmount))! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 5/29/2019 14:35:35'!
+test05OneTransactionAccountSummaryReportInformsBalanceProperly
+	| anEmptyAccount aReport aDeposit anAmmount |
+	
+	anAmmount := 25.
+	anEmptyAccount := ReceptiveAccount new.
+	aDeposit := Deposit register: anAmmount on: anEmptyAccount.
+	
+	aReport := Report generateAccountSummaryReportOf: anEmptyAccount.
+	
+	self assert: aReport size equals: 2.
+	self assert: (aReport at: 2) equals: (self balanceStringFor: anEmptyAccount balance).! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 5/29/2019 14:37:27'!
+test06AccountSummaryReportInformsMultipleTransactionsProperly
+	| anEmptyAccount aReport anAmmount anotherAmmount |
+	
+	anAmmount := 25.
+	anotherAmmount := 50.
+	anEmptyAccount := ReceptiveAccount new.
+	Withdraw register: anAmmount on: anEmptyAccount.
+	Deposit register: anotherAmmount on: anEmptyAccount.
+	
+	aReport := Report generateAccountSummaryReportOf: anEmptyAccount.
+	
+	self assert: aReport size equals: 3.
+	self assert: (aReport includes: (self withdrawStringFor: anAmmount)).
+	self assert: (aReport includes: (self depositStringFor: anotherAmmount)).! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 5/29/2019 15:03:22'!
+test07AccountSummaryReportMantainsTransactionOrder
+	| anEmptyAccount aReport firstAmmount secondAmmount thirdAmmount |
+	
+	firstAmmount := 25.
+	secondAmmount := 50.
+	thirdAmmount := 120.
+	
+	anEmptyAccount := ReceptiveAccount new.
+	
+	Deposit register: firstAmmount on: anEmptyAccount.
+	Withdraw register: secondAmmount on: anEmptyAccount.
+	Deposit register: thirdAmmount on: anEmptyAccount.
+	
+	aReport := Report generateAccountSummaryReportOf: anEmptyAccount.
+	
+	self assert: aReport size equals: 4.
+	self assert: (aReport at: 1) equals: (self depositStringFor: firstAmmount).
+	self assert: (aReport at: 2) equals: (self withdrawStringFor: secondAmmount).
+	self assert: (aReport at: 3) equals: (self depositStringFor: thirdAmmount).! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 5/29/2019 15:04:48'!
+test08ManyTransactionsAccountSummaryReportInformsBalanceProperly
+	| anEmptyAccount aReport firstAmmount secondAmmount thirdAmmount |
+	
+	firstAmmount := 25.
+	secondAmmount := 50.
+	thirdAmmount := 120.
+	
+	anEmptyAccount := ReceptiveAccount new.
+	
+	Deposit register: firstAmmount on: anEmptyAccount.
+	Withdraw register: secondAmmount on: anEmptyAccount.
+	Deposit register: thirdAmmount on: anEmptyAccount.
+	
+	aReport := Report generateAccountSummaryReportOf: anEmptyAccount.
+	
+	self assert: aReport size equals: 4.
+	self assert: (aReport at: 4) equals: (self balanceStringFor: anEmptyAccount balance).! !
 
 
 !classDefinition: #Account category: #'PortfolioTreePrinter-Ejercicio'!
@@ -621,17 +820,36 @@ AccountTransaction subclass: #WireTransfer
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!WireTransfer methodsFor: 'as yet unclassified' stamp: 'JIG 5/29/2019 02:38:43'!
-affectBalance: aBalance! !
+!WireTransfer methodsFor: 'balance' stamp: 'NI 5/29/2019 12:42:40'!
+affectBalance: aBalance
+	self subclassResponsibility! !
 
-!WireTransfer methodsFor: 'as yet unclassified' stamp: 'JIG 5/29/2019 02:26:54'!
-initializeWithWithdraw: wireTransferWithdraw andDeposit: wireTransferDeposit
-	withdrawLeg := wireTransferWithdraw.
+
+!WireTransfer methodsFor: 'initialization' stamp: 'NI 5/29/2019 15:17:55'!
+initializeWithWithdraw: aWireTransferWithdraw destinatedTo: aDestinationAccount
+	|wireTransferDeposit|
+
+	wireTransferDeposit := WireTransferDeposit comingOf: self.
+	"Le tuve que agregar el mensaje value a WireTransferDeposit para que responda wireTransfer value. Sin esto, lo que hacía era usar el del padre que retorna withdrawLeg value, pero withdrawLeg es nil"
+	
+	aDestinationAccount register: wireTransferDeposit.	
+	
+	withdrawLeg := aWireTransferWithdraw.
 	depositLeg  := wireTransferDeposit.! !
 
-!WireTransfer methodsFor: 'as yet unclassified' stamp: 'JIG 5/29/2019 02:35:13'!
+
+!WireTransfer methodsFor: 'value' stamp: 'JIG 5/29/2019 02:35:13'!
 value
 	^withdrawLeg value.! !
+
+
+!WireTransfer methodsFor: 'accessing' stamp: 'NI 5/29/2019 12:39:45'!
+depositLeg
+	^ depositLeg.! !
+
+!WireTransfer methodsFor: 'accessing' stamp: 'NI 5/29/2019 12:40:17'!
+withdrawLeg
+	^ withdrawLeg.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -639,25 +857,23 @@ value
 WireTransfer class
 	instanceVariableNames: ''!
 
-!WireTransfer class methodsFor: 'as yet unclassified' stamp: 'JIG 5/29/2019 02:45:28'!
+!WireTransfer class methodsFor: 'registration' stamp: 'NI 5/29/2019 12:52:05'!
 register: aValue from: aSourceAccount to: aDestinationAccount
-	| wireTransfer wireTransferWithdraw wireTransferDeposit |
+	|aWireTransferWithdraw|
 	
-	wireTransferWithdraw := WireTransferWithdraw for: aValue.
-	wireTransferDeposit := WireTransferDeposit comingOf: self. "Aca obviamente tiene que ser la instancia de wiretransfer, no la clase jeje. Una idea es que inicialice sin Deposito:"
+	aValue < 0 ifTrue: [self error: self cannotTransferNegativeMoneyErrorDescription].
+
+	aWireTransferWithdraw := WireTransferWithdraw for: aValue.
 	
-	"
-		wireTransferWithdraw := WireTransferWithdraw for: aValue.
-		wireTransfer := self new initializeWithWithdraw: wireTransferWithdraw andDeposit: wireTransferDeposit.
-		wireTransferDeposit := WireTransferDeposit comingOf: wireTransfer.
-	"
-	
-	aSourceAccount register: wireTransferWithdraw.
-	aSourceAccount register: wireTransferDeposit .
-	
-	wireTransfer := self new initializeWithWithdraw: wireTransferWithdraw andDeposit: wireTransferDeposit.
-		
-	^wireTransfer.
+	aSourceAccount register: aWireTransferWithdraw.
+
+	^ self new initializeWithWithdraw: aWireTransferWithdraw destinatedTo: aDestinationAccount.
+	! !
+
+
+!WireTransfer class methodsFor: 'error descriptions' stamp: 'NI 5/29/2019 12:51:21'!
+cannotTransferNegativeMoneyErrorDescription
+	^'No se puede transferir un valor negativo'
 	! !
 
 
@@ -668,17 +884,23 @@ WireTransfer subclass: #WireTransferDeposit
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!WireTransferDeposit methodsFor: 'as yet unclassified' stamp: 'JIG 5/29/2019 02:39:00'!
+!WireTransferDeposit methodsFor: 'balance' stamp: 'JIG 5/29/2019 02:39:00'!
 affectBalance: aBalance
 	^aBalance + (wireTransfer value).! !
 
-!WireTransferDeposit methodsFor: 'as yet unclassified' stamp: 'JIG 5/29/2019 02:32:43'!
-associatedWireTransfer
-	^wireTransfer.! !
+!WireTransferDeposit methodsFor: 'balance' stamp: 'NI 5/29/2019 15:15:14'!
+value
+	^wireTransfer value.! !
 
-!WireTransferDeposit methodsFor: 'as yet unclassified' stamp: 'JIG 5/29/2019 02:29:03'!
+
+!WireTransferDeposit methodsFor: 'initialization' stamp: 'JIG 5/29/2019 02:29:03'!
 initializeWithWireTransfer: aWireTransferTransaction
 	wireTransfer := aWireTransferTransaction.! !
+
+
+!WireTransferDeposit methodsFor: 'accessing' stamp: 'JIG 5/29/2019 02:32:43'!
+associatedWireTransfer
+	^wireTransfer.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -686,7 +908,7 @@ initializeWithWireTransfer: aWireTransferTransaction
 WireTransferDeposit class
 	instanceVariableNames: ''!
 
-!WireTransferDeposit class methodsFor: 'as yet unclassified' stamp: 'JIG 5/29/2019 02:28:46'!
+!WireTransferDeposit class methodsFor: 'initialization' stamp: 'JIG 5/29/2019 02:28:46'!
 comingOf: aWireTransferTransaction
 	^self new initializeWithWireTransfer: aWireTransferTransaction.! !
 
@@ -698,13 +920,19 @@ WireTransfer subclass: #WireTransferWithdraw
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!WireTransferWithdraw methodsFor: 'as yet unclassified' stamp: 'JIG 5/29/2019 02:30:10'!
-initializeFor: aValue
-	value := aValue.! !
+!WireTransferWithdraw methodsFor: 'balance' stamp: 'NI 5/29/2019 11:55:39'!
+affectBalance: aBalance
+	^aBalance - value.! !
 
-!WireTransferWithdraw methodsFor: 'as yet unclassified' stamp: 'JIG 5/29/2019 02:30:32'!
+
+!WireTransferWithdraw methodsFor: 'value' stamp: 'JIG 5/29/2019 02:30:32'!
 value
 	^value! !
+
+
+!WireTransferWithdraw methodsFor: 'initialization' stamp: 'JIG 5/29/2019 02:30:10'!
+initializeFor: aValue
+	value := aValue.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -712,7 +940,7 @@ value
 WireTransferWithdraw class
 	instanceVariableNames: ''!
 
-!WireTransferWithdraw class methodsFor: 'as yet unclassified' stamp: 'JIG 5/29/2019 02:37:29'!
+!WireTransferWithdraw class methodsFor: 'initialization' stamp: 'JIG 5/29/2019 02:37:29'!
 for: aValue
 	^self new initializeFor: aValue.! !
 
@@ -751,3 +979,56 @@ Withdraw class
 for: aValue
 
 	^ self new initializeFor: aValue ! !
+
+
+!classDefinition: #Report category: #'PortfolioTreePrinter-Ejercicio'!
+Object subclass: #Report
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Report class' category: #'PortfolioTreePrinter-Ejercicio'!
+Report class
+	instanceVariableNames: ''!
+
+!Report class methodsFor: 'transactions strings' stamp: 'NI 5/29/2019 13:20:41'!
+balanceStringFor: aValue
+	^'Balance = ' , aValue asString , '.'.! !
+
+!Report class methodsFor: 'transactions strings' stamp: 'NI 5/29/2019 13:20:34'!
+depositStringFor: aValue
+	^'Depósito por ' , aValue asString , '.'.! !
+
+!Report class methodsFor: 'transactions strings' stamp: 'NI 5/29/2019 13:20:44'!
+depositTransferStringFor: aValue
+	^'Entrada por transferencia de ' , aValue asString , '.'.! !
+
+!Report class methodsFor: 'transactions strings' stamp: 'NI 5/29/2019 13:29:15'!
+withdrawStringFor: aValue
+	^'Extracción por ' , aValue asString , '.'.! !
+
+!Report class methodsFor: 'transactions strings' stamp: 'NI 5/29/2019 13:20:51'!
+withdrawTransferStringFor: aValue
+	^'Salida por transferencia de ' , aValue asString , '.'.! !
+
+
+!Report class methodsFor: 'summary report' stamp: 'NI 5/29/2019 15:07:11'!
+generateAccountSummaryReportOf: aFinancialAsset
+	|report |
+	
+	report := OrderedCollection new.
+	aFinancialAsset transactions size = 0 ifTrue: [^ (report add: (self balanceStringFor: aFinancialAsset balance))].
+	
+	aFinancialAsset transactions do: [:aTransaction | 
+			aTransaction class = Deposit ifTrue: [report add: (self depositStringFor: aTransaction value)].
+			aTransaction class = Withdraw ifTrue: [report add: (self withdrawStringFor: aTransaction value)].
+			aTransaction class = WireTransferWithdraw ifTrue: [report add: (self withdrawTransferStringFor: aTransaction value)].
+			aTransaction class = WireTransferDeposit ifTrue: [report add: (self depositTransferStringFor: aTransaction value)].
+		].
+	
+	report add: (self balanceStringFor: aFinancialAsset balance).
+	
+	^ report! !
