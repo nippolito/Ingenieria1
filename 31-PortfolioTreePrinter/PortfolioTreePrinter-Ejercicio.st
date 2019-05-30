@@ -5,12 +5,12 @@ TestCase subclass: #PortfolioTest
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!PortfolioTest methodsFor: 'tests - portfolio' stamp: 'HAW 5/25/2019 11:16:26'!
+!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:16:26'!
 test01BalanceOfPortfolioWithoutAccountsIsZero
 
 	self assert: 0 equals: Portfolio new balance! !
 
-!PortfolioTest methodsFor: 'tests - portfolio' stamp: 'HAW 5/25/2019 11:17:51'!
+!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:17:51'!
 test02BalanceOfPortfolioWithOneAccountIsAccountBalance
 
 	| account portfolio |
@@ -21,7 +21,7 @@ test02BalanceOfPortfolioWithOneAccountIsAccountBalance
 	
 	self assert: account balance equals: portfolio balance! !
 
-!PortfolioTest methodsFor: 'tests - portfolio' stamp: 'HAW 5/25/2019 11:23:25'!
+!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:23:25'!
 test03BalanceOfPortfolioIsCalculatedRecursivelyOnPortfolios
 
 	| simplePortfolioAccount simplePortfolio composedPortfolioAccount composedPortofolio |
@@ -36,12 +36,12 @@ test03BalanceOfPortfolioIsCalculatedRecursivelyOnPortfolios
 	
 	self assert: (composedPortfolioAccount balance + simplePortfolio balance) equals: composedPortofolio balance! !
 
-!PortfolioTest methodsFor: 'tests - portfolio' stamp: 'HAW 5/25/2019 11:43:15'!
+!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:43:15'!
 test04PortfolioWithoutAccountsHasNoRegisteredTransaction
 
 	self deny: (Portfolio new hasRegistered: (Deposit for: 100))! !
 
-!PortfolioTest methodsFor: 'tests - portfolio' stamp: 'HAW 5/25/2019 11:43:11'!
+!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:43:11'!
 test05PortfolioHasRegisteredItsAccountsTransactions
 
 	| account portfolio deposit |
@@ -52,7 +52,7 @@ test05PortfolioHasRegisteredItsAccountsTransactions
 	
 	self assert: (portfolio hasRegistered: deposit)! !
 
-!PortfolioTest methodsFor: 'tests - portfolio' stamp: 'HAW 5/25/2019 11:58:06'!
+!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:58:06'!
 test06PortfolioLooksForRegisteredTransactionsRecursively
 
 	| simplePortfolioAccount simplePortfolio composedPortfolioAccount composedPortfolio composedPortfolioAccountWithdraw simplePortfolioAccountDeposit |
@@ -68,12 +68,12 @@ test06PortfolioLooksForRegisteredTransactionsRecursively
 	self assert: (composedPortfolio hasRegistered: simplePortfolioAccountDeposit).
 	self assert: (composedPortfolio hasRegistered: composedPortfolioAccountWithdraw)! !
 
-!PortfolioTest methodsFor: 'tests - portfolio' stamp: 'HAW 5/25/2019 11:58:10'!
+!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:58:10'!
 test07PortfolioHasNoTransactionWhenHasNoAccounts
 
 	self assert: Portfolio new transactions isEmpty! !
 
-!PortfolioTest methodsFor: 'tests - portfolio' stamp: 'HAW 5/25/2019 11:58:15'!
+!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:58:15'!
 test08PortfolioTransasctionsIncludesAllItsAccountsTransactions
 
 	| account portfolio accountDeposit anotherAccount portfolioTransactions anotherAccountWithdraw |
@@ -90,7 +90,7 @@ test08PortfolioTransasctionsIncludesAllItsAccountsTransactions
 	self assert: (portfolioTransactions includes: accountDeposit).
 	self assert: (portfolioTransactions includes: anotherAccountWithdraw)! !
 
-!PortfolioTest methodsFor: 'tests - portfolio' stamp: 'HAW 5/25/2019 11:58:20'!
+!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:58:20'!
 test09PortfolioTransactionsAreCalculatedRecursively
 
 	| simplePortfolioAccount simplePortfolio composedPortfolioAccount composedPortfolio composedPortfolioAccountWithdraw simplePortfolioAccountDeposit composedPortfolioTransactions |
@@ -108,7 +108,7 @@ test09PortfolioTransactionsAreCalculatedRecursively
 	self assert: (composedPortfolioTransactions includes: simplePortfolioAccountDeposit).
 	self assert: (composedPortfolioTransactions includes: composedPortfolioAccountWithdraw)! !
 
-!PortfolioTest methodsFor: 'tests - portfolio' stamp: 'HAW 5/25/2019 11:58:24'!
+!PortfolioTest methodsFor: 'tests' stamp: 'Nipo 5/30/2019 15:49:19'!
 test10PortfolioCanNotIncludeTheSameAccountMoreThanOnce
 
 	| account portfolio |
@@ -121,10 +121,10 @@ test10PortfolioCanNotIncludeTheSameAccountMoreThanOnce
 		raise: Error - MessageNotUnderstood 
 		withExceptionDo: [ :anError |
 			self assert: Portfolio canNotAddAccountErrorMessage equals: anError messageText.
-			self assert: 1 equals: portfolio accountsSize.
-			self assert: (portfolio accountsIncludes: account) ]! !
+			self assert: 1 equals: portfolio financialAssetsSize.
+			self assert: (portfolio financialAssetsIncludes: account) ]! !
 
-!PortfolioTest methodsFor: 'tests - portfolio' stamp: 'HAW 5/25/2019 11:58:28'!
+!PortfolioTest methodsFor: 'tests' stamp: 'Nipo 5/30/2019 15:49:19'!
 test11PortfolioCanNotIncludeAccountOfItsPortfolios
 
 	| account simplePortfolio composedPortfolio |
@@ -138,10 +138,10 @@ test11PortfolioCanNotIncludeAccountOfItsPortfolios
 		raise: Error - MessageNotUnderstood 
 		withExceptionDo: [ :anError |
 			self assert: Portfolio canNotAddAccountErrorMessage equals: anError messageText.
-			self assert: 1 equals: composedPortfolio accountsSize.
-			self assert: (composedPortfolio accountsIncludes: simplePortfolio) ]! !
+			self assert: 1 equals: composedPortfolio financialAssetsSize.
+			self assert: (composedPortfolio financialAssetsIncludes: simplePortfolio) ]! !
 
-!PortfolioTest methodsFor: 'tests - portfolio' stamp: 'HAW 5/25/2019 11:58:32'!
+!PortfolioTest methodsFor: 'tests' stamp: 'Nipo 5/30/2019 15:49:19'!
 test12PortfolioCanNotIncludeItself
 
 	| account simplePortfolio |
@@ -154,10 +154,10 @@ test12PortfolioCanNotIncludeItself
 		raise: Error - MessageNotUnderstood 
 		withExceptionDo: [ :anError |
 			self assert: Portfolio canNotAddAccountErrorMessage equals: anError messageText.
-			self assert: 1 equals: simplePortfolio accountsSize.
-			self assert: (simplePortfolio accountsIncludes: account) ]! !
+			self assert: 1 equals: simplePortfolio financialAssetsSize.
+			self assert: (simplePortfolio financialAssetsIncludes: account) ]! !
 
-!PortfolioTest methodsFor: 'tests - portfolio' stamp: 'HAW 5/25/2019 12:01:51'!
+!PortfolioTest methodsFor: 'tests' stamp: 'Nipo 5/30/2019 15:49:06'!
 test13ComposedPortfolioCanNotHaveParentPortfolioAccount
 
 	| account simplePortfolio composedPortfolio |
@@ -172,9 +172,9 @@ test13ComposedPortfolioCanNotHaveParentPortfolioAccount
 		raise: Error - MessageNotUnderstood 
 		withExceptionDo: [ :anError |
 			self assert: Portfolio canNotAddAccountErrorMessage equals: anError messageText.
-			self assert: simplePortfolio accountsIsEmpty ]! !
+			self assert: simplePortfolio financialAssetsIsEmpty ]! !
 
-!PortfolioTest methodsFor: 'tests - portfolio' stamp: 'HAW 5/25/2019 12:12:16'!
+!PortfolioTest methodsFor: 'tests' stamp: 'Nipo 5/30/2019 15:49:06'!
 test14ComposedPortfolioCanNotHaveAccountOfAnyRootParentRecursively
 
 	| account leftParentPortfolio leftRootParentPortfolio portfolio rightParentPortfolio rightRootParentPortfolio |
@@ -194,7 +194,24 @@ test14ComposedPortfolioCanNotHaveAccountOfAnyRootParentRecursively
 		raise: Error - MessageNotUnderstood 
 		withExceptionDo: [ :anError |
 			self assert: Portfolio canNotAddAccountErrorMessage equals: anError messageText.
-			self assert: portfolio accountsIsEmpty ]! !
+			self assert: portfolio financialAssetsIsEmpty ]! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'Nipo 5/30/2019 15:49:06'!
+test15PortfolioCanNotIncludeAnyOfTheComposedAccountOfPortfolioToAdd
+
+	| portfolioToAdd portfolioToModify rootPortfolio sharedAccount |
+	
+	sharedAccount := ReceptiveAccount new.
+	portfolioToModify := Portfolio new.
+	rootPortfolio := Portfolio with: sharedAccount with: portfolioToModify.
+	portfolioToAdd := Portfolio with: sharedAccount.
+	
+	self 
+		should: [ portfolioToModify add: portfolioToAdd ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [ :anError | 
+			self assert: Portfolio canNotAddAccountErrorMessage equals: anError messageText.
+			self assert: portfolioToModify financialAssetsIsEmpty ]! !
 
 
 !classDefinition: #ReceptiveAccountTest category: #'PortfolioTreePrinter-Ejercicio'!
@@ -569,77 +586,258 @@ test13AccountTransferNetIgnoresNotWiredTransfers
 	self assert: aReport isZero.! !
 
 
-!classDefinition: #Account category: #'PortfolioTreePrinter-Ejercicio'!
-Object subclass: #Account
+!classDefinition: #AccountTransaction category: #'PortfolioTreePrinter-Ejercicio'!
+Object subclass: #AccountTransaction
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!Account methodsFor: 'testing' stamp: 'HAW 5/25/2019 12:23:47'!
+!AccountTransaction methodsFor: 'value' stamp: 'HernanWilkinson 9/12/2011 12:25'!
+value 
+
+	self subclassResponsibility ! !
+
+
+!AccountTransaction methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:25:39'!
+affectBalance: aBalance
+
+	self subclassResponsibility ! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'AccountTransaction class' category: #'PortfolioTreePrinter-Ejercicio'!
+AccountTransaction class
+	instanceVariableNames: ''!
+
+!AccountTransaction class methodsFor: 'instance creation' stamp: 'Nipo 5/30/2019 16:54:51'!
+register: aValue on: account
+
+	| accountTransaction |
+	
+	accountTransaction := self for: aValue.
+	account register: accountTransaction.
+		
+	^ accountTransaction! !
+
+
+!classDefinition: #Deposit category: #'PortfolioTreePrinter-Ejercicio'!
+AccountTransaction subclass: #Deposit
+	instanceVariableNames: 'value'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!Deposit methodsFor: 'initialization' stamp: 'HernanWilkinson 7/13/2011 18:45'!
+initializeFor: aValue
+
+	value := aValue ! !
+
+
+!Deposit methodsFor: 'value' stamp: 'HernanWilkinson 7/13/2011 18:38'!
+value
+
+	^ value! !
+
+
+!Deposit methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:25:02'!
+affectBalance: aBalance
+
+	^aBalance + value ! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Deposit class' category: #'PortfolioTreePrinter-Ejercicio'!
+Deposit class
+	instanceVariableNames: ''!
+
+!Deposit class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/13/2011 18:38'!
+for: aValue
+
+	^ self new initializeFor: aValue ! !
+
+
+!classDefinition: #WireDepositTransfer category: #'PortfolioTreePrinter-Ejercicio'!
+AccountTransaction subclass: #WireDepositTransfer
+	instanceVariableNames: 'wireTransfer'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!WireDepositTransfer methodsFor: 'balance' stamp: 'JIG 5/29/2019 02:39:00'!
+affectBalance: aBalance
+	^aBalance + (wireTransfer value).! !
+
+
+!WireDepositTransfer methodsFor: 'initialization' stamp: 'JIG 5/29/2019 02:29:03'!
+initializeWithWireTransfer: aWireTransferTransaction
+	wireTransfer := aWireTransferTransaction.! !
+
+
+!WireDepositTransfer methodsFor: 'accessing' stamp: 'JIG 5/29/2019 02:32:43'!
+associatedWireTransfer
+	^wireTransfer.! !
+
+
+!WireDepositTransfer methodsFor: 'value' stamp: 'NI 5/29/2019 15:15:14'!
+value
+	^wireTransfer value.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'WireDepositTransfer class' category: #'PortfolioTreePrinter-Ejercicio'!
+WireDepositTransfer class
+	instanceVariableNames: ''!
+
+!WireDepositTransfer class methodsFor: 'initialization' stamp: 'JIG 5/29/2019 02:28:46'!
+comingOf: aWireTransferTransaction
+	^self new initializeWithWireTransfer: aWireTransferTransaction.! !
+
+
+!classDefinition: #WireWithdrawTransfer category: #'PortfolioTreePrinter-Ejercicio'!
+AccountTransaction subclass: #WireWithdrawTransfer
+	instanceVariableNames: 'wireTransfer'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!WireWithdrawTransfer methodsFor: 'balance' stamp: 'Nipo 5/30/2019 16:23:14'!
+affectBalance: aBalance
+	^aBalance - (wireTransfer value).! !
+
+
+!WireWithdrawTransfer methodsFor: 'value' stamp: 'Nipo 5/30/2019 16:14:26'!
+value
+	^wireTransfer value.! !
+
+
+!WireWithdrawTransfer methodsFor: 'initialization' stamp: 'Nipo 5/30/2019 16:20:22'!
+initializeWithWireTransfer: aWireTransferTransaction
+	wireTransfer := aWireTransferTransaction.! !
+
+
+!WireWithdrawTransfer methodsFor: 'accessing' stamp: 'Nipo 5/30/2019 16:39:26'!
+associatedWireTransfer
+	^wireTransfer.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'WireWithdrawTransfer class' category: #'PortfolioTreePrinter-Ejercicio'!
+WireWithdrawTransfer class
+	instanceVariableNames: ''!
+
+!WireWithdrawTransfer class methodsFor: 'initialization' stamp: 'Nipo 5/30/2019 16:15:45'!
+comingOf: aWireTransferTransaction
+	^self new initializeWithWireTransfer: aWireTransferTransaction.! !
+
+
+!classDefinition: #Withdraw category: #'PortfolioTreePrinter-Ejercicio'!
+AccountTransaction subclass: #Withdraw
+	instanceVariableNames: 'value'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!Withdraw methodsFor: 'initialization' stamp: 'HernanWilkinson 7/13/2011 18:46'!
+initializeFor: aValue
+
+	value := aValue ! !
+
+
+!Withdraw methodsFor: 'value' stamp: 'HernanWilkinson 7/13/2011 18:33'!
+value
+
+	^ value! !
+
+
+!Withdraw methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:25:15'!
+affectBalance: aBalance
+
+	^aBalance - value! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Withdraw class' category: #'PortfolioTreePrinter-Ejercicio'!
+Withdraw class
+	instanceVariableNames: ''!
+
+!Withdraw class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/13/2011 18:33'!
+for: aValue
+
+	^ self new initializeFor: aValue ! !
+
+
+!classDefinition: #FinancialAsset category: #'PortfolioTreePrinter-Ejercicio'!
+Object subclass: #FinancialAsset
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!FinancialAsset methodsFor: 'testing' stamp: 'HAW 5/25/2019 12:23:47'!
 hasRegistered: aTransaction
 
 	self subclassResponsibility ! !
 
-!Account methodsFor: 'testing' stamp: 'HAW 5/25/2019 12:24:25'!
+!FinancialAsset methodsFor: 'testing' stamp: 'HAW 5/25/2019 12:24:25'!
 isComposedBy: anAccount
 
 	self subclassResponsibility ! !
 
 
-!Account methodsFor: 'balance' stamp: 'HAW 5/25/2019 12:23:40'!
+!FinancialAsset methodsFor: 'balance' stamp: 'HAW 5/25/2019 12:23:40'!
 balance
 
 	self subclassResponsibility ! !
 
 
-!Account methodsFor: 'transactions' stamp: 'HAW 5/25/2019 12:23:27'!
+!FinancialAsset methodsFor: 'transactions' stamp: 'HAW 5/25/2019 12:23:27'!
 addTransactionsTo: aCollectionOfTransactions
 
 	self subclassResponsibility ! !
 
-!Account methodsFor: 'transactions' stamp: 'HAW 5/25/2019 12:23:15'!
+!FinancialAsset methodsFor: 'transactions' stamp: 'HAW 5/25/2019 12:23:15'!
 transactions
 
 	self subclassResponsibility ! !
 
 
-!Account methodsFor: 'composition' stamp: 'HAW 5/25/2019 12:24:04'!
+!FinancialAsset methodsFor: 'composition' stamp: 'HAW 5/25/2019 12:24:04'!
 addedTo: aPortfolio
 
 	self subclassResponsibility ! !
 
 
 !classDefinition: #Portfolio category: #'PortfolioTreePrinter-Ejercicio'!
-Account subclass: #Portfolio
-	instanceVariableNames: 'accounts parents'
+FinancialAsset subclass: #Portfolio
+	instanceVariableNames: 'parents financialAssets'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!Portfolio methodsFor: 'accounts management' stamp: 'HAW 5/25/2019 11:49:20'!
-accountsIncludes: anAccount
+!Portfolio methodsFor: 'accounts management' stamp: 'Nipo 5/30/2019 15:49:29'!
+add: financialAssetToAdd
 
-	^accounts includes: anAccount ! !
-
-!Portfolio methodsFor: 'accounts management' stamp: 'HAW 5/25/2019 12:05:04'!
-accountsIsEmpty
-	
-	^accounts isEmpty ! !
-
-!Portfolio methodsFor: 'accounts management' stamp: 'HAW 5/25/2019 11:49:06'!
-accountsSize
-	
-	^accounts size! !
-
-!Portfolio methodsFor: 'accounts management' stamp: 'HAW 5/25/2019 12:19:20'!
-add: accountToAdd
-
-	self assertCanAdd: accountToAdd.
+	self assertCanAdd: financialAssetToAdd.
 		
-	accounts add: accountToAdd.
-	accountToAdd addedTo: self 
+	financialAssets add: financialAssetToAdd.
+	financialAssetToAdd addedTo: self 
 	! !
+
+!Portfolio methodsFor: 'accounts management' stamp: 'Nipo 5/30/2019 15:48:51'!
+financialAssetsIncludes: anAccount
+
+	^financialAssets includes: anAccount ! !
+
+!Portfolio methodsFor: 'accounts management' stamp: 'Nipo 5/30/2019 15:49:06'!
+financialAssetsIsEmpty
+	
+	^financialAssets isEmpty ! !
+
+!Portfolio methodsFor: 'accounts management' stamp: 'Nipo 5/30/2019 15:49:19'!
+financialAssetsSize
+	
+	^financialAssets size! !
 
 !Portfolio methodsFor: 'accounts management' stamp: 'HAW 5/25/2019 12:17:31'!
 rootParents
@@ -652,31 +850,31 @@ rootParents
 	^ rootParents! !
 
 
-!Portfolio methodsFor: 'initialization' stamp: 'HAW 5/25/2019 12:03:18'!
+!Portfolio methodsFor: 'initialization' stamp: 'Nipo 5/30/2019 15:48:33'!
 initialize
 
-	accounts := OrderedCollection new.
+	financialAssets := OrderedCollection new.
 	parents := OrderedCollection new.! !
 
 
-!Portfolio methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:19:36'!
+!Portfolio methodsFor: 'balance' stamp: 'Nipo 5/30/2019 15:50:23'!
 balance
 	
-	^accounts sum: [ :anAccount | anAccount balance ] ifEmpty: [ 0 ]! !
+	^financialAssets sum: [ :aFinancialAsset | aFinancialAsset balance ] ifEmpty: [ 0 ]! !
 
 
-!Portfolio methodsFor: 'transactions' stamp: 'HAW 5/25/2019 11:42:55'!
+!Portfolio methodsFor: 'transactions' stamp: 'Nipo 5/30/2019 15:48:33'!
 addTransactionsTo: aCollectionOfTransactions
 
-	accounts do: [ :anAccount | anAccount addTransactionsTo: aCollectionOfTransactions ]! !
+	financialAssets do: [ :anAccount | anAccount addTransactionsTo: aCollectionOfTransactions ]! !
 
-!Portfolio methodsFor: 'transactions' stamp: 'HAW 5/25/2019 11:38:32'!
+!Portfolio methodsFor: 'transactions' stamp: 'Nipo 5/30/2019 15:50:34'!
 transactions
 	
 	| transactions |
 	
 	transactions := OrderedCollection new.
-	accounts do: [ :anAccount | anAccount addTransactionsTo: transactions ].
+	financialAssets do: [ :aFinancialAsset | aFinancialAsset addTransactionsTo: transactions ].
 	
 	^transactions ! !
 
@@ -687,20 +885,20 @@ addedTo: aPortfolio
 	parents add: aPortfolio ! !
 
 
-!Portfolio methodsFor: 'testing' stamp: 'HAW 5/25/2019 12:20:56'!
-anyRootParentIsComposedBy: accountToAdd
+!Portfolio methodsFor: 'testing' stamp: 'Nipo 5/30/2019 15:51:55'!
+anyRootParentIsComposedBy: aFinancialAssetToAdd
 
-	^self rootParents anySatisfy: [ :aParent | aParent isComposedBy: accountToAdd]! !
+	^self rootParents anySatisfy: [ :aParent | aParent isComposedBy: aFinancialAssetToAdd]! !
 
-!Portfolio methodsFor: 'testing' stamp: 'HAW 5/25/2019 11:28:29'!
+!Portfolio methodsFor: 'testing' stamp: 'Nipo 5/30/2019 15:52:23'!
 hasRegistered: aTransaction
 
-	^accounts anySatisfy: [ :anAccount | anAccount hasRegistered: aTransaction ]! !
+	^financialAssets anySatisfy: [ :aFinancialAsset | aFinancialAsset hasRegistered: aTransaction ]! !
 
-!Portfolio methodsFor: 'testing' stamp: 'HAW 5/25/2019 11:57:20'!
-isComposedBy: anAccount
+!Portfolio methodsFor: 'testing' stamp: 'Nipo 5/30/2019 15:52:33'!
+isComposedBy: aFinancialAsset
 
-	^ self = anAccount or: [ accounts anySatisfy: [ :composedAccount | composedAccount isComposedBy: anAccount ]]! !
+	^ self = aFinancialAsset or: [ financialAssets anySatisfy: [ :composedAccount | (composedAccount isComposedBy: aFinancialAsset) or: [ aFinancialAsset isComposedBy: composedAccount ]]]! !
 
 
 !Portfolio methodsFor: 'account management - private' stamp: 'HAW 5/25/2019 12:17:31'!
@@ -710,10 +908,10 @@ addRootParentsTo: rootParents
 		ifEmpty: [ rootParents add: self ] 
 		ifNotEmpty: [ parents do: [ :aParent | aParent addRootParentsTo: rootParents ]]! !
 
-!Portfolio methodsFor: 'account management - private' stamp: 'HAW 5/25/2019 12:20:36'!
-assertCanAdd: accountToAdd
+!Portfolio methodsFor: 'account management - private' stamp: 'Nipo 5/30/2019 15:50:04'!
+assertCanAdd: financialAssetToAdd
 
-	(self anyRootParentIsComposedBy: accountToAdd) ifTrue: [ self signalCanNotAddAccount ].
+	(self anyRootParentIsComposedBy: financialAssetToAdd) ifTrue: [ self signalCanNotAddAccount ].
 ! !
 
 !Portfolio methodsFor: 'account management - private' stamp: 'HAW 5/25/2019 11:48:34'!
@@ -727,29 +925,30 @@ signalCanNotAddAccount
 Portfolio class
 	instanceVariableNames: ''!
 
-!Portfolio class methodsFor: 'as yet unclassified' stamp: 'HAW 5/25/2019 11:48:55'!
+!Portfolio class methodsFor: 'error messages' stamp: 'HAW 5/25/2019 11:48:55'!
 canNotAddAccountErrorMessage
 	
 	^'Can not add repeated account to a portfolio'! !
 
-!Portfolio class methodsFor: 'as yet unclassified' stamp: 'HAW 5/25/2019 11:18:21'!
-with: anAccount
+
+!Portfolio class methodsFor: 'initialization' stamp: 'Nipo 5/30/2019 15:47:52'!
+with: aFinancialAsset
 
 	^self new 
-		add: anAccount;
+		add: aFinancialAsset;
 		yourself! !
 
-!Portfolio class methodsFor: 'as yet unclassified' stamp: 'HAW 5/25/2019 11:23:59'!
-with: anAccount with: anotherAccount
+!Portfolio class methodsFor: 'initialization' stamp: 'Nipo 5/30/2019 15:48:11'!
+with: aFinancialAsset with: anotherFinancialAsset
 
 	^self new 
-		add: anAccount;
-		add: anotherAccount;
+		add: aFinancialAsset;
+		add: anotherFinancialAsset;
 		yourself! !
 
 
 !classDefinition: #ReceptiveAccount category: #'PortfolioTreePrinter-Ejercicio'!
-Account subclass: #ReceptiveAccount
+FinancialAsset subclass: #ReceptiveAccount
 	instanceVariableNames: 'transactions'
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -787,10 +986,10 @@ balance
 		into: [ :currentBalance :transaction | transaction affectBalance: currentBalance ]! !
 
 
-!ReceptiveAccount methodsFor: 'testing' stamp: 'HAW 10/11/2018 16:53:54'!
-hasRegistered: aTtransaction
+!ReceptiveAccount methodsFor: 'testing' stamp: 'Nipo 5/30/2019 15:54:25'!
+hasRegistered: aTransaction
 
-	^ transactions includes: aTtransaction 
+	^ transactions includes: aTransaction 
 ! !
 
 !ReceptiveAccount methodsFor: 'testing' stamp: 'HAW 5/25/2019 11:54:51'!
@@ -803,286 +1002,6 @@ isComposedBy: anAccount
 addedTo: aPortfolio 
 	
 	! !
-
-
-!classDefinition: #AccountTransaction category: #'PortfolioTreePrinter-Ejercicio'!
-Object subclass: #AccountTransaction
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTreePrinter-Ejercicio'!
-
-!AccountTransaction methodsFor: 'value' stamp: 'HernanWilkinson 9/12/2011 12:25'!
-value 
-
-	self subclassResponsibility ! !
-
-
-!AccountTransaction methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:25:39'!
-affectBalance: aBalance
-
-	self subclassResponsibility ! !
-
-
-!AccountTransaction methodsFor: 'testing' stamp: 'NI 5/30/2019 12:20:32'!
-isDeposit
-	^false.! !
-
-!AccountTransaction methodsFor: 'testing' stamp: 'NI 5/30/2019 12:20:54'!
-isWireDeposit
-	^false.! !
-
-!AccountTransaction methodsFor: 'testing' stamp: 'NI 5/30/2019 12:20:51'!
-isWireWithdraw
-	^false.! !
-
-!AccountTransaction methodsFor: 'testing' stamp: 'NI 5/30/2019 12:21:02'!
-isWithdraw
-	^false.! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'AccountTransaction class' category: #'PortfolioTreePrinter-Ejercicio'!
-AccountTransaction class
-	instanceVariableNames: ''!
-
-!AccountTransaction class methodsFor: 'instance creation' stamp: 'JIG 5/29/2019 02:17:14'!
-register: aValue from: aSourceAccount to: aDestinationAccount
-	^self subclassResponsibility.! !
-
-!AccountTransaction class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/13/2011 18:38'!
-register: aValue on: account
-
-	| withdraw |
-	
-	withdraw := self for: aValue.
-	account register: withdraw.
-		
-	^ withdraw! !
-
-
-!classDefinition: #Deposit category: #'PortfolioTreePrinter-Ejercicio'!
-AccountTransaction subclass: #Deposit
-	instanceVariableNames: 'value'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTreePrinter-Ejercicio'!
-
-!Deposit methodsFor: 'initialization' stamp: 'HernanWilkinson 7/13/2011 18:45'!
-initializeFor: aValue
-
-	value := aValue ! !
-
-
-!Deposit methodsFor: 'value' stamp: 'HernanWilkinson 7/13/2011 18:38'!
-value
-
-	^ value! !
-
-
-!Deposit methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:25:02'!
-affectBalance: aBalance
-
-	^aBalance + value ! !
-
-
-!Deposit methodsFor: 'testing' stamp: 'NI 5/30/2019 12:21:21'!
-isDeposit
-	^true! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'Deposit class' category: #'PortfolioTreePrinter-Ejercicio'!
-Deposit class
-	instanceVariableNames: ''!
-
-!Deposit class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/13/2011 18:38'!
-for: aValue
-
-	^ self new initializeFor: aValue ! !
-
-
-!classDefinition: #WireTransfer category: #'PortfolioTreePrinter-Ejercicio'!
-AccountTransaction subclass: #WireTransfer
-	instanceVariableNames: 'depositLeg withdrawLeg'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTreePrinter-Ejercicio'!
-
-!WireTransfer methodsFor: 'balance' stamp: 'NI 5/29/2019 12:42:40'!
-affectBalance: aBalance
-	self subclassResponsibility! !
-
-
-!WireTransfer methodsFor: 'initialization' stamp: 'NI 5/29/2019 15:17:55'!
-initializeWithWithdraw: aWireTransferWithdraw destinatedTo: aDestinationAccount
-	|wireTransferDeposit|
-
-	wireTransferDeposit := WireTransferDeposit comingOf: self.
-	"Le tuve que agregar el mensaje value a WireTransferDeposit para que responda wireTransfer value. Sin esto, lo que hacía era usar el del padre que retorna withdrawLeg value, pero withdrawLeg es nil"
-	
-	aDestinationAccount register: wireTransferDeposit.	
-	
-	withdrawLeg := aWireTransferWithdraw.
-	depositLeg  := wireTransferDeposit.! !
-
-
-!WireTransfer methodsFor: 'value' stamp: 'JIG 5/29/2019 02:35:13'!
-value
-	^withdrawLeg value.! !
-
-
-!WireTransfer methodsFor: 'accessing' stamp: 'NI 5/29/2019 12:39:45'!
-depositLeg
-	^ depositLeg.! !
-
-!WireTransfer methodsFor: 'accessing' stamp: 'NI 5/29/2019 12:40:17'!
-withdrawLeg
-	^ withdrawLeg.! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'WireTransfer class' category: #'PortfolioTreePrinter-Ejercicio'!
-WireTransfer class
-	instanceVariableNames: ''!
-
-!WireTransfer class methodsFor: 'registration' stamp: 'NI 5/29/2019 12:52:05'!
-register: aValue from: aSourceAccount to: aDestinationAccount
-	|aWireTransferWithdraw|
-	
-	aValue < 0 ifTrue: [self error: self cannotTransferNegativeMoneyErrorDescription].
-
-	aWireTransferWithdraw := WireTransferWithdraw for: aValue.
-	
-	aSourceAccount register: aWireTransferWithdraw.
-
-	^ self new initializeWithWithdraw: aWireTransferWithdraw destinatedTo: aDestinationAccount.
-	! !
-
-
-!WireTransfer class methodsFor: 'error descriptions' stamp: 'NI 5/29/2019 12:51:21'!
-cannotTransferNegativeMoneyErrorDescription
-	^'No se puede transferir un valor negativo'
-	! !
-
-
-!classDefinition: #WireTransferDeposit category: #'PortfolioTreePrinter-Ejercicio'!
-WireTransfer subclass: #WireTransferDeposit
-	instanceVariableNames: 'wireTransfer'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTreePrinter-Ejercicio'!
-
-!WireTransferDeposit methodsFor: 'balance' stamp: 'JIG 5/29/2019 02:39:00'!
-affectBalance: aBalance
-	^aBalance + (wireTransfer value).! !
-
-!WireTransferDeposit methodsFor: 'balance' stamp: 'NI 5/29/2019 15:15:14'!
-value
-	^wireTransfer value.! !
-
-
-!WireTransferDeposit methodsFor: 'initialization' stamp: 'JIG 5/29/2019 02:29:03'!
-initializeWithWireTransfer: aWireTransferTransaction
-	wireTransfer := aWireTransferTransaction.! !
-
-
-!WireTransferDeposit methodsFor: 'accessing' stamp: 'JIG 5/29/2019 02:32:43'!
-associatedWireTransfer
-	^wireTransfer.! !
-
-
-!WireTransferDeposit methodsFor: 'testing' stamp: 'NI 5/30/2019 12:21:45'!
-isWireDeposit
-	^true! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'WireTransferDeposit class' category: #'PortfolioTreePrinter-Ejercicio'!
-WireTransferDeposit class
-	instanceVariableNames: ''!
-
-!WireTransferDeposit class methodsFor: 'initialization' stamp: 'JIG 5/29/2019 02:28:46'!
-comingOf: aWireTransferTransaction
-	^self new initializeWithWireTransfer: aWireTransferTransaction.! !
-
-
-!classDefinition: #WireTransferWithdraw category: #'PortfolioTreePrinter-Ejercicio'!
-WireTransfer subclass: #WireTransferWithdraw
-	instanceVariableNames: 'value'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTreePrinter-Ejercicio'!
-
-!WireTransferWithdraw methodsFor: 'balance' stamp: 'NI 5/29/2019 11:55:39'!
-affectBalance: aBalance
-	^aBalance - value.! !
-
-
-!WireTransferWithdraw methodsFor: 'value' stamp: 'JIG 5/29/2019 02:30:32'!
-value
-	^value! !
-
-
-!WireTransferWithdraw methodsFor: 'initialization' stamp: 'JIG 5/29/2019 02:30:10'!
-initializeFor: aValue
-	value := aValue.! !
-
-
-!WireTransferWithdraw methodsFor: 'testing' stamp: 'NI 5/30/2019 12:21:56'!
-isWireWithdraw
-	^true! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'WireTransferWithdraw class' category: #'PortfolioTreePrinter-Ejercicio'!
-WireTransferWithdraw class
-	instanceVariableNames: ''!
-
-!WireTransferWithdraw class methodsFor: 'initialization' stamp: 'JIG 5/29/2019 02:37:29'!
-for: aValue
-	^self new initializeFor: aValue.! !
-
-
-!classDefinition: #Withdraw category: #'PortfolioTreePrinter-Ejercicio'!
-AccountTransaction subclass: #Withdraw
-	instanceVariableNames: 'value'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTreePrinter-Ejercicio'!
-
-!Withdraw methodsFor: 'initialization' stamp: 'HernanWilkinson 7/13/2011 18:46'!
-initializeFor: aValue
-
-	value := aValue ! !
-
-
-!Withdraw methodsFor: 'value' stamp: 'HernanWilkinson 7/13/2011 18:33'!
-value
-
-	^ value! !
-
-
-!Withdraw methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:25:15'!
-affectBalance: aBalance
-
-	^aBalance - value! !
-
-
-!Withdraw methodsFor: 'testing' stamp: 'NI 5/30/2019 12:22:07'!
-isWithdraw
-	^true! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'Withdraw class' category: #'PortfolioTreePrinter-Ejercicio'!
-Withdraw class
-	instanceVariableNames: ''!
-
-!Withdraw class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/13/2011 18:33'!
-for: aValue
-
-	^ self new initializeFor: aValue ! !
 
 
 !classDefinition: #Report category: #'PortfolioTreePrinter-Ejercicio'!
@@ -1119,7 +1038,7 @@ withdrawTransferStringFor: aValue
 	^'Salida por transferencia de ' , aValue asString , '.'.! !
 
 
-!Report class methodsFor: 'summary report' stamp: 'NI 5/30/2019 12:24:53'!
+!Report class methodsFor: 'summary report' stamp: 'Nipo 5/30/2019 15:46:51'!
 generateAccountSummaryReportOf: aFinancialAsset
 	|report |
 	
@@ -1127,25 +1046,89 @@ generateAccountSummaryReportOf: aFinancialAsset
 	aFinancialAsset transactions size = 0 ifTrue: [^ (report add: (self balanceStringFor: aFinancialAsset balance))].
 	
 	aFinancialAsset transactions do: [:aTransaction | 
-			aTransaction isDeposit ifTrue: [report add: (self depositStringFor: aTransaction value)].
-			aTransaction isWithdraw ifTrue: [report add: (self withdrawStringFor: aTransaction value)].
-			aTransaction isWireWithdraw ifTrue: [report add: (self withdrawTransferStringFor: aTransaction value)].
-			aTransaction isWireDeposit ifTrue: [report add: (self depositTransferStringFor: aTransaction value)].
+			aTransaction class = Deposit ifTrue: [report add: (self depositStringFor: aTransaction value)].
+			aTransaction class = Withdraw ifTrue: [report add: (self withdrawStringFor: aTransaction value)].
+			aTransaction class = WireWithdrawTransfer ifTrue: [report add: (self withdrawTransferStringFor: aTransaction value)].
+			aTransaction class = WireDepositTransfer ifTrue: [report add: (self depositTransferStringFor: aTransaction value)].
 		].
+	
+	"Me parece que sería más fácil directo hacer un mensaje tipo aTransaction stringForReport, pero esto por consigna NO se puede hacer (dado que no podemos modificar la jerarquía ni de FinancialAssets ni de AccountTransaction"
 	
 	report add: (self balanceStringFor: aFinancialAsset balance).
 	
 	^ report! !
 
-!Report class methodsFor: 'summary report' stamp: 'NI 5/30/2019 12:24:30'!
+!Report class methodsFor: 'summary report' stamp: 'Nipo 5/30/2019 15:46:51'!
 generateAccountTransferNetOf: aFinancialAsset
 	| finalResult |
 	
 	finalResult := 0.
 	
+	"^ aFinancialAsset transactions sum: [ :aTransaction |
+		aTransaction isWireDeposit ifTrue: [aTransaction value].
+		aTransaction isWireWithdraw ifTrue: [(-1) * aTransaction value].
+	]."
+	
 	aFinancialAsset transactions do: [ :aTransaction |
-		aTransaction isWireDeposit ifTrue: [finalResult := finalResult + aTransaction value].
-		aTransaction isWireWithdraw ifTrue: [finalResult := finalResult - aTransaction value].
+		aTransaction class = WireDepositTransfer ifTrue: [finalResult := finalResult + aTransaction value].
+		aTransaction class = WireWithdrawTransfer ifTrue: [finalResult := finalResult - aTransaction value].
 	].
 
 	^finalResult! !
+
+
+!classDefinition: #WireTransfer category: #'PortfolioTreePrinter-Ejercicio'!
+Object subclass: #WireTransfer
+	instanceVariableNames: 'depositLeg withdrawLeg value'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+
+!WireTransfer methodsFor: 'initialization' stamp: 'Nipo 5/30/2019 16:19:24'!
+initializeTransfering: aValue from: aSourceAccount to: aDestinationAccount
+	|wireTransferDeposit wireTransferWithdraw|
+
+	wireTransferDeposit := WireDepositTransfer comingOf: self.
+	wireTransferWithdraw := WireWithdrawTransfer comingOf: self.
+	
+	aDestinationAccount register: wireTransferDeposit.
+	aSourceAccount register: wireTransferWithdraw.	
+	
+	withdrawLeg := wireTransferWithdraw.
+	depositLeg  := wireTransferDeposit.
+	value := aValue.! !
+
+
+!WireTransfer methodsFor: 'value' stamp: 'Nipo 5/30/2019 16:20:36'!
+value
+	^value.! !
+
+
+!WireTransfer methodsFor: 'accessing' stamp: 'NI 5/29/2019 12:39:45'!
+depositLeg
+	^ depositLeg.! !
+
+!WireTransfer methodsFor: 'accessing' stamp: 'NI 5/29/2019 12:40:17'!
+withdrawLeg
+	^ withdrawLeg.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'WireTransfer class' category: #'PortfolioTreePrinter-Ejercicio'!
+WireTransfer class
+	instanceVariableNames: ''!
+
+!WireTransfer class methodsFor: 'registration' stamp: 'Nipo 5/30/2019 16:12:21'!
+register: aValue from: aSourceAccount to: aDestinationAccount
+	
+	aValue < 0 ifTrue: [self error: self cannotTransferNegativeMoneyErrorDescription].
+
+	^ self new initializeTransfering: aValue from: aSourceAccount to: aDestinationAccount.
+	! !
+
+
+!WireTransfer class methodsFor: 'error descriptions' stamp: 'NI 5/29/2019 12:51:21'!
+cannotTransferNegativeMoneyErrorDescription
+	^'No se puede transferir un valor negativo'
+	! !
