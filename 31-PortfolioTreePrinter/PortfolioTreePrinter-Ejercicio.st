@@ -304,46 +304,6 @@ test07AccountKnowsItsTransactions
 	self assert: (account1 transactions includes: deposit1).
 ! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'NI 5/29/2019 12:42:22'!
-test08WireTransferMustAffectSourceAndDestinyAccountBalance
-
-	| transferTransaction |
-	
-	transferTransaction := WireTransfer register: 80 from: accountWith100Deposit to: accountWithoutTransactions.
-	
-	self assert: (accountWith100Deposit balance = (accountWith100DepositTransaction value - transferTransaction value)).
-	self assert: (accountWithoutTransactions balance = transferTransaction value).! !
-
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'NI 5/29/2019 12:40:47'!
-test09WireTransferMustAffectSourceAndDestinyAccountsTransactions
-
-	| transferTransaction |
-	
-	transferTransaction := WireTransfer register: 80 from: accountWith100Deposit to: accountWithoutTransactions.
-	
-	self assert: (accountWith100Deposit transactions includes: transferTransaction withdrawLeg ).
-	self assert: (accountWithoutTransactions transactions includes: transferTransaction depositLeg)! !
-
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'NI 5/29/2019 12:45:30'!
-test10WireTransferSourceAndDestinyShouldHaveThatTransferRegistered
-
-	| transferTransaction |
-	
-	transferTransaction := WireTransfer register: 80 from: accountWith100Deposit to: accountWithoutTransactions.
-	
-	self assert: (accountWith100Deposit hasRegistered: transferTransaction withdrawLeg).
-	self assert: (accountWithoutTransactions hasRegistered: transferTransaction depositLeg)! !
-
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'NI 5/29/2019 12:50:48'!
-test11CantTransferNegativeMoney
-	
-	self 
-		should: [ WireTransfer register: -10 from: accountWith100Deposit to: accountWithoutTransactions ]
-		raise: Error - MessageNotUnderstood 
-		withExceptionDo: [:anError |
-			self assert:  WireTransfer cannotTransferNegativeMoneyErrorDescription equals: anError messageText.
-			]! !
-
 
 !ReceptiveAccountTest methodsFor: 'setup' stamp: 'NI 5/29/2019 12:30:21'!
 setUp
@@ -586,6 +546,60 @@ test13AccountTransferNetIgnoresNotWiredTransfers
 	self assert: aReport isZero.! !
 
 
+!classDefinition: #WireTransferTest category: #'PortfolioTreePrinter-Ejercicio'!
+TestCase subclass: #WireTransferTest
+	instanceVariableNames: 'myAccount otherAccount'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!WireTransferTest methodsFor: 'test' stamp: 'Nipo 5/30/2019 19:35:31'!
+test01WireTransferMustAffectSourceAndDestinyAccountBalance
+
+	| transferTransaction |
+	
+	transferTransaction := WireTransfer register: 80 from: myAccount to: otherAccount.
+	
+	self assert: (myAccount balance = (transferTransaction value * (-1))).
+	self assert: (otherAccount balance = transferTransaction value).! !
+
+!WireTransferTest methodsFor: 'test' stamp: 'Nipo 5/30/2019 19:37:24'!
+test02WireTransferMustAffectSourceAndDestinyAccountsTransactions
+
+	| transferTransaction |
+	
+	transferTransaction := WireTransfer register: 80 from: myAccount to: otherAccount.
+	
+	self assert: (myAccount transactions includes: transferTransaction withdrawLeg ).
+	self assert: (otherAccount transactions includes: transferTransaction depositLeg)! !
+
+!WireTransferTest methodsFor: 'test' stamp: 'Nipo 5/30/2019 19:38:45'!
+test03WireTransferSourceAndDestinyShouldHaveThatTransferRegistered
+
+	| transferTransaction |
+	
+	transferTransaction := WireTransfer register: 80 from: myAccount to: otherAccount .
+	
+	self assert: (myAccount hasRegistered: transferTransaction withdrawLeg).
+	self assert: (otherAccount hasRegistered: transferTransaction depositLeg)! !
+
+!WireTransferTest methodsFor: 'test' stamp: 'Nipo 5/30/2019 19:39:23'!
+test04CantTransferNegativeMoney
+	
+	self 
+		should: [ WireTransfer register: -10 from: myAccount to: otherAccount ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError |
+			self assert:  WireTransfer cannotTransferNegativeMoneyErrorDescription equals: anError messageText.
+			]! !
+
+
+!WireTransferTest methodsFor: 'setup' stamp: 'Nipo 5/30/2019 19:34:48'!
+setUp
+	myAccount := ReceptiveAccount new.
+	otherAccount := ReceptiveAccount new.! !
+
+
 !classDefinition: #AccountTransaction category: #'PortfolioTreePrinter-Ejercicio'!
 Object subclass: #AccountTransaction
 	instanceVariableNames: ''
@@ -657,78 +671,65 @@ for: aValue
 	^ self new initializeFor: aValue ! !
 
 
-!classDefinition: #WireDepositTransfer category: #'PortfolioTreePrinter-Ejercicio'!
-AccountTransaction subclass: #WireDepositTransfer
+!classDefinition: #WireTransferLegs category: #'PortfolioTreePrinter-Ejercicio'!
+AccountTransaction subclass: #WireTransferLegs
 	instanceVariableNames: 'wireTransfer'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!WireDepositTransfer methodsFor: 'balance' stamp: 'JIG 5/29/2019 02:39:00'!
-affectBalance: aBalance
-	^aBalance + (wireTransfer value).! !
+!WireTransferLegs methodsFor: 'value' stamp: 'Nipo 5/30/2019 19:45:20'!
+value
+	^wireTransfer value.! !
 
 
-!WireDepositTransfer methodsFor: 'initialization' stamp: 'JIG 5/29/2019 02:29:03'!
-initializeWithWireTransfer: aWireTransferTransaction
-	wireTransfer := aWireTransferTransaction.! !
-
-
-!WireDepositTransfer methodsFor: 'accessing' stamp: 'JIG 5/29/2019 02:32:43'!
+!WireTransferLegs methodsFor: 'accessing' stamp: 'Nipo 5/30/2019 19:45:06'!
 associatedWireTransfer
 	^wireTransfer.! !
 
 
-!WireDepositTransfer methodsFor: 'value' stamp: 'NI 5/29/2019 15:15:14'!
-value
-	^wireTransfer value.! !
+!WireTransferLegs methodsFor: 'initialization' stamp: 'Nipo 5/30/2019 19:45:13'!
+initializeWithWireTransfer: aWireTransferTransaction
+	wireTransfer := aWireTransferTransaction.! !
+
+
+!WireTransferLegs methodsFor: 'balance' stamp: 'Nipo 5/30/2019 19:44:53'!
+affectBalance: aBalance
+	^self subclassResponsibility! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'WireDepositTransfer class' category: #'PortfolioTreePrinter-Ejercicio'!
-WireDepositTransfer class
+!classDefinition: 'WireTransferLegs class' category: #'PortfolioTreePrinter-Ejercicio'!
+WireTransferLegs class
 	instanceVariableNames: ''!
 
-!WireDepositTransfer class methodsFor: 'initialization' stamp: 'JIG 5/29/2019 02:28:46'!
+!WireTransferLegs class methodsFor: 'initialization' stamp: 'Nipo 5/30/2019 19:44:06'!
 comingOf: aWireTransferTransaction
 	^self new initializeWithWireTransfer: aWireTransferTransaction.! !
 
 
-!classDefinition: #WireWithdrawTransfer category: #'PortfolioTreePrinter-Ejercicio'!
-AccountTransaction subclass: #WireWithdrawTransfer
-	instanceVariableNames: 'wireTransfer'
+!classDefinition: #WireDepositTransfer category: #'PortfolioTreePrinter-Ejercicio'!
+WireTransferLegs subclass: #WireDepositTransfer
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!WireWithdrawTransfer methodsFor: 'balance' stamp: 'Nipo 5/30/2019 16:23:14'!
+!WireDepositTransfer methodsFor: 'balance' stamp: 'Nipo 5/30/2019 19:29:45'!
 affectBalance: aBalance
-	^aBalance - (wireTransfer value).! !
+	^aBalance + (self value).! !
 
+
+!classDefinition: #WireWithdrawTransfer category: #'PortfolioTreePrinter-Ejercicio'!
+WireTransferLegs subclass: #WireWithdrawTransfer
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!WireWithdrawTransfer methodsFor: 'value' stamp: 'Nipo 5/30/2019 16:14:26'!
-value
-	^wireTransfer value.! !
-
-
-!WireWithdrawTransfer methodsFor: 'initialization' stamp: 'Nipo 5/30/2019 16:20:22'!
-initializeWithWireTransfer: aWireTransferTransaction
-	wireTransfer := aWireTransferTransaction.! !
-
-
-!WireWithdrawTransfer methodsFor: 'accessing' stamp: 'Nipo 5/30/2019 16:39:26'!
-associatedWireTransfer
-	^wireTransfer.! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'WireWithdrawTransfer class' category: #'PortfolioTreePrinter-Ejercicio'!
-WireWithdrawTransfer class
-	instanceVariableNames: ''!
-
-!WireWithdrawTransfer class methodsFor: 'initialization' stamp: 'Nipo 5/30/2019 16:15:45'!
-comingOf: aWireTransferTransaction
-	^self new initializeWithWireTransfer: aWireTransferTransaction.! !
+!WireWithdrawTransfer methodsFor: 'balance' stamp: 'Nipo 5/30/2019 19:30:12'!
+affectBalance: aBalance
+	^aBalance - (self value).! !
 
 
 !classDefinition: #Withdraw category: #'PortfolioTreePrinter-Ejercicio'!
@@ -1038,7 +1039,7 @@ withdrawTransferStringFor: aValue
 	^'Salida por transferencia de ' , aValue asString , '.'.! !
 
 
-!Report class methodsFor: 'summary report' stamp: 'Nipo 5/30/2019 15:46:51'!
+!Report class methodsFor: 'summary report' stamp: 'Nipo 5/30/2019 19:53:26'!
 generateAccountSummaryReportOf: aFinancialAsset
 	|report |
 	
@@ -1052,26 +1053,22 @@ generateAccountSummaryReportOf: aFinancialAsset
 			aTransaction class = WireDepositTransfer ifTrue: [report add: (self depositTransferStringFor: aTransaction value)].
 		].
 	
-	"Me parece que sería más fácil directo hacer un mensaje tipo aTransaction stringForReport, pero esto por consigna NO se puede hacer (dado que no podemos modificar la jerarquía ni de FinancialAssets ni de AccountTransaction"
+	"Me parece que sería más fácil directo hacer un mensaje tipo aTransaction stringForReport"
 	
 	report add: (self balanceStringFor: aFinancialAsset balance).
 	
 	^ report! !
 
-!Report class methodsFor: 'summary report' stamp: 'Nipo 5/30/2019 15:46:51'!
+!Report class methodsFor: 'summary report' stamp: 'Nipo 5/30/2019 19:59:13'!
 generateAccountTransferNetOf: aFinancialAsset
 	| finalResult |
 	
 	finalResult := 0.
 	
-	"^ aFinancialAsset transactions sum: [ :aTransaction |
-		aTransaction isWireDeposit ifTrue: [aTransaction value].
-		aTransaction isWireWithdraw ifTrue: [(-1) * aTransaction value].
-	]."
-	
 	aFinancialAsset transactions do: [ :aTransaction |
 		aTransaction class = WireDepositTransfer ifTrue: [finalResult := finalResult + aTransaction value].
 		aTransaction class = WireWithdrawTransfer ifTrue: [finalResult := finalResult - aTransaction value].
+		"aTransaction affectBalanceIfWireDeposit: finalResult "
 	].
 
 	^finalResult! !
