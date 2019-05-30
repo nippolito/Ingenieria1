@@ -501,6 +501,73 @@ test08ManyTransactionsAccountSummaryReportInformsBalanceProperly
 	self assert: aReport size equals: 4.
 	self assert: (aReport at: 4) equals: (self balanceStringFor: anEmptyAccount balance).! !
 
+!ReportTest methodsFor: 'tests' stamp: 'NI 5/30/2019 11:44:46'!
+test09EmptyTransactionsAccountTransferNetShouldBeCero
+	| anEmptyAccount aReport |
+	
+	anEmptyAccount := ReceptiveAccount new.
+	
+	aReport := Report generateAccountTransferNetOf: anEmptyAccount.
+	
+	self assert: aReport isZero.! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 5/30/2019 11:51:34'!
+test10AccountTransferNetSumsWireDeposit	
+	| anEmptyAccount aReport aWithdraw anAmmount anotherEmptyAccount |
+	
+	anAmmount := 25.
+	anEmptyAccount := ReceptiveAccount new.
+	anotherEmptyAccount := ReceptiveAccount new.
+	aWithdraw := WireTransfer register: anAmmount from: anEmptyAccount to: anotherEmptyAccount.
+	
+	aReport := Report generateAccountTransferNetOf: anotherEmptyAccount.
+	
+	self assert: aReport equals: anAmmount.! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 5/30/2019 11:52:35'!
+test11AccountTransferNetSubstractsWireWithdraw	
+	| anEmptyAccount aReport anAmmount anotherEmptyAccount |
+	
+	anAmmount := 25.
+	anEmptyAccount := ReceptiveAccount new.
+	anotherEmptyAccount := ReceptiveAccount new.
+	WireTransfer register: anAmmount from: anEmptyAccount to: anotherEmptyAccount.
+	
+	aReport := Report generateAccountTransferNetOf: anEmptyAccount.
+	
+	self assert: aReport equals: (-1) * anAmmount.! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 5/30/2019 11:58:46'!
+test12AccountTransferNetCanHandleMultipleTransfers	
+	| firstAccount firstReport anAmmount anotherAmmount secondAccount secondReport |
+	
+	anAmmount := 25.
+	anotherAmmount := 50.
+	firstAccount := ReceptiveAccount new.
+	secondAccount := ReceptiveAccount new.
+	WireTransfer register: anAmmount from: firstAccount to: secondAccount.
+	WireTransfer register: anotherAmmount from: secondAccount to: firstAccount.
+	
+	firstReport := Report generateAccountTransferNetOf: firstAccount.
+	secondReport := Report generateAccountTransferNetOf: secondAccount.
+	
+	self assert: firstReport equals: anotherAmmount - anAmmount.
+	self assert: secondReport equals: anAmmount - anotherAmmount! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 5/30/2019 12:17:54'!
+test13AccountTransferNetIgnoresNotWiredTransfers	
+	| anEmptyAccount aReport anAmmount anotherAmmount |
+	
+	anAmmount := 25.
+	anotherAmmount := 50.
+	anEmptyAccount := ReceptiveAccount new.
+	Withdraw register: anAmmount on: anEmptyAccount.
+	Deposit register: anotherAmmount on: anEmptyAccount.
+	
+	aReport := Report generateAccountTransferNetOf: anEmptyAccount.
+	
+	self assert: aReport isZero.! !
+
 
 !classDefinition: #Account category: #'PortfolioTreePrinter-Ejercicio'!
 Object subclass: #Account
@@ -756,6 +823,23 @@ affectBalance: aBalance
 
 	self subclassResponsibility ! !
 
+
+!AccountTransaction methodsFor: 'testing' stamp: 'NI 5/30/2019 12:20:32'!
+isDeposit
+	^false.! !
+
+!AccountTransaction methodsFor: 'testing' stamp: 'NI 5/30/2019 12:20:54'!
+isWireDeposit
+	^false.! !
+
+!AccountTransaction methodsFor: 'testing' stamp: 'NI 5/30/2019 12:20:51'!
+isWireWithdraw
+	^false.! !
+
+!AccountTransaction methodsFor: 'testing' stamp: 'NI 5/30/2019 12:21:02'!
+isWithdraw
+	^false.! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'AccountTransaction class' category: #'PortfolioTreePrinter-Ejercicio'!
@@ -800,6 +884,11 @@ value
 affectBalance: aBalance
 
 	^aBalance + value ! !
+
+
+!Deposit methodsFor: 'testing' stamp: 'NI 5/30/2019 12:21:21'!
+isDeposit
+	^true! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -902,6 +991,11 @@ initializeWithWireTransfer: aWireTransferTransaction
 associatedWireTransfer
 	^wireTransfer.! !
 
+
+!WireTransferDeposit methodsFor: 'testing' stamp: 'NI 5/30/2019 12:21:45'!
+isWireDeposit
+	^true! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'WireTransferDeposit class' category: #'PortfolioTreePrinter-Ejercicio'!
@@ -933,6 +1027,11 @@ value
 !WireTransferWithdraw methodsFor: 'initialization' stamp: 'JIG 5/29/2019 02:30:10'!
 initializeFor: aValue
 	value := aValue.! !
+
+
+!WireTransferWithdraw methodsFor: 'testing' stamp: 'NI 5/30/2019 12:21:56'!
+isWireWithdraw
+	^true! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -968,6 +1067,11 @@ value
 affectBalance: aBalance
 
 	^aBalance - value! !
+
+
+!Withdraw methodsFor: 'testing' stamp: 'NI 5/30/2019 12:22:07'!
+isWithdraw
+	^true! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1015,7 +1119,7 @@ withdrawTransferStringFor: aValue
 	^'Salida por transferencia de ' , aValue asString , '.'.! !
 
 
-!Report class methodsFor: 'summary report' stamp: 'NI 5/29/2019 15:07:11'!
+!Report class methodsFor: 'summary report' stamp: 'NI 5/30/2019 12:24:53'!
 generateAccountSummaryReportOf: aFinancialAsset
 	|report |
 	
@@ -1023,12 +1127,25 @@ generateAccountSummaryReportOf: aFinancialAsset
 	aFinancialAsset transactions size = 0 ifTrue: [^ (report add: (self balanceStringFor: aFinancialAsset balance))].
 	
 	aFinancialAsset transactions do: [:aTransaction | 
-			aTransaction class = Deposit ifTrue: [report add: (self depositStringFor: aTransaction value)].
-			aTransaction class = Withdraw ifTrue: [report add: (self withdrawStringFor: aTransaction value)].
-			aTransaction class = WireTransferWithdraw ifTrue: [report add: (self withdrawTransferStringFor: aTransaction value)].
-			aTransaction class = WireTransferDeposit ifTrue: [report add: (self depositTransferStringFor: aTransaction value)].
+			aTransaction isDeposit ifTrue: [report add: (self depositStringFor: aTransaction value)].
+			aTransaction isWithdraw ifTrue: [report add: (self withdrawStringFor: aTransaction value)].
+			aTransaction isWireWithdraw ifTrue: [report add: (self withdrawTransferStringFor: aTransaction value)].
+			aTransaction isWireDeposit ifTrue: [report add: (self depositTransferStringFor: aTransaction value)].
 		].
 	
 	report add: (self balanceStringFor: aFinancialAsset balance).
 	
 	^ report! !
+
+!Report class methodsFor: 'summary report' stamp: 'NI 5/30/2019 12:24:30'!
+generateAccountTransferNetOf: aFinancialAsset
+	| finalResult |
+	
+	finalResult := 0.
+	
+	aFinancialAsset transactions do: [ :aTransaction |
+		aTransaction isWireDeposit ifTrue: [finalResult := finalResult + aTransaction value].
+		aTransaction isWireWithdraw ifTrue: [finalResult := finalResult - aTransaction value].
+	].
+
+	^finalResult! !
