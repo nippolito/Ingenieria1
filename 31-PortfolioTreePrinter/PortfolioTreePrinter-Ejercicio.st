@@ -1436,6 +1436,25 @@ generate
 	
 	^stream! !
 
+
+!SpecialPortfolioReport methodsFor: 'financial assets handlers' stamp: 'Nipo 6/3/2019 15:25:21'!
+handlePortfolio: aPortfolio
+	|indentSpaceAmount |
+	
+	indentSpaceAmount := 4 * (aPortfolio depthFrom: financialAsset).
+
+	self write: aPortfolio name on: stream withSpaceOnNewLine: indentSpaceAmount.
+	
+	self handleReportForFinancialAssetsOf: aPortfolio.! !
+
+!SpecialPortfolioReport methodsFor: 'financial assets handlers' stamp: 'Nipo 6/3/2019 15:22:15'!
+handleReceptiveAccount: aReceptiveAccount
+	|indentSpaceAmount |
+	
+	indentSpaceAmount := 4 * (aReceptiveAccount depthFrom: financialAsset).
+	
+	self write: aReceptiveAccount name on: stream  withSpaceOnNewLine: indentSpaceAmount .! !
+
 
 !classDefinition: #SpecialSummaryReport category: #'PortfolioTreePrinter-Ejercicio'!
 SpecialPortfolioReport subclass: #SpecialSummaryReport
@@ -1445,27 +1464,17 @@ SpecialPortfolioReport subclass: #SpecialSummaryReport
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
 
-!SpecialSummaryReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/3/2019 10:30:33'!
+!SpecialSummaryReport methodsFor: 'private - financial assets handlers' stamp: 'Nipo 6/3/2019 15:27:59'!
 handlePortfolio: aPortfolio
-	|indentSpaceAmount |
+	super handlePortfolio: aPortfolio.
 	
-	indentSpaceAmount := 4 * (aPortfolio depthFrom: financialAsset).
+	self write: (self class balanceStringFor: aPortfolio balance) on: stream withSpaceOnNewLine: (4 * (aPortfolio depthFrom: financialAsset)) + 4. ! !
 
-	self write: aPortfolio name on: stream withSpaceOnNewLine: indentSpaceAmount.
+!SpecialSummaryReport methodsFor: 'private - financial assets handlers' stamp: 'Nipo 6/3/2019 15:28:03'!
+handleReceptiveAccount: aReceptiveAccount	
+	super handleReceptiveAccount: aReceptiveAccount.
 	
-	self handleReportForFinancialAssetsOf: aPortfolio.
-
-	self write: (self class balanceStringFor: aPortfolio balance) on: stream withSpaceOnNewLine: indentSpaceAmount + 4. ! !
-
-!SpecialSummaryReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/3/2019 10:30:39'!
-handleReceptiveAccount: aReceptiveAccount
-	|indentSpaceAmount |
-	
-	indentSpaceAmount := 4 * (aReceptiveAccount depthFrom: financialAsset).
-	
-	self write: aReceptiveAccount name on: stream  withSpaceOnNewLine: indentSpaceAmount .
-	
-	self addSummaryFrom: aReceptiveAccount to: stream withIndentation: (4 + indentSpaceAmount).! !
+	self addSummaryFrom: aReceptiveAccount to: stream withIndentation: 4 + (4 * (aReceptiveAccount depthFrom: financialAsset)).! !
 
 
 !SpecialSummaryReport methodsFor: 'private - summary' stamp: 'NI 6/2/2019 14:35:55'!
@@ -1489,23 +1498,13 @@ SpecialPortfolioReport subclass: #TreeStructureReport
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
 
-!TreeStructureReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/3/2019 10:30:25'!
+!TreeStructureReport methodsFor: 'private - financial assets handlers' stamp: 'Nipo 6/3/2019 15:28:17'!
 handlePortfolio: aPortfolio
-	|indentSpaceAmount |
-	
-	indentSpaceAmount := 4 * (aPortfolio depthFrom: financialAsset).
-	
-	self write: aPortfolio name on: stream withSpaceOnNewLine: indentSpaceAmount.
-	
-	self handleReportForFinancialAssetsOf: aPortfolio.! !
+	super handlePortfolio: aPortfolio.! !
 
-!TreeStructureReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/3/2019 10:30:12'!
+!TreeStructureReport methodsFor: 'private - financial assets handlers' stamp: 'Nipo 6/3/2019 15:28:13'!
 handleReceptiveAccount: aReceptiveAccount
-	|indentSpaceAmount |
-	
-	indentSpaceAmount := 4 * (aReceptiveAccount depthFrom: financialAsset).
-	
-	self write: aReceptiveAccount name on: stream withSpaceOnNewLine: indentSpaceAmount.! !
+	super handleReceptiveAccount: aReceptiveAccount.! !
 
 
 !classDefinition: #SummaryReport category: #'PortfolioTreePrinter-Ejercicio'!
