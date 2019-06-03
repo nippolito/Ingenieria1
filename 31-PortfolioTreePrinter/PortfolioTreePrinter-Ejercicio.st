@@ -5,84 +5,84 @@ TestCase subclass: #PortfolioTest
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:16:26'!
+!PortfolioTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:25:15'!
 test01BalanceOfPortfolioWithoutAccountsIsZero
 
-	self assert: 0 equals: Portfolio new balance! !
+	self assert: 0 equals: (Portfolio named: 'miPortfolio') balance! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:17:51'!
+!PortfolioTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:25:28'!
 test02BalanceOfPortfolioWithOneAccountIsAccountBalance
 
 	| account portfolio |
 	
-	account := ReceptiveAccount new.
+	account := ReceptiveAccount named: 'miCuenta'.
 	Deposit register: 100 on: account.
-	portfolio := Portfolio with: account.
+	portfolio := Portfolio named: 'miPortfolio' with: account.
 	
 	self assert: account balance equals: portfolio balance! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:23:25'!
+!PortfolioTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:26:12'!
 test03BalanceOfPortfolioIsCalculatedRecursivelyOnPortfolios
 
 	| simplePortfolioAccount simplePortfolio composedPortfolioAccount composedPortofolio |
 	
-	simplePortfolioAccount := ReceptiveAccount new.
+	simplePortfolioAccount := ReceptiveAccount named: 'simplePortfolioAccount'.
 	Deposit register: 100 on: simplePortfolioAccount.
-	simplePortfolio := Portfolio with: simplePortfolioAccount.
+	simplePortfolio := Portfolio named: 'simplePortfolio' with: simplePortfolioAccount.
 	
-	composedPortfolioAccount := ReceptiveAccount new.
+	composedPortfolioAccount := ReceptiveAccount named: 'composedPortfolioAccount'.
 	Withdraw register: 50 on: composedPortfolioAccount.
-	composedPortofolio := Portfolio with: simplePortfolio with: composedPortfolioAccount.
+	composedPortofolio := Portfolio named: 'composedPortfolio' with: simplePortfolio with: composedPortfolioAccount.
 	
 	self assert: (composedPortfolioAccount balance + simplePortfolio balance) equals: composedPortofolio balance! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:43:15'!
+!PortfolioTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:26:31'!
 test04PortfolioWithoutAccountsHasNoRegisteredTransaction
 
-	self deny: (Portfolio new hasRegistered: (Deposit for: 100))! !
+	self deny: ((Portfolio named: 'miPortfolio') hasRegistered: (Deposit for: 100))! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:43:11'!
+!PortfolioTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:26:46'!
 test05PortfolioHasRegisteredItsAccountsTransactions
 
 	| account portfolio deposit |
 	
-	account := ReceptiveAccount new.
+	account := ReceptiveAccount named: 'miCuenta'.
 	deposit := Deposit register: 100 on: account.
-	portfolio := Portfolio with: account.
+	portfolio := Portfolio named: 'miPortfolio' with: account.
 	
 	self assert: (portfolio hasRegistered: deposit)! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:58:06'!
+!PortfolioTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:27:20'!
 test06PortfolioLooksForRegisteredTransactionsRecursively
 
 	| simplePortfolioAccount simplePortfolio composedPortfolioAccount composedPortfolio composedPortfolioAccountWithdraw simplePortfolioAccountDeposit |
 	
-	simplePortfolioAccount := ReceptiveAccount new.
+	simplePortfolioAccount := ReceptiveAccount named: 'simplePortfolioAccount'.
 	simplePortfolioAccountDeposit := Deposit register: 100 on: simplePortfolioAccount.
-	simplePortfolio := Portfolio with: simplePortfolioAccount.
+	simplePortfolio := Portfolio named: 'simplePortfolio' with: simplePortfolioAccount.
 	
-	composedPortfolioAccount := ReceptiveAccount new.
+	composedPortfolioAccount := ReceptiveAccount named: 'composedPortfolioAccount'.
 	composedPortfolioAccountWithdraw := Withdraw register: 50 on: composedPortfolioAccount.
-	composedPortfolio := Portfolio with: simplePortfolio with: composedPortfolioAccount.
+	composedPortfolio := Portfolio named: 'composedPortfolio' with: simplePortfolio with: composedPortfolioAccount.
 	
 	self assert: (composedPortfolio hasRegistered: simplePortfolioAccountDeposit).
 	self assert: (composedPortfolio hasRegistered: composedPortfolioAccountWithdraw)! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:58:10'!
+!PortfolioTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:27:54'!
 test07PortfolioHasNoTransactionWhenHasNoAccounts
 
-	self assert: Portfolio new transactions isEmpty! !
+	self assert: (Portfolio named: 'miCuenta') transactions isEmpty! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:58:15'!
+!PortfolioTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:28:14'!
 test08PortfolioTransasctionsIncludesAllItsAccountsTransactions
 
 	| account portfolio accountDeposit anotherAccount portfolioTransactions anotherAccountWithdraw |
 	
-	account := ReceptiveAccount new.
+	account := ReceptiveAccount named: 'account'.
 	accountDeposit := Deposit register: 100 on: account.
 	anotherAccount := ReceptiveAccount new.
 	anotherAccountWithdraw := Withdraw register: 100 on: account.
-	portfolio := Portfolio with: account.
+	portfolio := Portfolio named: 'portfolio' with: account.
 	
 	portfolioTransactions := portfolio transactions.
 	
@@ -90,31 +90,31 @@ test08PortfolioTransasctionsIncludesAllItsAccountsTransactions
 	self assert: (portfolioTransactions includes: accountDeposit).
 	self assert: (portfolioTransactions includes: anotherAccountWithdraw)! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'HAW 5/25/2019 11:58:20'!
+!PortfolioTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:28:47'!
 test09PortfolioTransactionsAreCalculatedRecursively
 
 	| simplePortfolioAccount simplePortfolio composedPortfolioAccount composedPortfolio composedPortfolioAccountWithdraw simplePortfolioAccountDeposit composedPortfolioTransactions |
 	
-	simplePortfolioAccount := ReceptiveAccount new.
+	simplePortfolioAccount := ReceptiveAccount named: 'simplePortfolioAccount'.
 	simplePortfolioAccountDeposit := Deposit register: 100 on: simplePortfolioAccount.
-	simplePortfolio := Portfolio with: simplePortfolioAccount.
+	simplePortfolio := Portfolio named: 'simplePortfolio' with: simplePortfolioAccount.
 	
-	composedPortfolioAccount := ReceptiveAccount new.
+	composedPortfolioAccount := ReceptiveAccount named: 'composedPortfolioAccount'.
 	composedPortfolioAccountWithdraw := Withdraw register: 50 on: composedPortfolioAccount.
-	composedPortfolio := Portfolio with: simplePortfolio with: composedPortfolioAccount.
+	composedPortfolio := Portfolio named: 'composedPortfolio' with: simplePortfolio with: composedPortfolioAccount.
 	
 	composedPortfolioTransactions := composedPortfolio transactions.
 	self assert: 2 equals: composedPortfolioTransactions size.
 	self assert: (composedPortfolioTransactions includes: simplePortfolioAccountDeposit).
 	self assert: (composedPortfolioTransactions includes: composedPortfolioAccountWithdraw)! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'Nipo 5/30/2019 15:49:19'!
+!PortfolioTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:29:01'!
 test10PortfolioCanNotIncludeTheSameAccountMoreThanOnce
 
 	| account portfolio |
 	
-	account := ReceptiveAccount new.
-	portfolio := Portfolio with: account.
+	account := ReceptiveAccount named: 'account'.
+	portfolio := Portfolio named: 'portfolio' with: account.
 	
 	self 
 		should: [ portfolio add: account ]
@@ -124,14 +124,14 @@ test10PortfolioCanNotIncludeTheSameAccountMoreThanOnce
 			self assert: 1 equals: portfolio financialAssetsSize.
 			self assert: (portfolio financialAssetsIncludes: account) ]! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'Nipo 5/30/2019 15:49:19'!
+!PortfolioTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:29:27'!
 test11PortfolioCanNotIncludeAccountOfItsPortfolios
 
 	| account simplePortfolio composedPortfolio |
 	
-	account := ReceptiveAccount new.
-	simplePortfolio := Portfolio with: account.
-	composedPortfolio := Portfolio with: simplePortfolio.
+	account := ReceptiveAccount named: 'account'.
+	simplePortfolio := Portfolio named: 'simplePortfolio' with: account.
+	composedPortfolio := Portfolio named: 'composedPortfolio' with: simplePortfolio.
 	
 	self 
 		should: [ composedPortfolio add: account ]
@@ -141,13 +141,13 @@ test11PortfolioCanNotIncludeAccountOfItsPortfolios
 			self assert: 1 equals: composedPortfolio financialAssetsSize.
 			self assert: (composedPortfolio financialAssetsIncludes: simplePortfolio) ]! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'Nipo 5/30/2019 15:49:19'!
+!PortfolioTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:29:39'!
 test12PortfolioCanNotIncludeItself
 
 	| account simplePortfolio |
 	
-	account := ReceptiveAccount new.
-	simplePortfolio := Portfolio with: account.
+	account := ReceptiveAccount named: 'account'.
+	simplePortfolio := Portfolio named: 'simplePortfolio' with: account.
 	
 	self 
 		should: [ simplePortfolio add: simplePortfolio ]
@@ -157,14 +157,14 @@ test12PortfolioCanNotIncludeItself
 			self assert: 1 equals: simplePortfolio financialAssetsSize.
 			self assert: (simplePortfolio financialAssetsIncludes: account) ]! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'Nipo 5/30/2019 15:49:06'!
+!PortfolioTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:30:00'!
 test13ComposedPortfolioCanNotHaveParentPortfolioAccount
 
 	| account simplePortfolio composedPortfolio |
 	
-	account := ReceptiveAccount new.
-	simplePortfolio := Portfolio new.
-	composedPortfolio := Portfolio with: simplePortfolio.
+	account := ReceptiveAccount named: 'account'.
+	simplePortfolio := Portfolio named: 'simplePortfolio'.
+	composedPortfolio := Portfolio named: 'composedPortfolio' with: simplePortfolio.
 	composedPortfolio add: account.
 	
 	self 
@@ -174,19 +174,19 @@ test13ComposedPortfolioCanNotHaveParentPortfolioAccount
 			self assert: Portfolio canNotAddAccountErrorMessage equals: anError messageText.
 			self assert: simplePortfolio financialAssetsIsEmpty ]! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'Nipo 5/30/2019 15:49:06'!
+!PortfolioTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:30:43'!
 test14ComposedPortfolioCanNotHaveAccountOfAnyRootParentRecursively
 
 	| account leftParentPortfolio leftRootParentPortfolio portfolio rightParentPortfolio rightRootParentPortfolio |
 	
-	account := ReceptiveAccount new.
-	portfolio := Portfolio new.
-	leftParentPortfolio := Portfolio with: portfolio .
-	leftRootParentPortfolio := Portfolio with: leftParentPortfolio.
+	account := ReceptiveAccount named: 'account'.
+	portfolio := Portfolio named: 'portfolio'.
+	leftParentPortfolio := Portfolio named: 'leftParentPortfolio' with: portfolio .
+	leftRootParentPortfolio := Portfolio named: 'leftRootParentPortfolio' with: leftParentPortfolio.
 	leftRootParentPortfolio add: account.
 	
-	rightParentPortfolio := Portfolio with: portfolio .
-	rightRootParentPortfolio := Portfolio with: rightParentPortfolio.
+	rightParentPortfolio := Portfolio named: 'rightParentPortfolio' with: portfolio .
+	rightRootParentPortfolio := Portfolio named: 'rightRootParentPortfolio' with: rightParentPortfolio.
 	rightRootParentPortfolio add: account.
 
 	self 
@@ -196,15 +196,15 @@ test14ComposedPortfolioCanNotHaveAccountOfAnyRootParentRecursively
 			self assert: Portfolio canNotAddAccountErrorMessage equals: anError messageText.
 			self assert: portfolio financialAssetsIsEmpty ]! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'Nipo 5/30/2019 15:49:06'!
+!PortfolioTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:31:11'!
 test15PortfolioCanNotIncludeAnyOfTheComposedAccountOfPortfolioToAdd
 
 	| portfolioToAdd portfolioToModify rootPortfolio sharedAccount |
 	
-	sharedAccount := ReceptiveAccount new.
-	portfolioToModify := Portfolio new.
-	rootPortfolio := Portfolio with: sharedAccount with: portfolioToModify.
-	portfolioToAdd := Portfolio with: sharedAccount.
+	sharedAccount := ReceptiveAccount named: 'sharedAccount'.
+	portfolioToModify := Portfolio named: 'portfolioToModify'.
+	rootPortfolio := Portfolio named: 'rootPortfolio' with: sharedAccount with: portfolioToModify.
+	portfolioToAdd := Portfolio named: 'portfolioToAdd' with: sharedAccount.
 	
 	self 
 		should: [ portfolioToModify add: portfolioToAdd ]
@@ -216,61 +216,61 @@ test15PortfolioCanNotIncludeAnyOfTheComposedAccountOfPortfolioToAdd
 
 !classDefinition: #ReceptiveAccountTest category: #'PortfolioTreePrinter-Ejercicio'!
 TestCase subclass: #ReceptiveAccountTest
-	instanceVariableNames: 'accountWith100Deposit accountWithoutTransactions accountWith100DepositTransaction'
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'HAW 5/23/2019 15:19:48'!
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:23:16'!
 test01ReceptiveAccountHaveZeroAsBalanceWhenCreated 
 
 	| account |
 	
-	account := ReceptiveAccount new.
+	account := ReceptiveAccount named: 'miCuenta'.
 
 	self assert: 0 equals: account balance .
 ! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'HAW 5/23/2019 15:19:54'!
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:23:25'!
 test02DepositIncreasesBalanceOnTransactionValue 
 
 	| account |
 	
-	account := ReceptiveAccount  new.
+	account := ReceptiveAccount named: 'miCuenta'.
 	Deposit register: 100 on: account.
 		
 	self assert: 100 equals: account balance .
 ! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'HAW 5/23/2019 15:20:02'!
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:23:32'!
 test03WithdrawDecreasesBalanceOnTransactionValue 
 
 	| account |
 	
-	account := ReceptiveAccount new.
+	account := ReceptiveAccount named: 'miCuenta'.
 	Deposit register: 100 on: account.
 	Withdraw register: 50 on: account.
 		
 	self assert: 50 equals: account balance .
 ! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'HAW 5/23/2019 15:20:32'!
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:23:39'!
 test04WithdrawValueMustBePositive 
 
 	| account withdrawValue |
 	
-	account := ReceptiveAccount new.
+	account := ReceptiveAccount named: 'miCuenta'.
 	withdrawValue := 50.
 	
 	self assert: withdrawValue equals: (Withdraw register: withdrawValue on: account) value
 ! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'HAW 5/23/2019 15:20:46'!
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:23:46'!
 test05ReceptiveAccountKnowsRegisteredTransactions 
 
 	| account deposit withdraw |
 	
-	account := ReceptiveAccount new.
+	account := ReceptiveAccount named: 'miCuenta'.
 	deposit := Deposit register: 100 on: account.
 	withdraw := Withdraw register: 50 on: account.
 		
@@ -278,12 +278,12 @@ test05ReceptiveAccountKnowsRegisteredTransactions
 	self assert: (account hasRegistered: withdraw).
 ! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'HAW 5/23/2019 15:20:54'!
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:23:52'!
 test06ReceptiveAccountDoNotKnowNotRegisteredTransactions
 
 	| account deposit withdraw |
 	
-	account := ReceptiveAccount new.
+	account := ReceptiveAccount named: 'miCuenta'.
 	deposit :=  Deposit for: 100.
 	withdraw := Withdraw for: 50.
 		
@@ -291,12 +291,12 @@ test06ReceptiveAccountDoNotKnowNotRegisteredTransactions
 	self deny: (account hasRegistered:withdraw).
 ! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'HAW 5/23/2019 15:21:24'!
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'NI 6/2/2019 21:23:58'!
 test07AccountKnowsItsTransactions 
 
 	| account1 deposit1 |
 	
-	account1 := ReceptiveAccount new.
+	account1 := ReceptiveAccount named: 'miCuenta'.
 	
 	deposit1 := Deposit register: 100 on: account1.
 		
@@ -304,18 +304,10 @@ test07AccountKnowsItsTransactions
 	self assert: (account1 transactions includes: deposit1).
 ! !
 
-
-!ReceptiveAccountTest methodsFor: 'setup' stamp: 'NI 5/29/2019 12:30:21'!
-setUp
-	
-	accountWith100Deposit := ReceptiveAccount new.
-	accountWithoutTransactions  := ReceptiveAccount new.
-	accountWith100DepositTransaction := Deposit register: 100 on: accountWith100Deposit.! !
-
 
 !classDefinition: #ReportTest category: #'PortfolioTreePrinter-Ejercicio'!
 TestCase subclass: #ReportTest
-	instanceVariableNames: ''
+	instanceVariableNames: 'anAccountWithOneDeposit anAccountWithOneWithdraw depositAmount withdrawAmount firstEmptyAccount secondEmptyAccount anAccountWithThreeTransactions anotherDepositAmount anEmptyPortfolio aPortfolioWithTwoAccountsWithTransfers aPortfolioWithTwoEmptyAccounts'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
@@ -341,298 +333,353 @@ withdrawTransferStringFor: aValue
 	^'Salida por transferencia de ' , aValue asString , '.'.! !
 
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 5/31/2019 19:04:08'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 14:57:49'!
 test00SummaryReportInformsOnlyCeroBalanceWhenThereAreNotTransactions
 	
-	| anEmptyAccount aReport summaryAccountReport |
+	| aReport summaryAccountReport |
 	
-	anEmptyAccount := ReceptiveAccount new.
-	
-	aReport := Report for: anEmptyAccount.
+	aReport := Report for: firstEmptyAccount.
 	summaryAccountReport := aReport generateAccountSummary.
 	
-	self assert: summaryAccountReport size equals: 12.
-	self assert: summaryAccountReport equals: (self balanceStringFor: anEmptyAccount balance)! !
+	self assert: summaryAccountReport size equals: 1.
+	self assert: (summaryAccountReport includes: (self balanceStringFor: firstEmptyAccount balance))! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 5/31/2019 19:04:16'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 14:58:20'!
 test01SummaryReportInformsDepositProperly
-	| anEmptyAccount aReport anAmmount summaryAccountReport |
+	| aReport summaryAccountReport |
 	
-	anAmmount := 25.
-	anEmptyAccount := ReceptiveAccount new.
-	Deposit register: anAmmount on: anEmptyAccount.
-	
-	aReport := Report for: anEmptyAccount.
+	aReport := Report for: anAccountWithOneDeposit.
 	summaryAccountReport := aReport generateAccountSummary.
 	
 	self assert: summaryAccountReport size equals: 2.
-	self assert: (summaryAccountReport at: 1) = (self depositStringFor: anAmmount)! !
+	self assert: (summaryAccountReport at: 1) = (self depositStringFor: depositAmount)! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 5/31/2019 19:04:21'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 14:58:40'!
 test02SummaryReportInformsWithdrawProperly
-	| anEmptyAccount aReport anAmount summaryAccountReport |
+	| aReport summaryAccountReport |
 	
-	anAmount := 25.
-	anEmptyAccount := ReceptiveAccount new.
-	Withdraw register: anAmount on: anEmptyAccount.
-	
-	aReport := Report for: anEmptyAccount.
+	aReport := Report for: anAccountWithOneWithdraw.
 	summaryAccountReport := aReport generateAccountSummary.
 	
 	self assert: summaryAccountReport size equals: 2.
-	self assert: (summaryAccountReport at: 1) = (self withdrawStringFor: anAmount)! !
+	self assert: (summaryAccountReport at: 1) = (self withdrawStringFor: withdrawAmount)! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 5/31/2019 19:04:27'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 14:59:37'!
 test03SummaryReportInformsWireWithdrawProperly
-	| anEmptyAccount aReport anAmmount anotherEmptyAccount summaryAccountReport |
+	| aReport summaryAccountReport |
 	
-	anAmmount := 25.
-	anEmptyAccount := ReceptiveAccount new.
-	anotherEmptyAccount := ReceptiveAccount new.
-	WireTransfer register: anAmmount from: anEmptyAccount to: anotherEmptyAccount.
+	WireTransfer register: depositAmount from: firstEmptyAccount to: secondEmptyAccount.
 	
-	aReport := Report for: anEmptyAccount.
+	aReport := Report for: firstEmptyAccount .
 	summaryAccountReport := aReport generateAccountSummary.
 	
 	self assert: summaryAccountReport size equals: 2.
-	self assert: (summaryAccountReport at: 1) = (self withdrawTransferStringFor: anAmmount)! !
+	self assert: (summaryAccountReport at: 1) = (self withdrawTransferStringFor: depositAmount)! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 5/31/2019 19:04:34'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:00:33'!
 test04SummaryReportInformsWireDepositProperly
-	| anEmptyAccount aReport anAmmount anotherEmptyAccount summaryAccountReport |
+	| aReport summaryAccountReport |
 	
-	anAmmount := 25.
-	anEmptyAccount := ReceptiveAccount new.
-	anotherEmptyAccount := ReceptiveAccount new.
-	WireTransfer register: anAmmount from: anEmptyAccount to: anotherEmptyAccount.
+	WireTransfer register: depositAmount from: firstEmptyAccount to: secondEmptyAccount .
 	
-	aReport := Report for: anotherEmptyAccount.
+	aReport := Report for: secondEmptyAccount .
 	summaryAccountReport := aReport generateAccountSummary.
 	
 	self assert: summaryAccountReport size equals: 2.
-	self assert: (summaryAccountReport includes: (self depositTransferStringFor: anAmmount))! !
+	self assert: (summaryAccountReport includes: (self depositTransferStringFor: depositAmount ))! !
 
-!ReportTest methodsFor: 'tests' stamp: 'JIG 5/31/2019 16:17:45'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:00:59'!
 test05OneTransactionFinancialAssetSummaryReportInformsBalanceProperly
-	| anEmptyAccount aReport anAmount summaryAccountReport |
+	| aReport summaryAccountReport |
 	
-	anAmount := 25.
-	anEmptyAccount := ReceptiveAccount new.
-	Deposit register: anAmount on: anEmptyAccount.
-	
-	aReport := Report for: anEmptyAccount.
+	aReport := Report for: anAccountWithOneDeposit.
 	summaryAccountReport := aReport generateAccountSummary.
 	
 	self assert: summaryAccountReport size equals: 2.
-	self assert: (summaryAccountReport at: 2) equals: (self balanceStringFor: anEmptyAccount balance).! !
+	self assert: (summaryAccountReport at: 2) equals: (self balanceStringFor: anAccountWithOneDeposit balance).! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 5/31/2019 19:04:57'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:02:53'!
 test06SummaryReportInformsMultipleTransactionsProperly
-	| anEmptyAccount aReport anAmount anotherAmount summaryAccountReport |
+	| aReport summaryAccountReport |
 	
-	anAmount := 25.
-	anotherAmount := 50.
-	anEmptyAccount := ReceptiveAccount new.
-	Withdraw register: anAmount on: anEmptyAccount.
-	Deposit register: anotherAmount on: anEmptyAccount.
+	Withdraw register: withdrawAmount on: anAccountWithOneDeposit .
 	
-	aReport := Report for: anEmptyAccount.
+	aReport := Report for: anAccountWithOneDeposit .
 	summaryAccountReport := aReport generateAccountSummary.
 	
 	self assert: summaryAccountReport size equals: 3.
-	self assert: (summaryAccountReport includes: (self withdrawStringFor: anAmount)).
-	self assert: (summaryAccountReport includes: (self depositStringFor: anotherAmount)).! !
+	self assert: (summaryAccountReport includes: (self withdrawStringFor: withdrawAmount )).
+	self assert: (summaryAccountReport includes: (self depositStringFor: depositAmount )).! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 5/31/2019 19:05:24'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:07:42'!
 test07SummaryReportMantainsTransactionOrder
-	| anEmptyAccount aReport firstAmmount secondAmmount thirdAmmount summaryAccountReport |
+	| aReport summaryAccountReport |
 	
-	firstAmmount := 25.
-	secondAmmount := 50.
-	thirdAmmount := 120.
-	
-	anEmptyAccount := ReceptiveAccount new.
-	
-	Deposit register: firstAmmount on: anEmptyAccount.
-	Withdraw register: secondAmmount on: anEmptyAccount.
-	Deposit register: thirdAmmount on: anEmptyAccount.
-	
-	aReport := Report for: anEmptyAccount.
+	aReport := Report for: anAccountWithThreeTransactions.
 	summaryAccountReport := aReport generateAccountSummary.
 	
 	self assert: summaryAccountReport size equals: 4.
-	self assert: (summaryAccountReport at: 1) equals: (self depositStringFor: firstAmmount).
-	self assert: (summaryAccountReport at: 2) equals: (self withdrawStringFor: secondAmmount).
-	self assert: (summaryAccountReport at: 3) equals: (self depositStringFor: thirdAmmount).! !
+	self assert: (summaryAccountReport at: 1) equals: (self depositStringFor: depositAmount ).
+	self assert: (summaryAccountReport at: 2) equals: (self withdrawStringFor: withdrawAmount ).
+	self assert: (summaryAccountReport at: 3) equals: (self depositStringFor: anotherDepositAmount ).! !
 
-!ReportTest methodsFor: 'tests' stamp: 'JIG 5/31/2019 16:18:03'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:08:38'!
 test08ManyTransactionsFinancialAssetSummaryReportInformsBalanceProperly
-	| anEmptyAccount aReport firstAmmount secondAmmount thirdAmmount summaryAccountReport |
+	| aReport summaryAccountReport |
 	
-	firstAmmount := 25.
-	secondAmmount := 50.
-	thirdAmmount := 120.
-	
-	anEmptyAccount := ReceptiveAccount new.
-	
-	Deposit register: firstAmmount on: anEmptyAccount.
-	Withdraw register: secondAmmount on: anEmptyAccount.
-	Deposit register: thirdAmmount on: anEmptyAccount.
-	
-	aReport := Report for: anEmptyAccount.
+	aReport := Report for: anAccountWithThreeTransactions.
 	summaryAccountReport := aReport generateAccountSummary.
 	
 	self assert: summaryAccountReport size equals: 4.
-	self assert: (summaryAccountReport at: 4) equals: (self balanceStringFor: anEmptyAccount balance).! !
+	self assert: (summaryAccountReport at: 4) equals: (self balanceStringFor: anAccountWithThreeTransactions balance).! !
 
-!ReportTest methodsFor: 'tests' stamp: 'JIG 5/31/2019 16:18:10'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:09:12'!
 test09EmptyTransactionsFinancialAssetTransferNetShouldBeCero
-	| anEmptyAccount aReport trasnferNetReport |
+	| aReport trasnferNetReport |
 	
-	anEmptyAccount := ReceptiveAccount new.
-	
-	aReport := Report for: anEmptyAccount.
+	aReport := Report for: firstEmptyAccount.
 	trasnferNetReport := aReport generateAccountTransferNet.
 	
 	self assert: trasnferNetReport isZero.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 5/31/2019 19:05:44'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:10:09'!
 test10TransferNetSumsWireDeposit	
-	| anEmptyAccount aReport anAmount anotherEmptyAccount trasnferNetReport |
+	| aReport trasnferNetReport |
 	
-	anAmount := 25.
-	anEmptyAccount := ReceptiveAccount new.
-	anotherEmptyAccount := ReceptiveAccount new.
-	WireTransfer register: anAmount from: anEmptyAccount to: anotherEmptyAccount.
+	WireTransfer register: depositAmount from: firstEmptyAccount to: secondEmptyAccount .
 	
-	aReport := Report for: anotherEmptyAccount.
+	aReport := Report for: secondEmptyAccount .
 	trasnferNetReport := aReport generateAccountTransferNet.
 	
-	self assert: trasnferNetReport equals: anAmount.! !
+	self assert: trasnferNetReport equals: depositAmount.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 5/31/2019 19:05:50'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:10:33'!
 test11TransferNetSubstractsWireWithdraw	
-	| anEmptyAccount aReport anAmmount anotherEmptyAccount trasnferNetReport |
+	| aReport trasnferNetReport |
+
+	WireTransfer register: depositAmount from: firstEmptyAccount to: secondEmptyAccount .
 	
-	anAmmount := 25.
-	anEmptyAccount := ReceptiveAccount new.
-	anotherEmptyAccount := ReceptiveAccount new.
-	WireTransfer register: anAmmount from: anEmptyAccount to: anotherEmptyAccount.
-	
-	aReport := Report for: anEmptyAccount.
+	aReport := Report for: firstEmptyAccount .
 	trasnferNetReport := aReport generateAccountTransferNet.
 	
-	self assert: trasnferNetReport equals: (-1) * anAmmount.! !
+	self assert: trasnferNetReport equals: (-1) * depositAmount .! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 5/31/2019 19:06:19'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:11:43'!
 test12TransferNetCanHandleMultipleTransfers	
-	| firstAccount firstReport anAmmount anotherAmmount secondAccount secondReport firstTransferNetReport secondTransferNetReport |
+	| firstReport secondReport firstTransferNetReport secondTransferNetReport |
 	
-	anAmmount := 25.
-	anotherAmmount := 50.
-	firstAccount := ReceptiveAccount new.
-	secondAccount := ReceptiveAccount new.
-	WireTransfer register: anAmmount from: firstAccount to: secondAccount.
-	WireTransfer register: anotherAmmount from: secondAccount to: firstAccount.
+	WireTransfer register: depositAmount from: firstEmptyAccount to: secondEmptyAccount .
+	WireTransfer register: withdrawAmount from: secondEmptyAccount to: firstEmptyAccount .
 	
-	firstReport := Report for: firstAccount.
-	secondReport := Report for: secondAccount.
+	firstReport := Report for: firstEmptyAccount .
+	secondReport := Report for: secondEmptyAccount .
 	firstTransferNetReport := firstReport generateAccountTransferNet.
 	secondTransferNetReport := secondReport generateAccountTransferNet.
 	
-	self assert: firstTransferNetReport equals: anotherAmmount - anAmmount.
-	self assert: secondTransferNetReport equals: anAmmount - anotherAmmount! !
+	self assert: firstTransferNetReport equals: withdrawAmount - depositAmount .
+	self assert: secondTransferNetReport equals: depositAmount - withdrawAmount ! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 5/31/2019 19:06:22'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:12:39'!
 test13TransferNetIgnoresNotWiredTransfers	
-	| anEmptyAccount aReport anAmmount anotherAmmount transferNetReport |
+	| aReport transferNetReport |
 	
-	anAmmount := 25.
-	anotherAmmount := 50.
-	anEmptyAccount := ReceptiveAccount new.
-	Withdraw register: anAmmount on: anEmptyAccount.
-	Deposit register: anotherAmmount on: anEmptyAccount.
+	Withdraw register: withdrawAmount on: anAccountWithOneDeposit .
 	
-	aReport := Report for: anEmptyAccount.
+	aReport := Report for: anAccountWithOneDeposit.
 	transferNetReport := aReport generateAccountTransferNet.
 	
 	self assert: transferNetReport isZero.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 5/31/2019 19:33:52'!
-test14PortfolioTreeStructureSimplePortfolio
-	| aReport treeStructureReport aPortfolio |
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:03:53'!
+test14TreeStructureDoesntIndentSimplePortfolio
+	| aReport treeStructureReport |
 	
-	aPortfolio := Portfolio new.
-	
-	aReport := Report for: aPortfolio.
-	treeStructureReport := aReport generatePortfolioTreeStructureReport.
+	aReport := Report for: anEmptyPortfolio.
+	treeStructureReport := aReport generateTreeStructureReport.
 	
 	treeStructureReport reset.
-	self assert: treeStructureReport nextLine equals: 'Portfolio'.! !
+	self assert: treeStructureReport nextLine equals: 'anEmptyPortfolio'.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 5/31/2019 19:44:13'!
-test15PortfolioTreeStructurePortfolioWithAccounts
-	| aReport treeStructureReport aPortfolio anAccount anotherAccount |
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:04:29'!
+test15TreeStructureIndentsOncePortfoliosAccounts
+	| aReport treeStructureReport |
 	
-	anAccount := ReceptiveAccount new.
-	anotherAccount := ReceptiveAccount new.
-	
-	aPortfolio := Portfolio with: anAccount with: anotherAccount.
-	
-	aReport := Report for: aPortfolio.
-	treeStructureReport := aReport generatePortfolioTreeStructureReport.
+	aReport := Report for: aPortfolioWithTwoEmptyAccounts.
+	treeStructureReport := aReport generateTreeStructureReport.
 	
 	treeStructureReport reset.
-	self assert: treeStructureReport nextLine equals: 'Portfolio'.
-	self assert: treeStructureReport nextLine equals: '    ReceptiveAccount'.
-	self assert: treeStructureReport nextLine equals: '    ReceptiveAccount'.! !
+	self assert: treeStructureReport nextLine equals: 'aPortfolioWithTwoEmptyAccounts'.
+	self assert: treeStructureReport nextLine equals: '    firstEmptyAccount'.
+	self assert: treeStructureReport nextLine equals: '    secondEmptyAccount'.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 5/31/2019 20:28:20'!
-test16PortfolioTreeStructurePortfolioWithTwoLevels
-	| aReport treeStructureReport aPortfolio anAccount anotherAccount fatherPortfolio thirdAccount |
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:05:20'!
+test16TreeStructurePortfolioIndentsGrandchildrenTwice
+	| aReport treeStructureReport fatherPortfolio |
 	
-	anAccount := ReceptiveAccount new.
-	anotherAccount := ReceptiveAccount new.
-	thirdAccount := ReceptiveAccount new.
-	aPortfolio := Portfolio with: anAccount with: anotherAccount.
-	fatherPortfolio := Portfolio with: aPortfolio with: thirdAccount.
+	fatherPortfolio := Portfolio named: 'fatherPortfolio' with: aPortfolioWithTwoAccountsWithTransfers with: firstEmptyAccount.
 	
 	aReport := Report for: fatherPortfolio.
-	treeStructureReport := aReport generatePortfolioTreeStructureReport.
+	treeStructureReport := aReport generateTreeStructureReport.
 	
 	treeStructureReport reset.
-	self assert: treeStructureReport nextLine equals: 'Portfolio'.
-	self assert: treeStructureReport nextLine equals: '    Portfolio'.
-	self assert: treeStructureReport nextLine equals: '        ReceptiveAccount'.
-	self assert: treeStructureReport nextLine equals: '        ReceptiveAccount'.
-	self assert: treeStructureReport nextLine equals: '    ReceptiveAccount'.! !
+	self assert: treeStructureReport nextLine equals: 'fatherPortfolio'.
+	self assert: treeStructureReport nextLine equals: '    aPortfolioWithTwoAccountsWithTransfers'.
+	self assert: treeStructureReport nextLine equals: '        anAccountWithOneWithdraw'.
+	self assert: treeStructureReport nextLine equals: '        anAccountWithOneDeposit'.
+	self assert: treeStructureReport nextLine equals: '    firstEmptyAccount'.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 5/31/2019 20:36:40'!
-test17PortfolioTreeStructurePortfolioWithThreeLevels
-	| aReport treeStructureReport aPortfolio anAccount anotherAccount firstFatherPortfolio thirdAccount fourthAccount secondFatherPortfolio grandFatherPortfolio |
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:06:37'!
+test17TreeStructureIndentsRecursivelyBasedOnDepth
+	| aReport treeStructureReport aPortfolio secondFatherPortfolio grandFatherPortfolio |
 	
-	anAccount := ReceptiveAccount new.
-	anotherAccount := ReceptiveAccount new.
-	thirdAccount := ReceptiveAccount new.
-	fourthAccount := ReceptiveAccount new.
+	aPortfolio := Portfolio named: 'aPortfolio' with: anAccountWithOneDeposit .
+	secondFatherPortfolio := Portfolio named: 'secondFatherPortfolio' with: aPortfolio with: anAccountWithOneWithdraw .
+	grandFatherPortfolio := Portfolio named: 'grandFatherPortfolio' with: aPortfolioWithTwoEmptyAccounts with: secondFatherPortfolio.
+
+	aReport := Report for: grandFatherPortfolio.
+	treeStructureReport := aReport generateTreeStructureReport.
 	
-	aPortfolio := Portfolio with: anAccount.
-	firstFatherPortfolio := Portfolio with: anotherAccount with: thirdAccount.
-	secondFatherPortfolio := Portfolio with: aPortfolio with: fourthAccount.
-	grandFatherPortfolio := Portfolio with: firstFatherPortfolio with: secondFatherPortfolio.
+	treeStructureReport reset.
+	self assert: treeStructureReport nextLine equals: 'grandFatherPortfolio'.
+	self assert: treeStructureReport nextLine equals: '    aPortfolioWithTwoEmptyAccounts'.
+	self assert: treeStructureReport nextLine equals: '        firstEmptyAccount'.
+	self assert: treeStructureReport nextLine equals: '        secondEmptyAccount'.
+	self assert: treeStructureReport nextLine equals: '    secondFatherPortfolio'.
+	self assert: treeStructureReport nextLine equals: '        aPortfolio'.
+	self assert: treeStructureReport nextLine equals: '            anAccountWithOneDeposit'.
+	self assert: treeStructureReport nextLine equals: '        anAccountWithOneWithdraw'.! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:07:30'!
+test18SpecialSummaryIndentsOnlyBalanceOnSimplePortfolio
+	| aReport aSpecialSummaryReport |
+	
+	aReport := Report for: anEmptyPortfolio .
+	aSpecialSummaryReport := aReport generateSpecialSummaryReport.
+	
+	aSpecialSummaryReport reset.
+	self assert: aSpecialSummaryReport nextLine equals: 'anEmptyPortfolio'.
+	self assert: aSpecialSummaryReport nextLine equals: '    Balance = 0.'.! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:07:54'!
+test19SpecialSummaryWorksCorrectlyOnAPortfolioWithAccountsWithoutTransactions
+	| aReport aSpecialSummaryReport |
+	
+	aReport := Report for: aPortfolioWithTwoEmptyAccounts.
+	aSpecialSummaryReport := aReport generateSpecialSummaryReport .
+	
+	aSpecialSummaryReport reset.
+	self assert: aSpecialSummaryReport nextLine equals: 'aPortfolioWithTwoEmptyAccounts'.
+	self assert: aSpecialSummaryReport nextLine equals: '    firstEmptyAccount'.
+	self assert: aSpecialSummaryReport nextLine equals: '        Balance = 0.'.
+	self assert: aSpecialSummaryReport nextLine equals: '    secondEmptyAccount'.
+	self assert: aSpecialSummaryReport nextLine equals: '        Balance = 0.'.
+	self assert: aSpecialSummaryReport nextLine equals: '    Balance = 0.'! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:08:37'!
+test20SpecialSummaryWorksCorrectlyOnAPortfolioWithAccountsWithTransactions
+	| aReport aSpecialSummaryReport |
+	
+	aReport := Report for: aPortfolioWithTwoAccountsWithTransfers.
+	aSpecialSummaryReport := aReport generateSpecialSummaryReport . 
+	
+	aSpecialSummaryReport reset.
+	self assert: aSpecialSummaryReport nextLine equals: 'aPortfolioWithTwoAccountsWithTransfers'.
+	self assert: aSpecialSummaryReport nextLine equals: '    anAccountWithOneWithdraw'.
+	self assert: aSpecialSummaryReport nextLine equals: '        ' , (self withdrawStringFor: withdrawAmount ).
+	self assert: aSpecialSummaryReport nextLine equals: '        ' , (self balanceStringFor: anAccountWithOneWithdraw balance).
+	self assert: aSpecialSummaryReport nextLine equals: '    anAccountWithOneDeposit'.
+	self assert: aSpecialSummaryReport nextLine equals: '        ', (self depositStringFor: depositAmount ).
+	self assert: aSpecialSummaryReport nextLine equals: '        ', (self balanceStringFor: anAccountWithOneDeposit balance).
+	self assert: aSpecialSummaryReport nextLine equals: '    ', (self balanceStringFor: aPortfolioWithTwoAccountsWithTransfers balance)! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:09:21'!
+test21SpecialSummaryWorksCorrectlyOnAPortfolioWithPortfolioAndAccounts
+	| aReport aSpecialSummaryReport aPortfolio fatherPortfolio |
+	
+	WireTransfer register: anotherDepositAmount from: anAccountWithOneWithdraw to: firstEmptyAccount. 
+	
+	aPortfolio := Portfolio named: 'aPortfolio' with: anAccountWithOneWithdraw with: anAccountWithOneDeposit .
+	fatherPortfolio := Portfolio named: 'fatherPortfolio' with: aPortfolio with: firstEmptyAccount .
+	
+	aReport := Report for: fatherPortfolio.
+	aSpecialSummaryReport := aReport generateSpecialSummaryReport .
+	
+	aSpecialSummaryReport reset.
+	self assert: aSpecialSummaryReport nextLine equals: 'fatherPortfolio'.
+	self assert: aSpecialSummaryReport nextLine equals: '    aPortfolio'.
+	self assert: aSpecialSummaryReport nextLine equals: '        anAccountWithOneWithdraw'.
+	self assert: aSpecialSummaryReport nextLine equals: '            ' , (self withdrawStringFor: withdrawAmount ).
+	self assert: aSpecialSummaryReport nextLine equals: '            ' , (self withdrawTransferStringFor: anotherDepositAmount ).
+	self assert: aSpecialSummaryReport nextLine equals: '            ' , (self balanceStringFor: anAccountWithOneWithdraw balance).
+	self assert: aSpecialSummaryReport nextLine equals: '        anAccountWithOneDeposit'.
+	self assert: aSpecialSummaryReport nextLine equals: '            ', (self depositStringFor: depositAmount ).
+	self assert: aSpecialSummaryReport nextLine equals: '            ' , (self balanceStringFor: anAccountWithOneDeposit balance).
+	self assert: aSpecialSummaryReport nextLine equals: '        ', (self balanceStringFor: aPortfolio balance).
+	self assert: aSpecialSummaryReport nextLine equals: '    firstEmptyAccount'.
+	self assert: aSpecialSummaryReport nextLine equals: '        ', (self depositTransferStringFor: anotherDepositAmount ).
+	self assert: aSpecialSummaryReport nextLine equals: '        ', (self balanceStringFor: firstEmptyAccount balance).
+	self assert: aSpecialSummaryReport nextLine equals: '    ', (self balanceStringFor: fatherPortfolio balance).
+	
+	
+	! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:10:12'!
+test22SpecialSummaryIndentsRecursivelyBasedOnDepth
+	| aReport aSpecialSummaryReport parentPortfolio grandFatherPortfolio aPortfolio |
+	
+	WireTransfer register: anotherDepositAmount from: anAccountWithOneWithdraw to: firstEmptyAccount. 
+	
+	aPortfolio := Portfolio named: 'aPortfolio' with: anAccountWithOneDeposit.
+	parentPortfolio := Portfolio named: 'parentPortfolio' with: anAccountWithOneWithdraw with: aPortfolio.
+	grandFatherPortfolio := Portfolio named: 'grandFatherPortfolio' with: parentPortfolio with: firstEmptyAccount .
 	
 	aReport := Report for: grandFatherPortfolio.
-	treeStructureReport := aReport generatePortfolioTreeStructureReport.
+	aSpecialSummaryReport := aReport generateSpecialSummaryReport .
 	
-	treeStructureReport reset.
-	self assert: treeStructureReport nextLine equals: 'Portfolio'.
-	self assert: treeStructureReport nextLine equals: '    Portfolio'.
-	self assert: treeStructureReport nextLine equals: '        ReceptiveAccount'.
-	self assert: treeStructureReport nextLine equals: '        ReceptiveAccount'.
-	self assert: treeStructureReport nextLine equals: '    Portfolio'.
-	self assert: treeStructureReport nextLine equals: '        Portfolio'.
-	self assert: treeStructureReport nextLine equals: '            ReceptiveAccount'.
-	self assert: treeStructureReport nextLine equals: '        ReceptiveAccount'.! !
+	aSpecialSummaryReport reset.
+	self assert: aSpecialSummaryReport nextLine equals: 'grandFatherPortfolio'.
+	self assert: aSpecialSummaryReport nextLine equals: '    parentPortfolio'.
+	self assert: aSpecialSummaryReport nextLine equals: '        anAccountWithOneWithdraw'.
+	self assert: aSpecialSummaryReport nextLine equals: '            ' , (self withdrawStringFor: withdrawAmount ).
+	self assert: aSpecialSummaryReport nextLine equals: '            ' , (self withdrawTransferStringFor: anotherDepositAmount ).
+	self assert: aSpecialSummaryReport nextLine equals: '            ' , (self balanceStringFor: anAccountWithOneWithdraw balance).
+	self assert: aSpecialSummaryReport nextLine equals: '        aPortfolio'.
+	self assert: aSpecialSummaryReport nextLine equals: '            anAccountWithOneDeposit'.
+	self assert: aSpecialSummaryReport nextLine equals: '                ', (self depositStringFor: depositAmount ).
+	self assert: aSpecialSummaryReport nextLine equals: '                ' , (self balanceStringFor: anAccountWithOneDeposit balance).
+	self assert: aSpecialSummaryReport nextLine equals: '            ', (self balanceStringFor: aPortfolio balance).
+	self assert: aSpecialSummaryReport nextLine equals: '        ', (self balanceStringFor: parentPortfolio balance).
+	self assert: aSpecialSummaryReport nextLine equals: '    firstEmptyAccount'.
+	self assert: aSpecialSummaryReport nextLine equals: '        ', (self depositTransferStringFor: anotherDepositAmount ).
+	self assert: aSpecialSummaryReport nextLine equals: '        ', (self balanceStringFor: firstEmptyAccount balance).
+	self assert: aSpecialSummaryReport nextLine equals: '    ', (self balanceStringFor: grandFatherPortfolio balance).
+	
+	
+	! !
+
+
+!ReportTest methodsFor: 'setup' stamp: 'NI 6/2/2019 21:40:45'!
+setUp
+	firstEmptyAccount := ReceptiveAccount named: 'firstEmptyAccount'.
+	secondEmptyAccount := ReceptiveAccount named: 'secondEmptyAccount'.
+	anAccountWithOneDeposit := ReceptiveAccount named: 'anAccountWithOneDeposit'.
+	anAccountWithOneWithdraw := ReceptiveAccount named: 'anAccountWithOneWithdraw'.
+	anAccountWithThreeTransactions := ReceptiveAccount named: 'anAccountWithThreeTransactions'.
+	
+	depositAmount := 25.
+	Deposit register: depositAmount on: anAccountWithOneDeposit.
+	
+	withdrawAmount := 50.
+	Withdraw register: withdrawAmount on: anAccountWithOneWithdraw.
+	
+	anotherDepositAmount := 120.
+	Deposit register: depositAmount on: anAccountWithThreeTransactions.
+	Withdraw register: withdrawAmount on: anAccountWithThreeTransactions.
+	Deposit register: anotherDepositAmount on: anAccountWithThreeTransactions.
+	
+	anEmptyPortfolio := Portfolio named: 'anEmptyPortfolio'.
+	aPortfolioWithTwoAccountsWithTransfers := Portfolio named: 'aPortfolioWithTwoAccountsWithTransfers' with: anAccountWithOneWithdraw with: anAccountWithOneDeposit.
+	aPortfolioWithTwoEmptyAccounts := Portfolio named: 'aPortfolioWithTwoEmptyAccounts' with: firstEmptyAccount with: secondEmptyAccount.! !
 
 
 !classDefinition: #WireTransferTest category: #'PortfolioTreePrinter-Ejercicio'!
@@ -683,10 +730,10 @@ test04CantTransferNegativeMoney
 			]! !
 
 
-!WireTransferTest methodsFor: 'setup' stamp: 'Nipo 5/30/2019 19:34:48'!
+!WireTransferTest methodsFor: 'setup' stamp: 'NI 6/2/2019 21:39:37'!
 setUp
-	myAccount := ReceptiveAccount new.
-	otherAccount := ReceptiveAccount new.! !
+	myAccount := ReceptiveAccount named: 'myAccount'.
+	otherAccount := ReceptiveAccount named: 'otherAccount'.! !
 
 
 !classDefinition: #AccountTransaction category: #'PortfolioTreePrinter-Ejercicio'!
@@ -884,7 +931,7 @@ for: aValue
 
 !classDefinition: #FinancialAsset category: #'PortfolioTreePrinter-Ejercicio'!
 Object subclass: #FinancialAsset
-	instanceVariableNames: ''
+	instanceVariableNames: 'parents name'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
@@ -923,14 +970,19 @@ addedTo: aPortfolio
 	self subclassResponsibility ! !
 
 
-!FinancialAsset methodsFor: 'private - report' stamp: 'JIG 5/31/2019 17:22:24'!
+!FinancialAsset methodsFor: 'private - report' stamp: 'NI 6/2/2019 11:14:33'!
 handleReport: aReport
-	^self subclassResponsibility.! !
+	self subclassResponsibility.! !
+
+
+!FinancialAsset methodsFor: 'accessing' stamp: 'NI 6/2/2019 22:02:21'!
+name
+	^name! !
 
 
 !classDefinition: #Portfolio category: #'PortfolioTreePrinter-Ejercicio'!
 FinancialAsset subclass: #Portfolio
-	instanceVariableNames: 'parents financialAssets'
+	instanceVariableNames: 'financialAssets'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
@@ -1012,6 +1064,13 @@ initialize
 	financialAssets := OrderedCollection new.
 	parents := OrderedCollection new.! !
 
+!Portfolio methodsFor: 'initialization' stamp: 'NI 6/2/2019 21:22:05'!
+initializeWithName: aName
+
+	financialAssets := OrderedCollection new.
+	parents := OrderedCollection new.
+	name := aName! !
+
 
 !Portfolio methodsFor: 'testing' stamp: 'Nipo 5/30/2019 15:51:55'!
 anyRootParentIsComposedBy: aFinancialAssetToAdd
@@ -1027,6 +1086,12 @@ hasRegistered: aTransaction
 isComposedBy: aFinancialAsset
 
 	^ self = aFinancialAsset or: [ financialAssets anySatisfy: [ :composedAccount | (composedAccount isComposedBy: aFinancialAsset) or: [ aFinancialAsset isComposedBy: composedAccount ]]]! !
+
+!Portfolio methodsFor: 'testing' stamp: 'NI 6/2/2019 11:20:00'!
+isDescendantFrom: aPortfolio
+	parents ifEmpty: [^ self = aPortfolio].
+	
+	^ self = aPortfolio or: [parents anySatisfy: [:aParent | aParent isDescendantFrom: aPortfolio]].! !
 
 
 !Portfolio methodsFor: 'transactions' stamp: 'Nipo 5/30/2019 15:48:33'!
@@ -1049,9 +1114,13 @@ transactions
 handleReport: aReport
 	aReport handlePortfolio: self.! !
 
-!Portfolio methodsFor: 'private - report' stamp: 'NI 5/31/2019 20:16:32'!
-handleReport: aReport withDepth: aTreeDepth
-	aReport handlePortfolio: self withDepth: aTreeDepth.! !
+
+!Portfolio methodsFor: 'depth' stamp: 'NI 6/1/2019 12:03:53'!
+depthFrom: aPortfolio
+	|nextStepToPortfolio|
+	
+	nextStepToPortfolio := parents detect: [:aParent | aParent isDescendantFrom: aPortfolio] ifNone: [^0].
+	^ 1 + (nextStepToPortfolio depthFrom: aPortfolio)! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1064,6 +1133,27 @@ canNotAddAccountErrorMessage
 	
 	^'Can not add repeated account to a portfolio'! !
 
+
+!Portfolio class methodsFor: 'initialization' stamp: 'NI 6/2/2019 21:24:49'!
+named: aName
+
+	^ (self new initializeWithName: aName).
+	"^self new 
+		add: aFinancialAsset;
+		yourself"! !
+
+!Portfolio class methodsFor: 'initialization' stamp: 'NI 6/2/2019 21:21:50'!
+named: aName with: aFinancialAsset
+
+	^ (self new initializeWithName: aName) add: aFinancialAsset; yourself.
+	"^self new 
+		add: aFinancialAsset;
+		yourself"! !
+
+!Portfolio class methodsFor: 'initialization' stamp: 'NI 6/2/2019 21:22:45'!
+named: aName with: aFinancialAsset with: anotherFinancialAsset
+
+	^ (self new initializeWithName: aName) add: aFinancialAsset; add: anotherFinancialAsset; yourself.! !
 
 !Portfolio class methodsFor: 'initialization' stamp: 'Nipo 5/30/2019 15:47:52'!
 with: aFinancialAsset
@@ -1096,17 +1186,25 @@ balance
 		into: [ :currentBalance :transaction | transaction affectBalance: currentBalance ]! !
 
 
-!ReceptiveAccount methodsFor: 'composition' stamp: 'HAW 5/25/2019 12:03:32'!
+!ReceptiveAccount methodsFor: 'composition' stamp: 'NI 6/1/2019 12:00:45'!
 addedTo: aPortfolio 
-	
+	parents add: aPortfolio.
 	! !
 
 
-!ReceptiveAccount methodsFor: 'initialization' stamp: 'HernanWilkinson 7/13/2011 18:35'!
+!ReceptiveAccount methodsFor: 'initialization' stamp: 'NI 6/1/2019 12:01:24'!
 initialize
 
 	super initialize.
-	transactions := OrderedCollection new.! !
+	transactions := OrderedCollection new.
+	parents := OrderedCollection new.! !
+
+!ReceptiveAccount methodsFor: 'initialization' stamp: 'NI 6/2/2019 21:19:54'!
+initializeWithName: aName
+
+	transactions := OrderedCollection new.
+	parents := OrderedCollection new.
+	name := aName.! !
 
 
 !ReceptiveAccount methodsFor: 'testing' stamp: 'Nipo 5/30/2019 15:54:25'!
@@ -1119,6 +1217,12 @@ hasRegistered: aTransaction
 isComposedBy: anAccount
 
 	^self = anAccount ! !
+
+!ReceptiveAccount methodsFor: 'testing' stamp: 'NI 6/2/2019 11:21:53'!
+isDescendantFrom: aPortfolio
+	parents ifEmpty: [^false].
+
+	^ parents anySatisfy: [:aParent | aParent isDescendantFrom: aPortfolio]! !
 
 
 !ReceptiveAccount methodsFor: 'transactions' stamp: 'HAW 5/25/2019 11:38:52'!
@@ -1142,9 +1246,23 @@ transactions
 handleReport: aReport
 	aReport handleReceptiveAccount: self.! !
 
-!ReceptiveAccount methodsFor: 'private - report' stamp: 'NI 5/31/2019 20:20:06'!
-handleReport: aReport withDepth: aTreeDepth
-	aReport handleReceptiveAccount: self withDepth: aTreeDepth.! !
+
+!ReceptiveAccount methodsFor: 'depth' stamp: 'NI 6/1/2019 12:04:46'!
+depthFrom: aPortfolio
+	|nextStepToPortfolio|
+	
+	nextStepToPortfolio := parents detect: [:aParent | aParent isDescendantFrom: aPortfolio] ifNone: [^0].
+	^ 1 + (nextStepToPortfolio depthFrom: aPortfolio).! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'ReceptiveAccount class' category: #'PortfolioTreePrinter-Ejercicio'!
+ReceptiveAccount class
+	instanceVariableNames: ''!
+
+!ReceptiveAccount class methodsFor: 'initialization' stamp: 'NI 6/2/2019 21:19:28'!
+named: aName
+	^ self new initializeWithName: aName.! !
 
 
 !classDefinition: #Report category: #'PortfolioTreePrinter-Ejercicio'!
@@ -1154,18 +1272,22 @@ Object subclass: #Report
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!Report methodsFor: 'generate' stamp: 'JIG 5/31/2019 16:33:10'!
+!Report methodsFor: 'report generation' stamp: 'JIG 5/31/2019 16:33:10'!
 generateAccountSummary
 	^(SummaryReport for: financialAsset) generate.! !
 
-!Report methodsFor: 'generate' stamp: 'JIG 5/31/2019 17:04:05'!
+!Report methodsFor: 'report generation' stamp: 'JIG 5/31/2019 17:04:05'!
 generateAccountTransferNet
 	^(TransferNetReport for: financialAsset) generate.
 	! !
 
-!Report methodsFor: 'generate' stamp: 'NI 5/31/2019 19:23:45'!
-generatePortfolioTreeStructureReport
-	^ (PortfolioTreeStructureReport for: financialAsset) generate.! !
+!Report methodsFor: 'report generation' stamp: 'NI 6/2/2019 11:27:36'!
+generateSpecialSummaryReport
+	^ (SpecialSummaryReport for: financialAsset) generate.! !
+
+!Report methodsFor: 'report generation' stamp: 'NI 6/2/2019 11:27:12'!
+generateTreeStructureReport
+	^ (TreeStructureReport for: financialAsset) generate.! !
 
 
 !Report methodsFor: 'initialization' stamp: 'JIG 5/31/2019 15:51:38'!
@@ -1179,6 +1301,14 @@ handleDepositTransaction: aDepositTransaction
 
 !Report methodsFor: 'private' stamp: 'JIG 5/31/2019 17:21:27'!
 handleDepositTransferTransaction: aDepositTransferTransaction
+	^self subclassResponsibility.! !
+
+!Report methodsFor: 'private' stamp: 'NI 6/2/2019 11:23:58'!
+handlePortfolio: aPortfolio
+	^self subclassResponsibility.! !
+
+!Report methodsFor: 'private' stamp: 'NI 6/2/2019 11:24:11'!
+handleReceptiveAccount: aReceptiveAccount
 	^self subclassResponsibility.! !
 
 !Report methodsFor: 'private' stamp: 'JIG 5/31/2019 17:21:33'!
@@ -1199,52 +1329,128 @@ Report class
 for: aFinancialAsset
 	^self new initializeFor: aFinancialAsset.! !
 
+
+!Report class methodsFor: 'transaction descriptions' stamp: 'NI 6/2/2019 11:32:05'!
+balanceStringFor: aValue
+	^'Balance = ' , aValue asString , '.'.! !
+
+!Report class methodsFor: 'transaction descriptions' stamp: 'NI 6/2/2019 11:32:14'!
+depositStringFor: aValue
+	^'Depósito por ' , aValue asString , '.'.! !
+
+!Report class methodsFor: 'transaction descriptions' stamp: 'NI 6/2/2019 11:32:22'!
+depositTransferStringFor: aValue
+	^'Entrada por transferencia de ' , aValue asString , '.'.! !
+
+!Report class methodsFor: 'transaction descriptions' stamp: 'NI 6/2/2019 11:32:31'!
+withdrawStringFor: aValue
+	^'Extracción por ' , aValue asString , '.'.! !
+
+!Report class methodsFor: 'transaction descriptions' stamp: 'NI 6/2/2019 11:32:42'!
+withdrawTransferStringFor: aValue
+	^'Salida por transferencia de ' , aValue asString , '.'.! !
+
 
-!classDefinition: #PortfolioTreeStructureReport category: #'PortfolioTreePrinter-Ejercicio'!
-Report subclass: #PortfolioTreeStructureReport
+!classDefinition: #PortfolioReport category: #'PortfolioTreePrinter-Ejercicio'!
+Report subclass: #PortfolioReport
 	instanceVariableNames: 'stream'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!PortfolioTreeStructureReport methodsFor: 'generate' stamp: 'NI 5/31/2019 20:25:21'!
-generate
-	stream := ReadWriteStream with: financialAsset class asString.
-	"stream newLine; space: 4."
+!PortfolioReport methodsFor: 'private' stamp: 'NI 6/2/2019 20:53:11'!
+handleReportForFinancialAssetsOf: aPortfolio
 	
-	financialAsset financialAssets do: [:aFinancialAsset |
+	aPortfolio financialAssets do: [:aFinancialAsset |
 		aFinancialAsset handleReport: self.
-	].
+	].! !
+
+!PortfolioReport methodsFor: 'private' stamp: 'NI 6/2/2019 20:59:26'!
+write: aStringToWrite on: aStream withSpaceOnNewLine: indentationSpaceAmount
+	aStream newLine; space: indentationSpaceAmount; nextPutAll: aStringToWrite.! !
+
+!PortfolioReport methodsFor: 'private' stamp: 'NI 6/2/2019 22:02:02'!
+writeTopNameAndContinueWithFinancialAssets
+	stream := ReadWriteStream with: financialAsset name.
+	
+	self handleReportForFinancialAssetsOf: financialAsset.! !
+
+
+!classDefinition: #SpecialSummaryReport category: #'PortfolioTreePrinter-Ejercicio'!
+PortfolioReport subclass: #SpecialSummaryReport
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!SpecialSummaryReport methodsFor: 'report generation' stamp: 'NI 6/2/2019 20:55:12'!
+generate
+	self writeTopNameAndContinueWithFinancialAssets.
+	
+	self write: (self class balanceStringFor: financialAsset balance) on: stream withSpaceOnNewLine: 4 . 	
 	
 	^stream! !
 
 
-!PortfolioTreeStructureReport methodsFor: 'private - financial assets handlers' stamp: 'NI 5/31/2019 20:26:30'!
+!SpecialSummaryReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/2/2019 22:07:04'!
 handlePortfolio: aPortfolio
-	"stream nextPutAll: aPortfolio class asString; newLine; space: 4."
-	stream newLine; space: 4; nextPutAll: aPortfolio class asString.
-	aPortfolio financialAssets do: [:aFinancialAsset | 
-		aFinancialAsset handleReport: self withDepth: 2.
-	]! !
+	|depthFromFinancialAsset |
+	
+	depthFromFinancialAsset := 4 * (aPortfolio depthFrom: financialAsset).
 
-!PortfolioTreeStructureReport methodsFor: 'private - financial assets handlers' stamp: 'NI 5/31/2019 20:27:05'!
-handlePortfolio: aPortfolio withDepth: aTreeDepth
-	"stream nextPutAll: aPortfolio class asString; newLine; space: (aTreeDepth * 4)."
-	stream newLine; space: (aTreeDepth * 4); nextPutAll: aPortfolio class asString.
-	aPortfolio financialAssets do: [:aFinancialAsset | 
-		aFinancialAsset handleReport: self withDepth: aTreeDepth + 1.
-	]
-	! !
+	self write: aPortfolio name on: stream withSpaceOnNewLine: depthFromFinancialAsset.
+	
+	self handleReportForFinancialAssetsOf: aPortfolio.
 
-!PortfolioTreeStructureReport methodsFor: 'private - financial assets handlers' stamp: 'NI 5/31/2019 20:27:23'!
+	self write: (self class balanceStringFor: aPortfolio balance) on: stream withSpaceOnNewLine: depthFromFinancialAsset + 4. ! !
+
+!SpecialSummaryReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/2/2019 22:07:10'!
 handleReceptiveAccount: aReceptiveAccount
-	"stream nextPutAll: aReceptiveAccount class asString; newLine; space: 4."
-	stream newLine; space: 4; nextPutAll: aReceptiveAccount class asString.! !
+	|depthFromFinancialAsset |
+	
+	depthFromFinancialAsset := 4 * (aReceptiveAccount depthFrom: financialAsset).
+	
+	self write: aReceptiveAccount name on: stream  withSpaceOnNewLine: depthFromFinancialAsset .
+	
+	self addSummaryFrom: aReceptiveAccount to: stream withIndentation: (4 + depthFromFinancialAsset).! !
 
-!PortfolioTreeStructureReport methodsFor: 'private - financial assets handlers' stamp: 'NI 5/31/2019 20:27:43'!
-handleReceptiveAccount: aReceptiveAccount withDepth: aTreeDepth
-	"stream nextPutAll: aReceptiveAccount class asString; newLine; space: (aTreeDepth * 4)."
-	stream newLine; space: (aTreeDepth * 4); nextPutAll: aReceptiveAccount class asString.! !
+
+!SpecialSummaryReport methodsFor: 'private - summary' stamp: 'NI 6/2/2019 14:35:55'!
+addSummaryFrom: aReceptiveAccount to: aStream withIndentation: anIndentationAmount
+	
+	| aReport accountSummaryReport |
+	
+	aReport := Report for: aReceptiveAccount.
+	accountSummaryReport := aReport generateAccountSummary.
+
+	accountSummaryReport do: [:anElement | 
+		self write: anElement on: aStream withSpaceOnNewLine: anIndentationAmount .		
+	].! !
+
+
+!classDefinition: #TreeStructureReport category: #'PortfolioTreePrinter-Ejercicio'!
+PortfolioReport subclass: #TreeStructureReport
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!TreeStructureReport methodsFor: 'report generation' stamp: 'NI 6/2/2019 20:49:48'!
+generate
+	self writeTopNameAndContinueWithFinancialAssets.
+	
+	^stream! !
+
+
+!TreeStructureReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/2/2019 22:02:54'!
+handlePortfolio: aPortfolio
+	self write: aPortfolio name on: stream withSpaceOnNewLine: 4 * (aPortfolio depthFrom: financialAsset).
+	
+	self handleReportForFinancialAssetsOf: aPortfolio.! !
+
+!TreeStructureReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/2/2019 22:03:02'!
+handleReceptiveAccount: aReceptiveAccount
+	self write: aReceptiveAccount name on: stream withSpaceOnNewLine: 4 * (aReceptiveAccount depthFrom: financialAsset).! !
 
 
 !classDefinition: #SummaryReport category: #'PortfolioTreePrinter-Ejercicio'!
@@ -1254,11 +1460,11 @@ Report subclass: #SummaryReport
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!SummaryReport methodsFor: 'generate' stamp: 'NI 5/31/2019 19:02:23'!
+!SummaryReport methodsFor: 'report generation' stamp: 'NI 6/2/2019 12:18:32'!
 generate
 	
 	summary := OrderedCollection new.
-	financialAsset transactions size = 0 ifTrue: [^ (summary add: (self class balanceStringFor: financialAsset balance))].
+	financialAsset transactions size = 0 ifTrue: [summary add: (self class balanceStringFor: financialAsset balance). ^ summary].
 	
 	financialAsset transactions do: [:aTransaction | 
 		aTransaction handleReport: self.
@@ -1269,47 +1475,21 @@ generate
 	^ summary! !
 
 
-!SummaryReport methodsFor: 'private - transaction handlers' stamp: 'JIG 5/31/2019 16:58:20'!
+!SummaryReport methodsFor: 'private - transaction handlers' stamp: 'NI 6/2/2019 11:36:34'!
 handleDepositTransaction: aDepositTransaction
 	summary add: (self class depositStringFor: (aDepositTransaction value))! !
 
-!SummaryReport methodsFor: 'private - transaction handlers' stamp: 'JIG 5/31/2019 16:58:38'!
+!SummaryReport methodsFor: 'private - transaction handlers' stamp: 'NI 6/2/2019 11:36:39'!
 handleDepositTransferTransaction: aDepositTransferTransaction
 	summary add: (self class depositTransferStringFor: aDepositTransferTransaction value).! !
 
-!SummaryReport methodsFor: 'private - transaction handlers' stamp: 'JIG 5/31/2019 16:58:46'!
+!SummaryReport methodsFor: 'private - transaction handlers' stamp: 'NI 6/2/2019 11:36:44'!
 handleWithdrawTransaction: aWithdrawTransaction
 	summary add: (self class withdrawStringFor: aWithdrawTransaction value).! !
 
-!SummaryReport methodsFor: 'private - transaction handlers' stamp: 'JIG 5/31/2019 16:58:52'!
+!SummaryReport methodsFor: 'private - transaction handlers' stamp: 'NI 6/2/2019 11:36:49'!
 handleWithdrawTransferTransaction: aWithdrawTransferTransaction
 	summary add: (self class withdrawTransferStringFor: aWithdrawTransferTransaction value).! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'SummaryReport class' category: #'PortfolioTreePrinter-Ejercicio'!
-SummaryReport class
-	instanceVariableNames: ''!
-
-!SummaryReport class methodsFor: 'transaction descriptions' stamp: 'JIG 5/31/2019 16:36:15'!
-balanceStringFor: aValue
-	^'Balance = ' , aValue asString , '.'.! !
-
-!SummaryReport class methodsFor: 'transaction descriptions' stamp: 'JIG 5/31/2019 16:35:55'!
-depositStringFor: aValue
-	^'Depósito por ' , aValue asString , '.'.! !
-
-!SummaryReport class methodsFor: 'transaction descriptions' stamp: 'JIG 5/31/2019 16:39:09'!
-depositTransferStringFor: aValue
-	^'Entrada por transferencia de ' , aValue asString , '.'.! !
-
-!SummaryReport class methodsFor: 'transaction descriptions' stamp: 'JIG 5/31/2019 16:36:06'!
-withdrawStringFor: aValue
-	^'Extracción por ' , aValue asString , '.'.! !
-
-!SummaryReport class methodsFor: 'transaction descriptions' stamp: 'JIG 5/31/2019 16:37:57'!
-withdrawTransferStringFor: aValue
-	^'Salida por transferencia de ' , aValue asString , '.'.! !
 
 
 !classDefinition: #TransferNetReport category: #'PortfolioTreePrinter-Ejercicio'!
@@ -1319,7 +1499,7 @@ Report subclass: #TransferNetReport
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!TransferNetReport methodsFor: 'generate' stamp: 'NI 5/31/2019 19:02:16'!
+!TransferNetReport methodsFor: 'report generation' stamp: 'NI 5/31/2019 19:02:16'!
 generate
 
 	transferNet := 0.	
