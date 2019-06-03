@@ -333,8 +333,8 @@ withdrawTransferStringFor: aValue
 	^'Salida por transferencia de ' , aValue asString , '.'.! !
 
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 14:57:49'!
-test00SummaryReportInformsOnlyCeroBalanceWhenThereAreNotTransactions
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:04:59'!
+test00AccountSummaryReportInformsOnlyCeroBalanceWhenThereAreNotTransactions
 	
 	| aReport summaryAccountReport |
 	
@@ -344,8 +344,8 @@ test00SummaryReportInformsOnlyCeroBalanceWhenThereAreNotTransactions
 	self assert: summaryAccountReport size equals: 1.
 	self assert: (summaryAccountReport includes: (self balanceStringFor: firstEmptyAccount balance))! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 14:58:20'!
-test01SummaryReportInformsDepositProperly
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:05:03'!
+test01AccountSummaryReportInformsDepositProperly
 	| aReport summaryAccountReport |
 	
 	aReport := Report for: anAccountWithOneDeposit.
@@ -354,8 +354,8 @@ test01SummaryReportInformsDepositProperly
 	self assert: summaryAccountReport size equals: 2.
 	self assert: (summaryAccountReport at: 1) = (self depositStringFor: depositAmount)! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 14:58:40'!
-test02SummaryReportInformsWithdrawProperly
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:05:06'!
+test02AccountSummaryReportInformsWithdrawProperly
 	| aReport summaryAccountReport |
 	
 	aReport := Report for: anAccountWithOneWithdraw.
@@ -364,8 +364,8 @@ test02SummaryReportInformsWithdrawProperly
 	self assert: summaryAccountReport size equals: 2.
 	self assert: (summaryAccountReport at: 1) = (self withdrawStringFor: withdrawAmount)! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 14:59:37'!
-test03SummaryReportInformsWireWithdrawProperly
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:05:10'!
+test03AccountSummaryReportInformsWireWithdrawProperly
 	| aReport summaryAccountReport |
 	
 	WireTransfer register: depositAmount from: firstEmptyAccount to: secondEmptyAccount.
@@ -376,8 +376,8 @@ test03SummaryReportInformsWireWithdrawProperly
 	self assert: summaryAccountReport size equals: 2.
 	self assert: (summaryAccountReport at: 1) = (self withdrawTransferStringFor: depositAmount)! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:00:33'!
-test04SummaryReportInformsWireDepositProperly
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:05:14'!
+test04AccountSummaryReportInformsWireDepositProperly
 	| aReport summaryAccountReport |
 	
 	WireTransfer register: depositAmount from: firstEmptyAccount to: secondEmptyAccount .
@@ -388,8 +388,8 @@ test04SummaryReportInformsWireDepositProperly
 	self assert: summaryAccountReport size equals: 2.
 	self assert: (summaryAccountReport includes: (self depositTransferStringFor: depositAmount ))! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:00:59'!
-test05OneTransactionFinancialAssetSummaryReportInformsBalanceProperly
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:05:22'!
+test05OneTransactionAccountSummaryReportInformsBalanceProperly
 	| aReport summaryAccountReport |
 	
 	aReport := Report for: anAccountWithOneDeposit.
@@ -398,8 +398,8 @@ test05OneTransactionFinancialAssetSummaryReportInformsBalanceProperly
 	self assert: summaryAccountReport size equals: 2.
 	self assert: (summaryAccountReport at: 2) equals: (self balanceStringFor: anAccountWithOneDeposit balance).! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:02:53'!
-test06SummaryReportInformsMultipleTransactionsProperly
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:05:32'!
+test06AccountSummaryReportInformsMultipleTransactionsProperly
 	| aReport summaryAccountReport |
 	
 	Withdraw register: withdrawAmount on: anAccountWithOneDeposit .
@@ -411,8 +411,8 @@ test06SummaryReportInformsMultipleTransactionsProperly
 	self assert: (summaryAccountReport includes: (self withdrawStringFor: withdrawAmount )).
 	self assert: (summaryAccountReport includes: (self depositStringFor: depositAmount )).! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:07:42'!
-test07SummaryReportMantainsTransactionOrder
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:05:41'!
+test07AccountSummaryReportMantainsTransactionOrder
 	| aReport summaryAccountReport |
 	
 	aReport := Report for: anAccountWithThreeTransactions.
@@ -423,8 +423,8 @@ test07SummaryReportMantainsTransactionOrder
 	self assert: (summaryAccountReport at: 2) equals: (self withdrawStringFor: withdrawAmount ).
 	self assert: (summaryAccountReport at: 3) equals: (self depositStringFor: anotherDepositAmount ).! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:08:38'!
-test08ManyTransactionsFinancialAssetSummaryReportInformsBalanceProperly
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:05:54'!
+test08ManyTransactionsAccountSummaryReportInformsBalanceProperly
 	| aReport summaryAccountReport |
 	
 	aReport := Report for: anAccountWithThreeTransactions.
@@ -442,8 +442,29 @@ test09EmptyTransactionsFinancialAssetTransferNetShouldBeCero
 	
 	self assert: trasnferNetReport isZero.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:10:09'!
-test10TransferNetSumsWireDeposit	
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:12:42'!
+test10PortfolioSummaryReportInformsAllTheirAccountTransactionsProperly
+	| aReport summaryAccountReport |
+	
+	aReport := Report for: aPortfolioWithTwoAccountsWithTransfers.
+	summaryAccountReport := aReport generateAccountSummary.
+	
+	self assert: summaryAccountReport size equals: 3.
+	self assert: (summaryAccountReport at: 1) equals: (self withdrawStringFor: withdrawAmount).
+	self assert: (summaryAccountReport at: 2) equals: (self depositStringFor: depositAmount).! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:13:41'!
+test11PortfolioSummaryReportSumsTheirAccountTransactionsBalance
+	| aReport summaryAccountReport |
+	
+	aReport := Report for: aPortfolioWithTwoAccountsWithTransfers.
+	summaryAccountReport := aReport generateAccountSummary.
+	
+	self assert: summaryAccountReport size equals: 3.
+	self assert: (summaryAccountReport at: 3) equals: (self balanceStringFor: aPortfolioWithTwoAccountsWithTransfers balance).! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:21:09'!
+test12AccountTransferNetSumsWireDeposit	
 	| aReport trasnferNetReport |
 	
 	WireTransfer register: depositAmount from: firstEmptyAccount to: secondEmptyAccount .
@@ -453,8 +474,8 @@ test10TransferNetSumsWireDeposit
 	
 	self assert: trasnferNetReport equals: depositAmount.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:10:33'!
-test11TransferNetSubstractsWireWithdraw	
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:21:14'!
+test13AccountTransferNetSubstractsWireWithdraw	
 	| aReport trasnferNetReport |
 
 	WireTransfer register: depositAmount from: firstEmptyAccount to: secondEmptyAccount .
@@ -464,8 +485,8 @@ test11TransferNetSubstractsWireWithdraw
 	
 	self assert: trasnferNetReport equals: (-1) * depositAmount .! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:11:43'!
-test12TransferNetCanHandleMultipleTransfers	
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:21:16'!
+test14AccountTransferNetCanHandleMultipleTransfers	
 	| firstReport secondReport firstTransferNetReport secondTransferNetReport |
 	
 	WireTransfer register: depositAmount from: firstEmptyAccount to: secondEmptyAccount .
@@ -479,8 +500,8 @@ test12TransferNetCanHandleMultipleTransfers
 	self assert: firstTransferNetReport equals: withdrawAmount - depositAmount .
 	self assert: secondTransferNetReport equals: depositAmount - withdrawAmount ! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 15:12:39'!
-test13TransferNetIgnoresNotWiredTransfers	
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:21:19'!
+test15AccountTransferNetIgnoresNotWiredTransfers	
 	| aReport transferNetReport |
 	
 	Withdraw register: withdrawAmount on: anAccountWithOneDeposit .
@@ -490,8 +511,23 @@ test13TransferNetIgnoresNotWiredTransfers
 	
 	self assert: transferNetReport isZero.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:03:53'!
-test14TreeStructureDoesntIndentSimplePortfolio
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:29:12'!
+test16PortfolioTransferNetSumsAllOfTheirAccountsWireTransfers
+	| aReport transferNetReport aPortfolio thirdEmptyAccount |
+	
+	thirdEmptyAccount := ReceptiveAccount named: 'thirdEmptyAccount'.
+	WireTransfer register: depositAmount from: firstEmptyAccount to: secondEmptyAccount.
+	WireTransfer register: withdrawAmount from: firstEmptyAccount to: thirdEmptyAccount.
+	
+	aPortfolio := Portfolio named: 'miPortfolio' with: firstEmptyAccount with: thirdEmptyAccount.
+	
+	aReport := Report for: aPortfolio.
+	transferNetReport := aReport generateAccountTransferNet.
+	
+	self assert: transferNetReport equals: (-1) * (depositAmount + withdrawAmount) + withdrawAmount.! !
+
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:30:04'!
+test17TreeStructureDoesntIndentSimplePortfolio
 	| aReport treeStructureReport |
 	
 	aReport := Report for: anEmptyPortfolio.
@@ -500,8 +536,8 @@ test14TreeStructureDoesntIndentSimplePortfolio
 	treeStructureReport reset.
 	self assert: treeStructureReport nextLine equals: 'anEmptyPortfolio'.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:04:29'!
-test15TreeStructureIndentsOncePortfoliosAccounts
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:30:01'!
+test18TreeStructureIndentsOncePortfoliosAccounts
 	| aReport treeStructureReport |
 	
 	aReport := Report for: aPortfolioWithTwoEmptyAccounts.
@@ -512,8 +548,8 @@ test15TreeStructureIndentsOncePortfoliosAccounts
 	self assert: treeStructureReport nextLine equals: '    firstEmptyAccount'.
 	self assert: treeStructureReport nextLine equals: '    secondEmptyAccount'.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:05:20'!
-test16TreeStructurePortfolioIndentsGrandchildrenTwice
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:29:58'!
+test19TreeStructurePortfolioIndentsGrandchildrenTwice
 	| aReport treeStructureReport fatherPortfolio |
 	
 	fatherPortfolio := Portfolio named: 'fatherPortfolio' with: aPortfolioWithTwoAccountsWithTransfers with: firstEmptyAccount.
@@ -528,8 +564,8 @@ test16TreeStructurePortfolioIndentsGrandchildrenTwice
 	self assert: treeStructureReport nextLine equals: '        anAccountWithOneDeposit'.
 	self assert: treeStructureReport nextLine equals: '    firstEmptyAccount'.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:06:37'!
-test17TreeStructureIndentsRecursivelyBasedOnDepth
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:29:55'!
+test20TreeStructureIndentsRecursivelyBasedOnDepth
 	| aReport treeStructureReport aPortfolio secondFatherPortfolio grandFatherPortfolio |
 	
 	aPortfolio := Portfolio named: 'aPortfolio' with: anAccountWithOneDeposit .
@@ -549,8 +585,8 @@ test17TreeStructureIndentsRecursivelyBasedOnDepth
 	self assert: treeStructureReport nextLine equals: '            anAccountWithOneDeposit'.
 	self assert: treeStructureReport nextLine equals: '        anAccountWithOneWithdraw'.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:07:30'!
-test18SpecialSummaryIndentsOnlyBalanceOnSimplePortfolio
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:29:52'!
+test21SpecialSummaryIndentsOnlyBalanceOnSimplePortfolio
 	| aReport aSpecialSummaryReport |
 	
 	aReport := Report for: anEmptyPortfolio .
@@ -560,8 +596,8 @@ test18SpecialSummaryIndentsOnlyBalanceOnSimplePortfolio
 	self assert: aSpecialSummaryReport nextLine equals: 'anEmptyPortfolio'.
 	self assert: aSpecialSummaryReport nextLine equals: '    Balance = 0.'.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:07:54'!
-test19SpecialSummaryWorksCorrectlyOnAPortfolioWithAccountsWithoutTransactions
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:29:50'!
+test22SpecialSummaryWorksCorrectlyOnAPortfolioWithAccountsWithoutTransactions
 	| aReport aSpecialSummaryReport |
 	
 	aReport := Report for: aPortfolioWithTwoEmptyAccounts.
@@ -575,8 +611,8 @@ test19SpecialSummaryWorksCorrectlyOnAPortfolioWithAccountsWithoutTransactions
 	self assert: aSpecialSummaryReport nextLine equals: '        Balance = 0.'.
 	self assert: aSpecialSummaryReport nextLine equals: '    Balance = 0.'! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:08:37'!
-test20SpecialSummaryWorksCorrectlyOnAPortfolioWithAccountsWithTransactions
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:29:47'!
+test23SpecialSummaryWorksCorrectlyOnAPortfolioWithAccountsWithTransactions
 	| aReport aSpecialSummaryReport |
 	
 	aReport := Report for: aPortfolioWithTwoAccountsWithTransfers.
@@ -592,8 +628,8 @@ test20SpecialSummaryWorksCorrectlyOnAPortfolioWithAccountsWithTransactions
 	self assert: aSpecialSummaryReport nextLine equals: '        ', (self balanceStringFor: anAccountWithOneDeposit balance).
 	self assert: aSpecialSummaryReport nextLine equals: '    ', (self balanceStringFor: aPortfolioWithTwoAccountsWithTransfers balance)! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:09:21'!
-test21SpecialSummaryWorksCorrectlyOnAPortfolioWithPortfolioAndAccounts
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:29:44'!
+test24SpecialSummaryWorksCorrectlyOnAPortfolioWithPortfolioAndAccounts
 	| aReport aSpecialSummaryReport aPortfolio fatherPortfolio |
 	
 	WireTransfer register: anotherDepositAmount from: anAccountWithOneWithdraw to: firstEmptyAccount. 
@@ -623,8 +659,8 @@ test21SpecialSummaryWorksCorrectlyOnAPortfolioWithPortfolioAndAccounts
 	
 	! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 22:10:12'!
-test22SpecialSummaryIndentsRecursivelyBasedOnDepth
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:29:41'!
+test25SpecialSummaryIndentsRecursivelyBasedOnDepth
 	| aReport aSpecialSummaryReport parentPortfolio grandFatherPortfolio aPortfolio |
 	
 	WireTransfer register: anotherDepositAmount from: anAccountWithOneWithdraw to: firstEmptyAccount. 
@@ -1311,6 +1347,19 @@ handlePortfolio: aPortfolio
 handleReceptiveAccount: aReceptiveAccount
 	^self subclassResponsibility.! !
 
+!Report methodsFor: 'private' stamp: 'NI 6/2/2019 23:14:45'!
+handleReportForFinancialAssetsOf: aPortfolio
+	
+	aPortfolio financialAssets do: [:aFinancialAsset |
+		aFinancialAsset handleReport: self.
+	].! !
+
+!Report methodsFor: 'private' stamp: 'NI 6/2/2019 23:17:03'!
+handleReportForTransactionsOf: aReceptiveAccount.
+	aReceptiveAccount transactions do: [:aTransaction | 
+		aTransaction handleReport: self.
+	].! !
+
 !Report methodsFor: 'private' stamp: 'JIG 5/31/2019 17:21:33'!
 handleWithdrawTransaction: aWithdrawTransaction
 	^self subclassResponsibility.! !
@@ -1351,25 +1400,18 @@ withdrawTransferStringFor: aValue
 	^'Salida por transferencia de ' , aValue asString , '.'.! !
 
 
-!classDefinition: #PortfolioReport category: #'PortfolioTreePrinter-Ejercicio'!
-Report subclass: #PortfolioReport
+!classDefinition: #SpecialPortfolioReport category: #'PortfolioTreePrinter-Ejercicio'!
+Report subclass: #SpecialPortfolioReport
 	instanceVariableNames: 'stream'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!PortfolioReport methodsFor: 'private' stamp: 'NI 6/2/2019 20:53:11'!
-handleReportForFinancialAssetsOf: aPortfolio
-	
-	aPortfolio financialAssets do: [:aFinancialAsset |
-		aFinancialAsset handleReport: self.
-	].! !
-
-!PortfolioReport methodsFor: 'private' stamp: 'NI 6/2/2019 20:59:26'!
+!SpecialPortfolioReport methodsFor: 'private' stamp: 'NI 6/2/2019 20:59:26'!
 write: aStringToWrite on: aStream withSpaceOnNewLine: indentationSpaceAmount
 	aStream newLine; space: indentationSpaceAmount; nextPutAll: aStringToWrite.! !
 
-!PortfolioReport methodsFor: 'private' stamp: 'NI 6/2/2019 22:02:02'!
+!SpecialPortfolioReport methodsFor: 'private' stamp: 'NI 6/2/2019 22:02:02'!
 writeTopNameAndContinueWithFinancialAssets
 	stream := ReadWriteStream with: financialAsset name.
 	
@@ -1377,7 +1419,7 @@ writeTopNameAndContinueWithFinancialAssets
 
 
 !classDefinition: #SpecialSummaryReport category: #'PortfolioTreePrinter-Ejercicio'!
-PortfolioReport subclass: #SpecialSummaryReport
+SpecialPortfolioReport subclass: #SpecialSummaryReport
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -1429,7 +1471,7 @@ addSummaryFrom: aReceptiveAccount to: aStream withIndentation: anIndentationAmou
 
 
 !classDefinition: #TreeStructureReport category: #'PortfolioTreePrinter-Ejercicio'!
-PortfolioReport subclass: #TreeStructureReport
+SpecialPortfolioReport subclass: #TreeStructureReport
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -1460,15 +1502,13 @@ Report subclass: #SummaryReport
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!SummaryReport methodsFor: 'report generation' stamp: 'NI 6/2/2019 12:18:32'!
+!SummaryReport methodsFor: 'report generation' stamp: 'NI 6/2/2019 23:02:34'!
 generate
 	
 	summary := OrderedCollection new.
 	financialAsset transactions size = 0 ifTrue: [summary add: (self class balanceStringFor: financialAsset balance). ^ summary].
 	
-	financialAsset transactions do: [:aTransaction | 
-		aTransaction handleReport: self.
-	].
+	financialAsset handleReport: self.
 	
 	summary add: (self class balanceStringFor: financialAsset balance).
 	
@@ -1482,6 +1522,14 @@ handleDepositTransaction: aDepositTransaction
 !SummaryReport methodsFor: 'private - transaction handlers' stamp: 'NI 6/2/2019 11:36:39'!
 handleDepositTransferTransaction: aDepositTransferTransaction
 	summary add: (self class depositTransferStringFor: aDepositTransferTransaction value).! !
+
+!SummaryReport methodsFor: 'private - transaction handlers' stamp: 'NI 6/2/2019 23:16:02'!
+handlePortfolio: aPortfolio
+	self handleReportForFinancialAssetsOf: aPortfolio.! !
+
+!SummaryReport methodsFor: 'private - transaction handlers' stamp: 'NI 6/2/2019 23:17:11'!
+handleReceptiveAccount: aReceptiveAccount
+	self handleReportForTransactionsOf: aReceptiveAccount.! !
 
 !SummaryReport methodsFor: 'private - transaction handlers' stamp: 'NI 6/2/2019 11:36:44'!
 handleWithdrawTransaction: aWithdrawTransaction
@@ -1499,14 +1547,12 @@ Report subclass: #TransferNetReport
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!TransferNetReport methodsFor: 'report generation' stamp: 'NI 5/31/2019 19:02:16'!
+!TransferNetReport methodsFor: 'report generation' stamp: 'NI 6/2/2019 23:04:00'!
 generate
 
 	transferNet := 0.	
 
-	financialAsset transactions do: [ :aTransaction |
-		aTransaction handleReport: self.
-	].
+	financialAsset handleReport: self.
 
 	^transferNet ! !
 
@@ -1518,6 +1564,14 @@ handleDepositTransaction: aWithdrawTransaction
 !TransferNetReport methodsFor: 'private - transaction handlers' stamp: 'JIG 5/31/2019 17:17:45'!
 handleDepositTransferTransaction: aDepositTransferTransaction
 	transferNet := transferNet + aDepositTransferTransaction value! !
+
+!TransferNetReport methodsFor: 'private - transaction handlers' stamp: 'NI 6/2/2019 23:16:07'!
+handlePortfolio: aPortfolio
+	self handleReportForFinancialAssetsOf: aPortfolio.! !
+
+!TransferNetReport methodsFor: 'private - transaction handlers' stamp: 'NI 6/2/2019 23:17:26'!
+handleReceptiveAccount: aReceptiveAccount
+	self handleReportForTransactionsOf: aReceptiveAccount.! !
 
 !TransferNetReport methodsFor: 'private - transaction handlers' stamp: 'JIG 5/31/2019 17:15:30'!
 handleWithdrawTransaction: aWithdrawTransaction
