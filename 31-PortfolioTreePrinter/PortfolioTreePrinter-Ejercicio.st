@@ -526,7 +526,7 @@ test16PortfolioTransferNetSumsAllOfTheirAccountsWireTransfers
 	
 	self assert: transferNetReport equals: (-1) * (depositAmount + withdrawAmount) + withdrawAmount.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:30:04'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/3/2019 10:26:37'!
 test17TreeStructureDoesntIndentSimplePortfolio
 	| aReport treeStructureReport |
 	
@@ -534,9 +534,10 @@ test17TreeStructureDoesntIndentSimplePortfolio
 	treeStructureReport := aReport generateTreeStructureReport.
 	
 	treeStructureReport reset.
+	self assert: treeStructureReport nextLine equals: ''.
 	self assert: treeStructureReport nextLine equals: 'anEmptyPortfolio'.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:30:01'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/3/2019 10:26:48'!
 test18TreeStructureIndentsOncePortfoliosAccounts
 	| aReport treeStructureReport |
 	
@@ -544,11 +545,12 @@ test18TreeStructureIndentsOncePortfoliosAccounts
 	treeStructureReport := aReport generateTreeStructureReport.
 	
 	treeStructureReport reset.
+	self assert: treeStructureReport nextLine equals: ''.
 	self assert: treeStructureReport nextLine equals: 'aPortfolioWithTwoEmptyAccounts'.
 	self assert: treeStructureReport nextLine equals: '    firstEmptyAccount'.
 	self assert: treeStructureReport nextLine equals: '    secondEmptyAccount'.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:29:58'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/3/2019 10:26:53'!
 test19TreeStructurePortfolioIndentsGrandchildrenTwice
 	| aReport treeStructureReport fatherPortfolio |
 	
@@ -558,13 +560,14 @@ test19TreeStructurePortfolioIndentsGrandchildrenTwice
 	treeStructureReport := aReport generateTreeStructureReport.
 	
 	treeStructureReport reset.
+	self assert: treeStructureReport nextLine equals: ''.
 	self assert: treeStructureReport nextLine equals: 'fatherPortfolio'.
 	self assert: treeStructureReport nextLine equals: '    aPortfolioWithTwoAccountsWithTransfers'.
 	self assert: treeStructureReport nextLine equals: '        anAccountWithOneWithdraw'.
 	self assert: treeStructureReport nextLine equals: '        anAccountWithOneDeposit'.
 	self assert: treeStructureReport nextLine equals: '    firstEmptyAccount'.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:29:55'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/3/2019 10:26:56'!
 test20TreeStructureIndentsRecursivelyBasedOnDepth
 	| aReport treeStructureReport aPortfolio secondFatherPortfolio grandFatherPortfolio |
 	
@@ -576,6 +579,7 @@ test20TreeStructureIndentsRecursivelyBasedOnDepth
 	treeStructureReport := aReport generateTreeStructureReport.
 	
 	treeStructureReport reset.
+	self assert: treeStructureReport nextLine equals: ''.
 	self assert: treeStructureReport nextLine equals: 'grandFatherPortfolio'.
 	self assert: treeStructureReport nextLine equals: '    aPortfolioWithTwoEmptyAccounts'.
 	self assert: treeStructureReport nextLine equals: '        firstEmptyAccount'.
@@ -585,7 +589,7 @@ test20TreeStructureIndentsRecursivelyBasedOnDepth
 	self assert: treeStructureReport nextLine equals: '            anAccountWithOneDeposit'.
 	self assert: treeStructureReport nextLine equals: '        anAccountWithOneWithdraw'.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:29:52'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/3/2019 10:24:09'!
 test21SpecialSummaryIndentsOnlyBalanceOnSimplePortfolio
 	| aReport aSpecialSummaryReport |
 	
@@ -593,10 +597,11 @@ test21SpecialSummaryIndentsOnlyBalanceOnSimplePortfolio
 	aSpecialSummaryReport := aReport generateSpecialSummaryReport.
 	
 	aSpecialSummaryReport reset.
+	self assert: aSpecialSummaryReport nextLine equals: ''.
 	self assert: aSpecialSummaryReport nextLine equals: 'anEmptyPortfolio'.
 	self assert: aSpecialSummaryReport nextLine equals: '    Balance = 0.'.! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:29:50'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/3/2019 10:24:21'!
 test22SpecialSummaryWorksCorrectlyOnAPortfolioWithAccountsWithoutTransactions
 	| aReport aSpecialSummaryReport |
 	
@@ -604,6 +609,7 @@ test22SpecialSummaryWorksCorrectlyOnAPortfolioWithAccountsWithoutTransactions
 	aSpecialSummaryReport := aReport generateSpecialSummaryReport .
 	
 	aSpecialSummaryReport reset.
+	self assert: aSpecialSummaryReport nextLine equals: ''.
 	self assert: aSpecialSummaryReport nextLine equals: 'aPortfolioWithTwoEmptyAccounts'.
 	self assert: aSpecialSummaryReport nextLine equals: '    firstEmptyAccount'.
 	self assert: aSpecialSummaryReport nextLine equals: '        Balance = 0.'.
@@ -611,7 +617,7 @@ test22SpecialSummaryWorksCorrectlyOnAPortfolioWithAccountsWithoutTransactions
 	self assert: aSpecialSummaryReport nextLine equals: '        Balance = 0.'.
 	self assert: aSpecialSummaryReport nextLine equals: '    Balance = 0.'! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:29:47'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/3/2019 10:24:26'!
 test23SpecialSummaryWorksCorrectlyOnAPortfolioWithAccountsWithTransactions
 	| aReport aSpecialSummaryReport |
 	
@@ -619,6 +625,7 @@ test23SpecialSummaryWorksCorrectlyOnAPortfolioWithAccountsWithTransactions
 	aSpecialSummaryReport := aReport generateSpecialSummaryReport . 
 	
 	aSpecialSummaryReport reset.
+	self assert: aSpecialSummaryReport nextLine equals: ''.
 	self assert: aSpecialSummaryReport nextLine equals: 'aPortfolioWithTwoAccountsWithTransfers'.
 	self assert: aSpecialSummaryReport nextLine equals: '    anAccountWithOneWithdraw'.
 	self assert: aSpecialSummaryReport nextLine equals: '        ' , (self withdrawStringFor: withdrawAmount ).
@@ -628,7 +635,7 @@ test23SpecialSummaryWorksCorrectlyOnAPortfolioWithAccountsWithTransactions
 	self assert: aSpecialSummaryReport nextLine equals: '        ', (self balanceStringFor: anAccountWithOneDeposit balance).
 	self assert: aSpecialSummaryReport nextLine equals: '    ', (self balanceStringFor: aPortfolioWithTwoAccountsWithTransfers balance)! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:29:44'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/3/2019 10:24:30'!
 test24SpecialSummaryWorksCorrectlyOnAPortfolioWithPortfolioAndAccounts
 	| aReport aSpecialSummaryReport aPortfolio fatherPortfolio |
 	
@@ -641,6 +648,7 @@ test24SpecialSummaryWorksCorrectlyOnAPortfolioWithPortfolioAndAccounts
 	aSpecialSummaryReport := aReport generateSpecialSummaryReport .
 	
 	aSpecialSummaryReport reset.
+	self assert: aSpecialSummaryReport nextLine equals: ''.
 	self assert: aSpecialSummaryReport nextLine equals: 'fatherPortfolio'.
 	self assert: aSpecialSummaryReport nextLine equals: '    aPortfolio'.
 	self assert: aSpecialSummaryReport nextLine equals: '        anAccountWithOneWithdraw'.
@@ -659,7 +667,7 @@ test24SpecialSummaryWorksCorrectlyOnAPortfolioWithPortfolioAndAccounts
 	
 	! !
 
-!ReportTest methodsFor: 'tests' stamp: 'NI 6/2/2019 23:29:41'!
+!ReportTest methodsFor: 'tests' stamp: 'NI 6/3/2019 10:24:33'!
 test25SpecialSummaryIndentsRecursivelyBasedOnDepth
 	| aReport aSpecialSummaryReport parentPortfolio grandFatherPortfolio aPortfolio |
 	
@@ -673,6 +681,7 @@ test25SpecialSummaryIndentsRecursivelyBasedOnDepth
 	aSpecialSummaryReport := aReport generateSpecialSummaryReport .
 	
 	aSpecialSummaryReport reset.
+	self assert: aSpecialSummaryReport nextLine equals: ''.
 	self assert: aSpecialSummaryReport nextLine equals: 'grandFatherPortfolio'.
 	self assert: aSpecialSummaryReport nextLine equals: '    parentPortfolio'.
 	self assert: aSpecialSummaryReport nextLine equals: '        anAccountWithOneWithdraw'.
@@ -1407,15 +1416,13 @@ Report subclass: #SpecialPortfolioReport
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
+!SpecialPortfolioReport methodsFor: 'private' stamp: 'NI 6/3/2019 10:28:08'!
+createStream
+	stream := ReadWriteStream with: ''.! !
+
 !SpecialPortfolioReport methodsFor: 'private' stamp: 'NI 6/2/2019 20:59:26'!
 write: aStringToWrite on: aStream withSpaceOnNewLine: indentationSpaceAmount
 	aStream newLine; space: indentationSpaceAmount; nextPutAll: aStringToWrite.! !
-
-!SpecialPortfolioReport methodsFor: 'private' stamp: 'NI 6/2/2019 22:02:02'!
-writeTopNameAndContinueWithFinancialAssets
-	stream := ReadWriteStream with: financialAsset name.
-	
-	self handleReportForFinancialAssetsOf: financialAsset.! !
 
 
 !classDefinition: #SpecialSummaryReport category: #'PortfolioTreePrinter-Ejercicio'!
@@ -1425,36 +1432,38 @@ SpecialPortfolioReport subclass: #SpecialSummaryReport
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!SpecialSummaryReport methodsFor: 'report generation' stamp: 'NI 6/2/2019 20:55:12'!
-generate
-	self writeTopNameAndContinueWithFinancialAssets.
+!SpecialSummaryReport methodsFor: 'report generation' stamp: 'NI 6/3/2019 10:28:19'!
+generate	
+	self createStream.
+	
+	financialAsset handleReport: self.
 	
 	self write: (self class balanceStringFor: financialAsset balance) on: stream withSpaceOnNewLine: 4 . 	
 	
 	^stream! !
 
 
-!SpecialSummaryReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/2/2019 22:07:04'!
+!SpecialSummaryReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/3/2019 10:30:33'!
 handlePortfolio: aPortfolio
-	|depthFromFinancialAsset |
+	|indentSpaceAmount |
 	
-	depthFromFinancialAsset := 4 * (aPortfolio depthFrom: financialAsset).
+	indentSpaceAmount := 4 * (aPortfolio depthFrom: financialAsset).
 
-	self write: aPortfolio name on: stream withSpaceOnNewLine: depthFromFinancialAsset.
+	self write: aPortfolio name on: stream withSpaceOnNewLine: indentSpaceAmount.
 	
 	self handleReportForFinancialAssetsOf: aPortfolio.
 
-	self write: (self class balanceStringFor: aPortfolio balance) on: stream withSpaceOnNewLine: depthFromFinancialAsset + 4. ! !
+	self write: (self class balanceStringFor: aPortfolio balance) on: stream withSpaceOnNewLine: indentSpaceAmount + 4. ! !
 
-!SpecialSummaryReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/2/2019 22:07:10'!
+!SpecialSummaryReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/3/2019 10:30:39'!
 handleReceptiveAccount: aReceptiveAccount
-	|depthFromFinancialAsset |
+	|indentSpaceAmount |
 	
-	depthFromFinancialAsset := 4 * (aReceptiveAccount depthFrom: financialAsset).
+	indentSpaceAmount := 4 * (aReceptiveAccount depthFrom: financialAsset).
 	
-	self write: aReceptiveAccount name on: stream  withSpaceOnNewLine: depthFromFinancialAsset .
+	self write: aReceptiveAccount name on: stream  withSpaceOnNewLine: indentSpaceAmount .
 	
-	self addSummaryFrom: aReceptiveAccount to: stream withIndentation: (4 + depthFromFinancialAsset).! !
+	self addSummaryFrom: aReceptiveAccount to: stream withIndentation: (4 + indentSpaceAmount).! !
 
 
 !SpecialSummaryReport methodsFor: 'private - summary' stamp: 'NI 6/2/2019 14:35:55'!
@@ -1477,22 +1486,32 @@ SpecialPortfolioReport subclass: #TreeStructureReport
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!TreeStructureReport methodsFor: 'report generation' stamp: 'NI 6/2/2019 20:49:48'!
+!TreeStructureReport methodsFor: 'report generation' stamp: 'NI 6/3/2019 10:28:00'!
 generate
-	self writeTopNameAndContinueWithFinancialAssets.
+	self createStream.
+	
+	financialAsset handleReport: self.
 	
 	^stream! !
 
 
-!TreeStructureReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/2/2019 22:02:54'!
+!TreeStructureReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/3/2019 10:30:25'!
 handlePortfolio: aPortfolio
-	self write: aPortfolio name on: stream withSpaceOnNewLine: 4 * (aPortfolio depthFrom: financialAsset).
+	|indentSpaceAmount |
+	
+	indentSpaceAmount := 4 * (aPortfolio depthFrom: financialAsset).
+	
+	self write: aPortfolio name on: stream withSpaceOnNewLine: indentSpaceAmount.
 	
 	self handleReportForFinancialAssetsOf: aPortfolio.! !
 
-!TreeStructureReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/2/2019 22:03:02'!
+!TreeStructureReport methodsFor: 'private - financial assets handlers' stamp: 'NI 6/3/2019 10:30:12'!
 handleReceptiveAccount: aReceptiveAccount
-	self write: aReceptiveAccount name on: stream withSpaceOnNewLine: 4 * (aReceptiveAccount depthFrom: financialAsset).! !
+	|indentSpaceAmount |
+	
+	indentSpaceAmount := 4 * (aReceptiveAccount depthFrom: financialAsset).
+	
+	self write: aReceptiveAccount name on: stream withSpaceOnNewLine: indentSpaceAmount.! !
 
 
 !classDefinition: #SummaryReport category: #'PortfolioTreePrinter-Ejercicio'!
@@ -1502,11 +1521,10 @@ Report subclass: #SummaryReport
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!SummaryReport methodsFor: 'report generation' stamp: 'NI 6/2/2019 23:02:34'!
+!SummaryReport methodsFor: 'report generation' stamp: 'NI 6/3/2019 10:15:22'!
 generate
 	
 	summary := OrderedCollection new.
-	financialAsset transactions size = 0 ifTrue: [summary add: (self class balanceStringFor: financialAsset balance). ^ summary].
 	
 	financialAsset handleReport: self.
 	
