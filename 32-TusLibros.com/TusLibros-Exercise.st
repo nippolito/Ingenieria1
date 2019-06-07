@@ -115,87 +115,48 @@ itemSellByTheStore
 
 !classDefinition: #CashierTest category: #'TusLibros-Exercise'!
 TestCase subclass: #CashierTest
-	instanceVariableNames: ''
+	instanceVariableNames: 'aSingleCart aCompoundCart'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Exercise'!
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 11:37:41'!
-anotherItemSellByTheStore
+!CashierTest methodsFor: 'tests' stamp: 'Nip 6/7/2019 14:12:43'!
+test01CashierShouldNotCheckOutEmptyCart
 	
-	^ 'anotherValidBook'! !
-
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 11:39:18'!
-defaultCatalog
+	| anEmptyCart |
 	
-	^ Array with: self itemSellByTheStore with: self anotherItemSellByTheStore.! !
-
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 11:41:27'!
-itemNotSellByTheStore
+	anEmptyCart := Cart acceptingItemsOf: self defaultCatalog.
 	
-	^ 'invalidBook'! !
-
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 11:37:57'!
-itemPriceListFromTheStore
-	^Dictionary 
-		newFromPairs: {
-			self itemSellByTheStore. 300.
-			self anotherItemSellByTheStore. 400.
-		}.! !
-
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 11:08:23'!
-itemSellByTheStore
-	
-	^ 'validBook'! !
-
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 11:25:24'!
-test01CashierShouldNotAcceptEmptyCart
-	
-	| aSingleCart |
-	
-	aSingleCart := Cart acceptingItemsOf: self defaultCatalog.
-	
-	self should: [ Cashier checkoutFor: aSingleCart withItemPriceList: self itemPriceListFromTheStore ] 
+	self should: [ Cashier checkoutFor: anEmptyCart withItemPriceList: self itemPriceListFromTheStore ] 
 	raise: Error 
 	withExceptionDo: [ :anError | anError messageText = Cashier cannotAcceptEmptyCartErrorDescription ].! !
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 11:35:42'!
-test02CashierKnowsOneItemCartPrice
+!CashierTest methodsFor: 'tests' stamp: 'Nip 6/7/2019 14:13:02'!
+test02CashierForACartWithOneItemChargesThatItemPrice
 	
-	| aSingleCart cashier |
-	
-	aSingleCart := Cart acceptingItemsOf: self defaultCatalog.
-	aSingleCart add: self itemSellByTheStore.
+	| cashier |
 	
 	cashier := Cashier checkoutFor: aSingleCart withItemPriceList: self itemPriceListFromTheStore.
 	
 	self assert: cashier totalPrice = (self itemPriceListFromTheStore at: self itemSellByTheStore).
-	self assert: (cashier priceOf: self itemSellByTheStore) = (self itemPriceListFromTheStore at: self itemSellByTheStore).
+	"self assert: (cashier priceOf: self itemSellByTheStore) = (self itemPriceListFromTheStore at: self itemSellByTheStore)."
 	! !
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 11:39:32'!
-test03CashierKnowsManyItemsCartPrice
+!CashierTest methodsFor: 'tests' stamp: 'Nip 6/7/2019 14:13:40'!
+test03CashierForACartWithManyItemsChargesThatItemsPriceSum
 	
-	| aCompoundCart cashier |
-	
-	aCompoundCart := Cart acceptingItemsOf: self defaultCatalog.
-	aCompoundCart add: self itemSellByTheStore.
-	aCompoundCart add: self anotherItemSellByTheStore.
+	|  cashier |
 	
 	cashier := Cashier checkoutFor: aCompoundCart withItemPriceList: self itemPriceListFromTheStore.
 	
 	self assert: cashier totalPrice = ((self itemPriceListFromTheStore at: self itemSellByTheStore) + (self itemPriceListFromTheStore at: self anotherItemSellByTheStore)).
-	self assert: (cashier priceOf: self itemSellByTheStore) = (self itemPriceListFromTheStore at: self itemSellByTheStore).
-	self assert: (cashier priceOf: self anotherItemSellByTheStore) = (self itemPriceListFromTheStore at: self anotherItemSellByTheStore).	! !
+	"self assert: (cashier priceOf: self itemSellByTheStore) = (self itemPriceListFromTheStore at: self itemSellByTheStore).
+	self assert: (cashier priceOf: self anotherItemSellByTheStore) = (self itemPriceListFromTheStore at: self anotherItemSellByTheStore)."! !
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 12:05:55'!
+!CashierTest methodsFor: 'tests' stamp: 'Nip 6/7/2019 14:13:48'!
 test04CashierCannotTellPriceOfUnknownItemOnPriceList
 	
-	| aCompoundCart cashier |
-	
-	aCompoundCart := Cart acceptingItemsOf: self defaultCatalog.
-	aCompoundCart add: self itemSellByTheStore.
-	aCompoundCart add: self anotherItemSellByTheStore.
+	| cashier |
 	
 	cashier := Cashier checkoutFor: aCompoundCart withItemPriceList: self itemPriceListFromTheStore.
 	
@@ -203,10 +164,10 @@ test04CashierCannotTellPriceOfUnknownItemOnPriceList
 	raise: Error
 	withExceptionDo: [:anError | anError messageText = Cashier cannotTellPriceOfUnknownItemErrorDescription ].! !
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 12:04:22'!
+!CashierTest methodsFor: 'tests' stamp: 'Nip 6/7/2019 14:07:52'!
 test05CashierMayRemoveSomeItemFromCart
 	
-	| aCompoundCart cashier |
+	"| aCompoundCart cashier |
 	
 	aCompoundCart := Cart acceptingItemsOf: self defaultCatalog.
 	aCompoundCart add: self itemSellByTheStore.
@@ -216,12 +177,12 @@ test05CashierMayRemoveSomeItemFromCart
 	
 	cashier removeFromCart: self itemSellByTheStore.
 	
-	self assert: cashier totalPrice = (self itemPriceListFromTheStore at: self anotherItemSellByTheStore).! !
+	self assert: cashier totalPrice = (self itemPriceListFromTheStore at: self anotherItemSellByTheStore)."! !
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 12:05:35'!
+!CashierTest methodsFor: 'tests' stamp: 'Nip 6/7/2019 14:07:58'!
 test06CashierCannotRemoveItemThatIsNotOnCart
 	
-	| aSingleCart cashier |
+	"| aSingleCart cashier |
 	
 	aSingleCart := Cart acceptingItemsOf: self defaultCatalog.
 	aSingleCart add: self itemSellByTheStore.
@@ -231,7 +192,46 @@ test06CashierCannotRemoveItemThatIsNotOnCart
 	self should: [ cashier removeFromCart: self anotherItemSellByTheStore ]  
 	raise: Error 
 	withExceptionDo: [ :anError | anError messageText = Cashier cannotRemoveItemThatIsNotOnCartErrorDescription ].
-	! !
+	"! !
+
+
+!CashierTest methodsFor: 'support' stamp: 'JIG 6/6/2019 11:37:41'!
+anotherItemSellByTheStore
+	
+	^ 'anotherValidBook'! !
+
+!CashierTest methodsFor: 'support' stamp: 'JIG 6/6/2019 11:39:18'!
+defaultCatalog
+	
+	^ Array with: self itemSellByTheStore with: self anotherItemSellByTheStore.! !
+
+!CashierTest methodsFor: 'support' stamp: 'JIG 6/6/2019 11:41:27'!
+itemNotSellByTheStore
+	
+	^ 'invalidBook'! !
+
+!CashierTest methodsFor: 'support' stamp: 'JIG 6/6/2019 11:37:57'!
+itemPriceListFromTheStore
+	^Dictionary 
+		newFromPairs: {
+			self itemSellByTheStore. 300.
+			self anotherItemSellByTheStore. 400.
+		}.! !
+
+!CashierTest methodsFor: 'support' stamp: 'JIG 6/6/2019 11:08:23'!
+itemSellByTheStore
+	
+	^ 'validBook'! !
+
+
+!CashierTest methodsFor: 'setup' stamp: 'Nip 6/7/2019 14:13:34'!
+setUp
+	aSingleCart := Cart acceptingItemsOf: self defaultCatalog.
+	aSingleCart add: self itemSellByTheStore.
+	
+	aCompoundCart := Cart acceptingItemsOf: self defaultCatalog.
+	aCompoundCart add: self itemSellByTheStore.
+	aCompoundCart add: self anotherItemSellByTheStore.! !
 
 
 !classDefinition: #Cart category: #'TusLibros-Exercise'!
@@ -324,24 +324,26 @@ Object subclass: #Cashier
 	poolDictionaries: ''
 	category: 'TusLibros-Exercise'!
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 12:02:12'!
+!Cashier methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 12:03:48'!
+removeFromCart: anItem
+	cartItemList remove: anItem ifAbsent: [ self error: self class cannotRemoveItemThatIsNotOnCartErrorDescription ].
+ ! !
+
+
+!Cashier methodsFor: 'initialization' stamp: 'JIG 6/6/2019 12:02:12'!
 initializeFor: aCart withItemPriceList: aPriceList 
 	cartItemList := aCart items.
 	priceList := aPriceList.! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 11:58:44'!
+
+!Cashier methodsFor: 'private - pricing' stamp: 'JIG 6/6/2019 11:58:44'!
 priceOf: anItem
 	| finalPrice |
 	finalPrice := priceList at: anItem ifAbsent: [ self error : self class cannotTellPriceOfUnknownItemErrorDescription ] .
 	
 	^finalPrice! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 12:03:48'!
-removeFromCart: anItem
-	cartItemList remove: anItem ifAbsent: [ self error: self class cannotRemoveItemThatIsNotOnCartErrorDescription ].
- ! !
-
-!Cashier methodsFor: 'as yet unclassified' stamp: 'JIG 6/6/2019 12:02:20'!
+!Cashier methodsFor: 'private - pricing' stamp: 'JIG 6/6/2019 12:02:20'!
 totalPrice
 	| accumulatedPrice |
 
