@@ -102,8 +102,8 @@ test09CartWithOneItemTotalPriceEqualsThatItemPrice
 	
 	self assert: cart totalPrice = (self defaultCatalog at: self itemSellByTheStore).! !
 
-!CartTest methodsFor: 'tests' stamp: 'JIG 6/7/2019 16:02:43'!
-test10CartWithManyItemsTotalPriceEqualsToCartItemList
+!CartTest methodsFor: 'tests' stamp: 'NI 6/8/2019 19:21:16'!
+test10CartWithManyItemsTotalPriceEqualsToCartItemListPricesSummed
 
 	| cart |
 	
@@ -211,7 +211,7 @@ test03CashierForANonEmptyCartAddsANewSaleEntryCorrectly
 	
 	! !
 
-!CashierTest methodsFor: 'tests' stamp: 'JIG 6/7/2019 17:54:54'!
+!CashierTest methodsFor: 'tests' stamp: 'NI 6/8/2019 19:22:02'!
 test04CannotMakePaymentWithAnExpiredCreditCard
 	| salesBookBeforeSale |
 	
@@ -220,96 +220,58 @@ test04CannotMakePaymentWithAnExpiredCreditCard
 	self should: [Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook andCreditCard: anExpiredCreditCard ]
 	raise: Error 
 	withExceptionDo: [:anError |
-		self assert: anError messageText equals: Cashier cannotMakePaymentWithExpiredCreditCard.
+		self assert: anError messageText equals: Cashier cannotMakePaymentWithExpiredCreditCardErrorDescription.
 		self assert: anEmptySalesBook equals: salesBookBeforeSale.
 	].
 	
 	! !
 
 
+!CashierTest methodsFor: 'support' stamp: 'JIG 6/7/2019 16:58:45'!
+aValidExpirationDate
+	^June ofYear: (Date today + (Duration days: 365)) yearNumber.! !
+
+!CashierTest methodsFor: 'support' stamp: 'JIG 6/7/2019 16:28:22'!
+anExpiredDate
+	^May ofYear: 2019.! !
+
+!CashierTest methodsFor: 'support' stamp: 'JIG 6/7/2019 16:29:13'!
+anIDForExpiredCreditCard
+	^'4700000034541234'! !
+
+!CashierTest methodsFor: 'support' stamp: 'JIG 6/7/2019 17:53:15'!
+anIDForValidCreditCard
+	^'1234678934210007'! !
+
 !CashierTest methodsFor: 'support' stamp: 'JIG 6/6/2019 11:37:41'!
 anotherItemSellByTheStore
 	
 	^ 'anotherValidBook'! !
+
+!CashierTest methodsFor: 'support' stamp: 'NI 6/8/2019 19:29:47'!
+createEmptySalesBook
+	^OrderedCollection new.! !
 
 !CashierTest methodsFor: 'support' stamp: 'JIG 6/7/2019 15:02:52'!
 defaultCatalog
 	
 	^ Dictionary newFromPairs: {self itemSellByTheStore. 200. self anotherItemSellByTheStore. 150.}! !
 
-!CashierTest methodsFor: 'support' stamp: 'JIG 6/6/2019 11:41:27'!
-itemNotSellByTheStore
-	
-	^ 'invalidBook'! !
-
-!CashierTest methodsFor: 'support' stamp: 'JIG 6/6/2019 11:37:57'!
-itemPriceListFromTheStore
-	^Dictionary 
-		newFromPairs: {
-			self itemSellByTheStore. 300.
-			self anotherItemSellByTheStore. 400.
-		}.! !
-
 !CashierTest methodsFor: 'support' stamp: 'JIG 6/6/2019 11:08:23'!
 itemSellByTheStore
 	
 	^ 'validBook'! !
 
-
-!CashierTest methodsFor: 'setup' stamp: 'JIG 6/7/2019 16:58:45'!
-aValidExpirationDate
-	^June ofYear: (Date today + (Duration days: 365)) yearNumber.! !
-
-!CashierTest methodsFor: 'setup' stamp: 'JIG 6/7/2019 16:28:22'!
-anExpiredDate
-	^May ofYear: 2019.! !
-
-!CashierTest methodsFor: 'setup' stamp: 'JIG 6/7/2019 16:29:13'!
-anIDForExpiredCreditCard
-	^'4700000034541234'! !
-
-!CashierTest methodsFor: 'setup' stamp: 'JIG 6/7/2019 17:53:15'!
-anIDForValidCreditCard
-	^'1234678934210007'! !
-
-!CashierTest methodsFor: 'setup' stamp: 'JIG 6/7/2019 15:27:24'!
-createEmptySalesBook
-	"0 -> fecha
-	1 -> diccionario de item producto Libro A ->  #(2    36)
-		LibroA: {
-			precio : 36
-			cantidad: 2
-		}
-	2 -> total
-	"
-	^OrderedCollection new.
-	"
-	
-	saleBody := Dictionary new.
-	
-	items do: [:anItem | saleBody add: {anItem. items quantityOf: anItem.}]
-	
-	^saleBody.
-	
-	saleBodyEntry := cart generateSaleBody.
-	
-	saleBookEntry = OrderedCollection new.
-	saleBookEntry add: Date today.
-	
-	saleBookEntry add: saleBody
-	salesBook add: cart totalPrice.
-	
-	"! !
-
-!CashierTest methodsFor: 'setup' stamp: 'JIG 6/7/2019 16:29:25'!
+!CashierTest methodsFor: 'support' stamp: 'JIG 6/7/2019 16:29:25'!
 ownerOfExpiredCreditCard
 	^'Jose'.! !
 
-!CashierTest methodsFor: 'setup' stamp: 'JIG 6/7/2019 16:32:53'!
+!CashierTest methodsFor: 'support' stamp: 'JIG 6/7/2019 16:32:53'!
 ownerOfValidCreditCard
 	^'Nico'.! !
 
-!CashierTest methodsFor: 'setup' stamp: 'JIG 6/7/2019 17:53:08'!
+
+!CashierTest methodsFor: 'setup' stamp: 'NI 6/8/2019 19:31:16'!
 setUp
 
 	aSingleCart := Cart acceptingItemsOf: self defaultCatalog.
@@ -319,7 +281,7 @@ setUp
 	aCompoundCart add: self itemSellByTheStore.
 	aCompoundCart add: self anotherItemSellByTheStore.
 	
-	anEmptySalesBook := OrderedCollection new.
+	anEmptySalesBook := self createEmptySalesBook.
 	
 	anExpiredCreditCard := CreditCard for: self ownerOfExpiredCreditCard expiringOn: self anExpiredDate anIDNumber: self anIDForExpiredCreditCard.
 	aValidCreditCard := CreditCard for: self ownerOfValidCreditCard expiringOn: self aValidExpirationDate anIDNumber: self anIDForValidCreditCard.! !
@@ -332,39 +294,7 @@ TestCase subclass: #CreditCardTest
 	poolDictionaries: ''
 	category: 'TusLibros-Exercise'!
 
-!CreditCardTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/7/2019 17:03:05'!
-aValidExpirationDate
-	^June ofYear: (Date today + (Duration days: 365)) yearNumber.! !
-
-!CreditCardTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/7/2019 17:03:13'!
-anExpiredDate
-	^May ofYear: 2019.! !
-
-!CreditCardTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/7/2019 17:03:22'!
-anIDForExpiredCreditCard
-	^'4700000034541234'! !
-
-!CreditCardTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/7/2019 17:24:55'!
-anIDForValidCreditCard
-	^'4700000034540007'! !
-
-!CreditCardTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/7/2019 17:24:23'!
-ownerOfExpiredCreditCard
-	^'Jose'.! !
-
-!CreditCardTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/7/2019 17:24:38'!
-ownerOfValidCreditCard
-	^'Nico'.! !
-
-!CreditCardTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/7/2019 18:04:12'!
-setUp
-
-	anExpiredCreditCard := CreditCard for: self ownerOfExpiredCreditCard expiringOn: self anExpiredDate anIDNumber: self anIDForExpiredCreditCard.
-	aValidCreditCard := CreditCard for: self ownerOfValidCreditCard expiringOn: self aValidExpirationDate anIDNumber: self anIDForValidCreditCard.
-	
-	currentMonthOfYear := GregorianMonthOfYear year: Date today year yearNumber month: (GregorianMonth named: Date today monthName).! !
-
-!CreditCardTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/7/2019 17:23:35'!
+!CreditCardTest methodsFor: 'tests' stamp: 'JIG 6/7/2019 17:23:35'!
 test01CreditCardShouldHaveAnOwner
 	| invalidCreditCard |
 	
@@ -375,7 +305,7 @@ test01CreditCardShouldHaveAnOwner
 		self assert: invalidCreditCard isNil.
 	].! !
 
-!CreditCardTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/7/2019 17:41:38'!
+!CreditCardTest methodsFor: 'tests' stamp: 'JIG 6/7/2019 17:41:38'!
 test02IdentificationNumberShouldBeValid
 	| invalidCreditCard |
 	
@@ -386,15 +316,53 @@ test02IdentificationNumberShouldBeValid
 		self assert: invalidCreditCard isNil.
 	].! !
 
-!CreditCardTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/7/2019 18:04:24'!
+!CreditCardTest methodsFor: 'tests' stamp: 'JIG 6/7/2019 18:04:24'!
 test03AnCreditCardWithAnOldDateIsExpired
 	
 	self assert: (anExpiredCreditCard isExpiredOn: currentMonthOfYear).! !
 
-!CreditCardTest methodsFor: 'as yet unclassified' stamp: 'JIG 6/7/2019 17:45:39'!
+!CreditCardTest methodsFor: 'tests' stamp: 'JIG 6/7/2019 17:45:39'!
 test04AnCreditCardWithAFutureDateIsNotExpired
 	
 	self assert: (aValidCreditCard isExpiredOn: currentMonthOfYear) not.! !
+
+
+!CreditCardTest methodsFor: 'setup' stamp: 'NI 6/8/2019 19:38:16'!
+setUp
+
+	anExpiredCreditCard := CreditCard for: self ownerOfExpiredCreditCard expiringOn: self anExpiredDate anIDNumber: self anIDForExpiredCreditCard.
+	aValidCreditCard := CreditCard for: self ownerOfValidCreditCard expiringOn: self aValidExpirationDate anIDNumber: self anIDForValidCreditCard.
+	
+	currentMonthOfYear := self currentMonthOfYear.! !
+
+
+!CreditCardTest methodsFor: 'support' stamp: 'JIG 6/7/2019 17:03:05'!
+aValidExpirationDate
+	^June ofYear: (Date today + (Duration days: 365)) yearNumber.! !
+
+!CreditCardTest methodsFor: 'support' stamp: 'JIG 6/7/2019 17:03:13'!
+anExpiredDate
+	^May ofYear: 2019.! !
+
+!CreditCardTest methodsFor: 'support' stamp: 'JIG 6/7/2019 17:03:22'!
+anIDForExpiredCreditCard
+	^'4700000034541234'! !
+
+!CreditCardTest methodsFor: 'support' stamp: 'JIG 6/7/2019 17:24:55'!
+anIDForValidCreditCard
+	^'4700000034540007'! !
+
+!CreditCardTest methodsFor: 'support' stamp: 'NI 6/8/2019 19:38:06'!
+currentMonthOfYear
+	^GregorianMonthOfYear year: Date today year yearNumber month: (GregorianMonth named: Date today monthName).! !
+
+!CreditCardTest methodsFor: 'support' stamp: 'JIG 6/7/2019 17:24:23'!
+ownerOfExpiredCreditCard
+	^'Jose'.! !
+
+!CreditCardTest methodsFor: 'support' stamp: 'JIG 6/7/2019 17:24:38'!
+ownerOfValidCreditCard
+	^'Nico'.! !
 
 
 !classDefinition: #Cart category: #'TusLibros-Exercise'!
@@ -450,7 +418,7 @@ isEmpty
 	^items isEmpty ! !
 
 
-!Cart methodsFor: 'operations' stamp: 'JIG 6/7/2019 16:52:04'!
+!Cart methodsFor: 'operations' stamp: 'NI 6/8/2019 19:20:23'!
 generateSaleBody
 	| saleBody |
 	
@@ -459,7 +427,8 @@ generateSaleBody
 	items do: [ :anItem | 
 		| aBodyEntry | 
 		
-		aBodyEntry := Array with: (items occurrencesOf: anItem) with: (self priceOf: anItem).
+		aBodyEntry := self generateBodyEntryOf: anItem.
+		
 		saleBody at: anItem put: aBodyEntry.
 	].
 	
@@ -495,6 +464,12 @@ priceOf: anItem
 	
 	^priceCatalog at: anItem.! !
 
+
+!Cart methodsFor: 'private - operations' stamp: 'NI 6/8/2019 19:19:03'!
+generateBodyEntryOf: anItem
+	^Array with: (items occurrencesOf: anItem) with: (self priceOf: anItem)
+	 ! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Cart class' category: #'TusLibros-Exercise'!
@@ -522,21 +497,14 @@ initializeFor: aCart withSalesBook: aSalesBook andCreditCard: aCreditCard
 	self doCheckout.! !
 
 
-!Cashier methodsFor: 'operations' stamp: 'JIG 6/7/2019 18:03:58'!
+!Cashier methodsFor: 'operations' stamp: 'NI 6/8/2019 19:27:51'!
 doCheckout
-	| saleBody saleBookEntry currentMonthOfYear |
-	cart isEmpty ifTrue: [self error: self class cannotAcceptEmptyCartErrorDescription].
+	| saleBookEntry |
 	
-	currentMonthOfYear := GregorianMonthOfYear year: Date today year yearNumber month: (GregorianMonth named: Date today monthName).
- 	(creditCard isExpiredOn: currentMonthOfYear) ifTrue: [self error: self class cannotMakePaymentWithExpiredCreditCard ].
+	self assertCardIsNotEmpty.	
+	self assertCardIsNotExpired.
 	
-	saleBody := cart generateSaleBody.
-	
-	saleBookEntry := OrderedCollection new.
-	
-	saleBookEntry add: Date today.
-	saleBookEntry add: saleBody.
-	saleBookEntry add: cart totalPrice.
+	saleBookEntry := self createSaleBookEntry.
 	
 	salesBook add: saleBookEntry.! !
 
@@ -546,19 +514,50 @@ totalPrice
 
 	^cart totalPrice.! !
 
+
+!Cashier methodsFor: 'private' stamp: 'NI 6/8/2019 19:27:44'!
+createSaleBookEntry
+	| saleBody saleBookEntry |
+	
+	saleBody := cart generateSaleBody.
+	
+	saleBookEntry := OrderedCollection new.
+	
+	saleBookEntry add: Date today.
+	saleBookEntry add: saleBody.
+	saleBookEntry add: cart totalPrice.
+	
+	^saleBookEntry! !
+
+!Cashier methodsFor: 'private' stamp: 'NI 6/8/2019 19:22:59'!
+currentMonthOfYear
+	^GregorianMonthOfYear year: Date today year yearNumber month: (GregorianMonth named: Date today monthName)! !
+
+
+!Cashier methodsFor: 'assertions' stamp: 'NI 6/8/2019 19:25:07'!
+assertCardIsNotEmpty
+	cart isEmpty ifTrue: [self error: self class cannotAcceptEmptyCartErrorDescription].! !
+
+!Cashier methodsFor: 'assertions' stamp: 'NI 6/8/2019 19:24:17'!
+assertCardIsNotExpired
+	| currentMonthOfYear |
+	
+	currentMonthOfYear := self currentMonthOfYear.
+ 	(creditCard isExpiredOn: currentMonthOfYear) ifTrue: [self error: self class cannotMakePaymentWithExpiredCreditCardErrorDescription ].! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Cashier class' category: #'TusLibros-Exercise'!
 Cashier class
 	instanceVariableNames: ''!
 
-!Cashier class methodsFor: 'errors' stamp: 'JIG 6/6/2019 11:08:54'!
+!Cashier class methodsFor: 'error descriptions' stamp: 'NI 6/8/2019 19:37:02'!
 cannotAcceptEmptyCartErrorDescription
-	^'No se puede hacer checkout de un carrito vacio'.! !
+	^'No se puede hacer checkout de un carrito vacío'.! !
 
-!Cashier class methodsFor: 'errors' stamp: 'JIG 6/7/2019 16:46:15'!
-cannotMakePaymentWithExpiredCreditCard
-	^'No se puede realizar un pago con una tarjeta de credito expirada'.! !
+!Cashier class methodsFor: 'error descriptions' stamp: 'NI 6/8/2019 19:37:11'!
+cannotMakePaymentWithExpiredCreditCardErrorDescription
+	^'No se puede realizar un pago con una tarjeta de crédito vencida'.! !
 
 
 !Cashier class methodsFor: 'instance creation' stamp: 'JIG 6/7/2019 16:47:27'!
@@ -580,7 +579,7 @@ initializeFor: anOwner expiringOn: anExpirationDate anIDNumber: anIdentification
 	idNumber := anIdentificationNumber.! !
 
 
-!CreditCard methodsFor: 'as yet unclassified' stamp: 'JIG 6/7/2019 16:53:15'!
+!CreditCard methodsFor: 'testing' stamp: 'JIG 6/7/2019 16:53:15'!
 isExpiredOn: anExpirationDate
 	^expirationDate < anExpirationDate.! !
 
@@ -590,20 +589,32 @@ isExpiredOn: anExpirationDate
 CreditCard class
 	instanceVariableNames: ''!
 
-!CreditCard class methodsFor: 'instance creation' stamp: 'JIG 6/7/2019 17:40:01'!
+!CreditCard class methodsFor: 'instance creation' stamp: 'NI 6/8/2019 19:35:50'!
 for: anOwner expiringOn: anExpirationDate anIDNumber: anIdentificationNumber 
-	(anOwner isEmpty or: [anOwner isString not]) ifTrue: [ self error: self ownerCannotBeEmptyErrorDescription ].
-	(anIdentificationNumber isString 
-		and: [ (anIdentificationNumber allSatisfy: [:aCharacter | aCharacter isDigit ]) 
-		and: [ anIdentificationNumber size = 16 ]]) ifFalse: [ self error: self identificationNumberMustBeValidErrorDescription ].
+	self assertOwnerIsValid: anOwner.
+	self assertIdentificationNumberIsValid: anIdentificationNumber.
 	
 	^self new initializeFor: anOwner expiringOn: anExpirationDate anIDNumber: anIdentificationNumber.
 		! !
 
-!CreditCard class methodsFor: 'instance creation' stamp: 'JIG 6/7/2019 17:40:15'!
-identificationNumberMustBeValidErrorDescription
-	^'El numero de tarjeta de credito debe poseer 16 digitos'.! !
 
-!CreditCard class methodsFor: 'instance creation' stamp: 'JIG 6/7/2019 17:21:22'!
+!CreditCard class methodsFor: 'error descriptions' stamp: 'NI 6/8/2019 19:36:27'!
+identificationNumberMustBeValidErrorDescription
+	^'El número de la tarjeta de crédito debe poseer 16 digitos'.! !
+
+!CreditCard class methodsFor: 'error descriptions' stamp: 'JIG 6/7/2019 17:21:22'!
 ownerCannotBeEmptyErrorDescription
 	^'La tarjeta debe tener propietario'.! !
+
+
+!CreditCard class methodsFor: 'assertions' stamp: 'NI 6/8/2019 19:35:44'!
+assertIdentificationNumberIsValid: anIdentificationNumber.
+	(anIdentificationNumber isString 
+		and: [ (anIdentificationNumber allSatisfy: [:aCharacter | aCharacter isDigit ]) 
+		and: [ anIdentificationNumber size = 16 ]]) ifFalse: [ self error: self identificationNumberMustBeValidErrorDescription ].
+		! !
+
+!CreditCard class methodsFor: 'assertions' stamp: 'NI 6/8/2019 19:34:51'!
+assertOwnerIsValid: anOwner.
+	(anOwner isEmpty or: [anOwner isString not]) ifTrue: [ self error: self ownerCannotBeEmptyErrorDescription ].
+		! !
