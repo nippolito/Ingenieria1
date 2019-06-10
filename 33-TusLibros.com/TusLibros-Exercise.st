@@ -1,6 +1,6 @@
 !classDefinition: #CartTest category: #'TusLibros-Exercise'!
 TestCase subclass: #CartTest
-	instanceVariableNames: 'testFacility'
+	instanceVariableNames: 'testFacility emptyCart'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Exercise'!
@@ -10,132 +10,88 @@ test01NewCartsAreCreatedEmpty
 
 	self assert: testFacility createCart isEmpty! !
 
-!CartTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:26:48'!
+!CartTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 14:17:37'!
 test02CanNotAddItemsThatDoNotBelongToStore
-
-	| cart |
-	
-	cart := testFacility createCart.
 	
 	self 
-		should: [ cart add: self itemNotSellByTheStore ]
+		should: [ emptyCart add: self itemNotSellByTheStore ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = cart invalidItemErrorMessage.
-			self assert: cart isEmpty ]! !
+			self assert: anError messageText = emptyCart invalidItemErrorMessage.
+			self assert: emptyCart isEmpty ]! !
 
-!CartTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:27:02'!
+!CartTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 14:17:37'!
 test03AfterAddingAnItemTheCartIsNotEmptyAnymore
-
-	| cart |
 	
-	cart := testFacility createCart.
-	
-	cart add: testFacility itemSellByTheStore.
-	self deny: cart isEmpty ! !
+	emptyCart add: testFacility itemSellByTheStore.
+	self deny: emptyCart isEmpty ! !
 
-!CartTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:27:12'!
+!CartTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 14:18:01'!
 test04CanNotAddNonPositiveNumberOfItems
-
-	| cart |
-	
-	cart := testFacility createCart.
 	
 	self 
-		should: [cart add: 0 of: testFacility itemSellByTheStore ]
+		should: [emptyCart add: 0 of: testFacility itemSellByTheStore ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = cart invalidQuantityErrorMessage.
-			self assert: cart isEmpty ]! !
+			self assert: anError messageText = emptyCart invalidQuantityErrorMessage.
+			self assert: emptyCart isEmpty ]! !
 
-!CartTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:27:22'!
+!CartTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 14:18:18'!
 test05CanNotAddMoreThanOneItemNotSellByTheStore
-
-	| cart |
-	
-	cart := testFacility createCart.
 	
 	self 
-		should: [cart add: 2 of: self itemNotSellByTheStore  ]
+		should: [emptyCart add: 2 of: self itemNotSellByTheStore  ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = cart invalidItemErrorMessage.
-			self assert: cart isEmpty ]! !
+			self assert: anError messageText = emptyCart invalidItemErrorMessage.
+			self assert: emptyCart isEmpty ]! !
 
-!CartTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:27:42'!
+!CartTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 14:18:33'!
 test06CartRemembersAddedItems
-
-	| cart |
 	
-	cart := testFacility createCart.
-	
-	cart add: testFacility itemSellByTheStore.
-	self assert: (cart includes: testFacility itemSellByTheStore)! !
+	emptyCart add: testFacility itemSellByTheStore.
+	self assert: (emptyCart includes: testFacility itemSellByTheStore)! !
 
-!CartTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:27:50'!
+!CartTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 14:18:44'!
 test07CartDoesNotHoldNotAddedItems
-
-	| cart |
 	
-	cart := testFacility createCart.
-	
-	self deny: (cart includes: testFacility itemSellByTheStore)! !
+	self deny: (emptyCart includes: testFacility itemSellByTheStore)! !
 
-!CartTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:28:05'!
+!CartTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 14:18:58'!
 test08CartRemembersTheNumberOfAddedItems
-
-	| cart |
 	
-	cart := testFacility createCart.
-	
-	cart add: 2 of: testFacility itemSellByTheStore.
-	self assert: (cart occurrencesOf: testFacility itemSellByTheStore) equals: 2! !
+	emptyCart add: 2 of: testFacility itemSellByTheStore.
+	self assert: (emptyCart occurrencesOf: testFacility itemSellByTheStore) equals: 2! !
 
-!CartTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:28:20'!
+!CartTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 14:19:20'!
 test09CartWithOneItemTotalPriceEqualsThatItemPrice
+	
+	emptyCart add: testFacility itemSellByTheStore.
+	
+	self assert: emptyCart totalPrice = (testFacility defaultCatalog at: testFacility itemSellByTheStore).! !
 
-	| cart |
-	
-	cart := testFacility createCart.
-	
-	cart add: testFacility itemSellByTheStore.
-	
-	self assert: cart totalPrice = (testFacility defaultCatalog at: testFacility itemSellByTheStore).! !
-
-!CartTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:28:42'!
+!CartTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 14:28:28'!
 test10CartWithManyItemsTotalPriceEqualsToCartItemListPricesSummed
+	
+	emptyCart add: testFacility itemSellByTheStore.
+	emptyCart add: testFacility anotherItemSellByTheStore.  
+	
+	self assert: emptyCart totalPrice equals: (testFacility defaultCatalog at: testFacility itemSellByTheStore) + (testFacility defaultCatalog at: testFacility anotherItemSellByTheStore).! !
 
-	| cart |
-	
-	cart := testFacility createCart.
-	
-	cart add: testFacility itemSellByTheStore.
-	cart add: testFacility anotherItemSellByTheStore.  
-	
-	self assert: cart totalPrice equals: (testFacility defaultCatalog at: testFacility itemSellByTheStore) + (testFacility defaultCatalog at: testFacility anotherItemSellByTheStore).! !
-
-!CartTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:28:57'!
+!CartTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 14:28:51'!
 test11CartWithOneItemGeneratesSaleBodyCorrectly
+	
+	emptyCart add: testFacility itemSellByTheStore.
+	
+	self assert: emptyCart generateSaleBody equals: (Dictionary newFromPairs: {testFacility itemSellByTheStore. #(1 200).}).! !
 
-	| cart |
-	
-	cart := testFacility createCart.
-	
-	cart add: testFacility itemSellByTheStore.
-	
-	self assert: cart generateSaleBody equals: (Dictionary newFromPairs: {testFacility itemSellByTheStore. #(1 200).}).! !
-
-!CartTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:29:15'!
+!CartTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 14:29:06'!
 test12CartWithManyItemsGeneratesSaleBodyCorrectly
-
-	| cart |
 	
-	cart := testFacility createCart.
+	emptyCart add: testFacility itemSellByTheStore.
+	emptyCart add: testFacility anotherItemSellByTheStore.
 	
-	cart add: testFacility itemSellByTheStore.
-	cart add: testFacility anotherItemSellByTheStore.
-	
-	self assert: cart generateSaleBody equals: (Dictionary newFromPairs: {testFacility itemSellByTheStore. #(1 200). testFacility anotherItemSellByTheStore. #(1 150).}).! !
+	self assert: emptyCart generateSaleBody equals: (Dictionary newFromPairs: {testFacility itemSellByTheStore. #(1 200). testFacility anotherItemSellByTheStore. #(1 150).}).! !
 
 
 !CartTest methodsFor: 'support' stamp: 'JIG 6/7/2019 14:52:21'!
@@ -144,9 +100,11 @@ itemNotSellByTheStore
 	^'invalidBook'! !
 
 
-!CartTest methodsFor: 'setup' stamp: 'NI 6/9/2019 15:31:55'!
+!CartTest methodsFor: 'setup' stamp: 'Nipo 6/10/2019 14:17:37'!
 setUp
-	testFacility := TestFacility new.! !
+	testFacility := TestFacility new.
+	
+	emptyCart := testFacility createCart.! !
 
 
 !classDefinition: #CashierTest category: #'TusLibros-Exercise'!
@@ -183,8 +141,8 @@ test02CashierForANonEmptyCartCalculatesCartTotalPriceCorrectly
 	self assert: cashier totalPrice equals: (testFacility defaultCatalog at: testFacility itemSellByTheStore).
 	! !
 
-!CashierTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:29:23'!
-test03CashierForANonEmptyCartAddsANewSaleEntryCorrectly
+!CashierTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 15:01:47'!
+test03CashierForANonEmptyCartAddsANewSaleEntryOnASuccessfullCheckOut
 	
 	Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook payingWith: aValidCreditCard andProcessingWith: aMerchantProcessor.
 	
@@ -194,12 +152,23 @@ test03CashierForANonEmptyCartAddsANewSaleEntryCorrectly
 	
 	! !
 
-!CashierTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:29:23'!
-test04CannotMakePaymentWithAnExpiredCreditCard
+!CashierTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 15:23:37'!
+test04CashierForANonEmptyCartChargesTotalPriceToCreditCard
+	
+	| cashier merchantProcessorChargesAmount |
+	
+	cashier := Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook payingWith: aValidCreditCard andProcessingWith: aMerchantProcessor.
+	merchantProcessorChargesAmount := aMerchantProcessor chargesAmount copy.
+	
+	self assert: merchantProcessorChargesAmount equals: aMerchantProcessor chargesAmount.
+	self assert: aMerchantProcessor lastCharge equals: cashier totalPrice.
+	! !
+
+!CashierTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 15:23:54'!
+test05CannotMakePaymentWithAnExpiredCreditCard
 	| salesBookBeforeSale merchantProcessorChargesAmount |
 	
 	salesBookBeforeSale := anEmptySalesBook copy.
-	
 	merchantProcessorChargesAmount := aMerchantProcessor chargesAmount copy.
 	
 	self should: [Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook payingWith: anExpiredCreditCard andProcessingWith: aMerchantProcessor]
@@ -212,12 +181,11 @@ test04CannotMakePaymentWithAnExpiredCreditCard
 	
 	! !
 
-!CashierTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:54:21'!
-test05CannotMakePaymentWithAStolenCreditCard
+!CashierTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 15:23:48'!
+test06CannotMakePaymentWithAStolenCreditCard
 	| salesBookBeforeSale aStolenCreditCard merchantProcessorChargesAmount |
 	
 	salesBookBeforeSale := anEmptySalesBook copy.
-	
 	aStolenCreditCard := CreditCard for: 'Juan Carlos' expiringOn: testFacility aValidExpirationDate withIDNumber: self anIDForStolenCreditCard.
 	merchantProcessorChargesAmount := aMerchantProcessor chargesAmount copy.
 	
@@ -231,12 +199,11 @@ test05CannotMakePaymentWithAStolenCreditCard
 	
 	! !
 
-!CashierTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:54:21'!
-test06CannotMakePaymentWithACardWithNoFunds
+!CashierTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 15:23:45'!
+test07CannotMakePaymentWithACardWithNoFunds
 	| salesBookBeforeSale aLowFundsCreditCard merchantProcessorChargesAmount |
 	
 	salesBookBeforeSale := anEmptySalesBook copy.
-	
 	aLowFundsCreditCard := CreditCard for: 'Juan Carlos' expiringOn: testFacility aValidExpirationDate withIDNumber: self anIDForALowFundsCreditCard.
 	merchantProcessorChargesAmount := aMerchantProcessor chargesAmount copy.
 	
@@ -250,19 +217,28 @@ test06CannotMakePaymentWithACardWithNoFunds
 	
 	! !
 
-!CashierTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:29:23'!
-test07CashierForANonEmptyCartChargesTotalPriceToCreditCard
+!CashierTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 15:23:41'!
+test08CannotMakePaymentIfCardOwnerIsMoreThan30CharactersLong
+	| salesBookBeforeSale merchantProcessorChargesAmount aCreditCardWithLongOwnerName |
 	
-	| cashier merchantProcessorChargesAmount |
-	
-	cashier := Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook payingWith: aValidCreditCard andProcessingWith: aMerchantProcessor.
-	
+	salesBookBeforeSale := anEmptySalesBook copy.
+	aCreditCardWithLongOwnerName := CreditCard for: self aLongOwnerName expiringOn: testFacility aValidExpirationDate withIDNumber: testFacility anIDForValidCreditCard.
 	merchantProcessorChargesAmount := aMerchantProcessor chargesAmount copy.
 	
-	self assert: merchantProcessorChargesAmount equals: aMerchantProcessor chargesAmount.
-	self assert: aMerchantProcessor lastCharge equals: cashier totalPrice.
+	self should: [Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook payingWith: aCreditCardWithLongOwnerName andProcessingWith: aMerchantProcessor]
+	raise: Error 
+	withExceptionDo: [:anError |
+		self assert: anError messageText equals: MerchantProcessorInternalSimulator creditCardOwnerShouldHaveLessThan30CharactersErrorDescription.
+		self assert: anEmptySalesBook equals: salesBookBeforeSale.
+		self assert: merchantProcessorChargesAmount equals: aMerchantProcessor chargesAmount.
+	].
+	
 	! !
 
+
+!CashierTest methodsFor: 'support' stamp: 'Nipo 6/10/2019 14:56:29'!
+aLongOwnerName
+	^'Nicolazakimisapetalil Ippolizitakytian'! !
 
 !CashierTest methodsFor: 'support' stamp: 'NI 6/9/2019 15:51:50'!
 anIDForALowFundsCreditCard
@@ -308,30 +284,8 @@ TestCase subclass: #CreditCardTest
 	poolDictionaries: ''
 	category: 'TusLibros-Exercise'!
 
-!CreditCardTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:17:00'!
-test01CreditCardShouldHaveAnOwner
-	| invalidCreditCard |
-	
-	self should: [ invalidCreditCard := CreditCard for: '' expiringOn: testFacility aValidExpirationDate withIDNumber: testFacility anIDForValidCreditCard ]
-	raise: Error
-	withExceptionDo: [ :anError | 
-		CreditCard ownerCannotBeEmptyErrorDescription = anError messageText.
-		self assert: invalidCreditCard isNil.
-	].! !
-
-!CreditCardTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:17:00'!
-test02CreditCardOwnerShouldHaveNoMoreThan30Characters
-	| invalidCreditCard |
-	
-	self should: [ invalidCreditCard := CreditCard for: 'juan ignacio grandoso nicolas ippolito' expiringOn: testFacility aValidExpirationDate withIDNumber: testFacility anIDForValidCreditCard ]
-	raise: Error
-	withExceptionDo: [ :anError | 
-		CreditCard ownerShouldHaveLessThan30CharactersErrorDescription = anError messageText.
-		self assert: invalidCreditCard isNil.
-	].! !
-
-!CreditCardTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:17:00'!
-test03IdentificationNumberShouldBeValid
+!CreditCardTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 15:00:00'!
+test02IdentificationNumberShouldBeValid
 	| invalidCreditCard |
 	
 	self should: [ invalidCreditCard := CreditCard for: testFacility ownerOfValidCreditCard expiringOn: testFacility aValidExpirationDate withIDNumber: '2423' ]
@@ -341,13 +295,13 @@ test03IdentificationNumberShouldBeValid
 		self assert: invalidCreditCard isNil.
 	].! !
 
-!CreditCardTest methodsFor: 'tests' stamp: 'NI 6/9/2019 13:46:14'!
-test04AnCreditCardWithAnOldDateIsExpired
+!CreditCardTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 15:00:18'!
+test03ACreditCardWithAnOldExpirationDateIsExpired
 	
 	self assert: (anExpiredCreditCard isExpiredOn: currentMonthOfYear).! !
 
-!CreditCardTest methodsFor: 'tests' stamp: 'NI 6/9/2019 13:46:11'!
-test05AnCreditCardWithAFutureDateIsNotExpired
+!CreditCardTest methodsFor: 'tests' stamp: 'Nipo 6/10/2019 15:00:22'!
+test04ACreditCardWithAFutureExpirationDateIsNotExpired
 	
 	self assert: (aValidCreditCard isExpiredOn: currentMonthOfYear) not.! !
 
@@ -367,6 +321,17 @@ setUp
 currentMonthOfYear
 	^GregorianMonthOfYear year: Date today year yearNumber month: (GregorianMonth named: Date today monthName).! !
 
+!CreditCardTest methodsFor: 'support' stamp: 'NI 6/10/2019 10:17:00'!
+test01CreditCardShouldHaveAnOwner
+	| invalidCreditCard |
+	
+	self should: [ invalidCreditCard := CreditCard for: '' expiringOn: testFacility aValidExpirationDate withIDNumber: testFacility anIDForValidCreditCard ]
+	raise: Error
+	withExceptionDo: [ :anError | 
+		CreditCard ownerCannotBeEmptyErrorDescription = anError messageText.
+		self assert: invalidCreditCard isNil.
+	].! !
+
 
 !classDefinition: #Cart category: #'TusLibros-Exercise'!
 Object subclass: #Cart
@@ -375,15 +340,32 @@ Object subclass: #Cart
 	poolDictionaries: ''
 	category: 'TusLibros-Exercise'!
 
-!Cart methodsFor: 'error messages' stamp: 'HernanWilkinson 6/17/2013 17:45'!
-invalidItemErrorMessage
-	
-	^'Item is not in catalog'! !
+!Cart methodsFor: 'accessing' stamp: 'JIG 6/6/2019 11:32:17'!
+items
+	^items.! !
 
-!Cart methodsFor: 'error messages' stamp: 'HernanWilkinson 6/17/2013 17:45'!
-invalidQuantityErrorMessage
-	
-	^'Invalid number of items'! !
+!Cart methodsFor: 'accessing' stamp: 'HernanWilkinson 6/17/2013 17:45'!
+occurrencesOf: anItem
+
+	^items occurrencesOf: anItem  ! !
+
+!Cart methodsFor: 'accessing' stamp: 'JIG 6/7/2019 15:01:51'!
+totalPrice
+	^items sum: [ :anItem | self priceOf: anItem ].! !
+
+
+!Cart methodsFor: 'adding' stamp: 'HernanWilkinson 6/17/2013 17:44'!
+add: anItem
+
+	^ self add: 1 of: anItem ! !
+
+!Cart methodsFor: 'adding' stamp: 'JIG 6/7/2019 15:25:04'!
+add: aQuantity of: anItem
+
+	self assertIsValidQuantity: aQuantity.
+	self assertIsValidItem: anItem.
+
+	items add: anItem withOccurrences: aQuantity.! !
 
 
 !Cart methodsFor: 'assertions' stamp: 'JIG 6/7/2019 14:54:30'!
@@ -397,6 +379,17 @@ assertIsValidQuantity: aQuantity
 	aQuantity strictlyPositive ifFalse: [ self error: self invalidQuantityErrorMessage ]! !
 
 
+!Cart methodsFor: 'error messages' stamp: 'HernanWilkinson 6/17/2013 17:45'!
+invalidItemErrorMessage
+	
+	^'Item is not in catalog'! !
+
+!Cart methodsFor: 'error messages' stamp: 'HernanWilkinson 6/17/2013 17:45'!
+invalidQuantityErrorMessage
+	
+	^'Invalid number of items'! !
+
+
 !Cart methodsFor: 'initialization' stamp: 'JIG 6/7/2019 15:24:15'!
 initializeAcceptingItemsOf: aPricedCatalog
 
@@ -404,24 +397,7 @@ initializeAcceptingItemsOf: aPricedCatalog
 	items := Bag new.! !
 
 
-!Cart methodsFor: 'queries' stamp: 'HernanWilkinson 6/17/2013 17:45'!
-occurrencesOf: anItem
-
-	^items occurrencesOf: anItem  ! !
-
-
-!Cart methodsFor: 'testing' stamp: 'HernanWilkinson 6/17/2013 17:44'!
-includes: anItem
-
-	^items includes: anItem ! !
-
-!Cart methodsFor: 'testing' stamp: 'HernanWilkinson 6/17/2013 17:44'!
-isEmpty
-	
-	^items isEmpty ! !
-
-
-!Cart methodsFor: 'operations' stamp: 'NI 6/8/2019 19:20:23'!
+!Cart methodsFor: 'sale body' stamp: 'NI 6/8/2019 19:20:23'!
 generateSaleBody
 	| saleBody |
 	
@@ -439,27 +415,15 @@ generateSaleBody
 	 ! !
 
 
-!Cart methodsFor: 'adding' stamp: 'HernanWilkinson 6/17/2013 17:44'!
-add: anItem
+!Cart methodsFor: 'testing' stamp: 'HernanWilkinson 6/17/2013 17:44'!
+includes: anItem
 
-	^ self add: 1 of: anItem ! !
+	^items includes: anItem ! !
 
-!Cart methodsFor: 'adding' stamp: 'JIG 6/7/2019 15:25:04'!
-add: aQuantity of: anItem
-
-	self assertIsValidQuantity: aQuantity.
-	self assertIsValidItem: anItem.
-
-	items add: anItem withOccurrences: aQuantity.! !
-
-
-!Cart methodsFor: 'accessing' stamp: 'JIG 6/6/2019 11:32:17'!
-items
-	^items.! !
-
-!Cart methodsFor: 'accessing' stamp: 'JIG 6/7/2019 15:01:51'!
-totalPrice
-	^items sum: [ :anItem | self priceOf: anItem ].! !
+!Cart methodsFor: 'testing' stamp: 'HernanWilkinson 6/17/2013 17:44'!
+isEmpty
+	
+	^items isEmpty ! !
 
 
 !Cart methodsFor: 'private - accessing' stamp: 'JIG 6/7/2019 16:04:22'!
@@ -468,7 +432,7 @@ priceOf: anItem
 	^priceCatalog at: anItem.! !
 
 
-!Cart methodsFor: 'private - operations' stamp: 'NI 6/8/2019 19:19:03'!
+!Cart methodsFor: 'private - sale body' stamp: 'NI 6/8/2019 19:19:03'!
 generateBodyEntryOf: anItem
 	^Array with: (items occurrencesOf: anItem) with: (self priceOf: anItem)
 	 ! !
@@ -621,10 +585,6 @@ identificationNumberMustBeValidErrorDescription
 ownerCannotBeEmptyErrorDescription
 	^'La tarjeta debe tener propietario'.! !
 
-!CreditCard class methodsFor: 'error descriptions' stamp: 'NI 6/9/2019 13:44:39'!
-ownerShouldHaveLessThan30CharactersErrorDescription
-	^'El nombre del propietario debe tener menos de 30 caracteres'.! !
-
 
 !CreditCard class methodsFor: 'assertions' stamp: 'NI 6/8/2019 19:35:44'!
 assertIdentificationNumberIsValid: anIdentificationNumber.
@@ -633,9 +593,9 @@ assertIdentificationNumberIsValid: anIdentificationNumber.
 		and: [ anIdentificationNumber size = 16 ]]) ifFalse: [ self error: self identificationNumberMustBeValidErrorDescription ].
 		! !
 
-!CreditCard class methodsFor: 'assertions' stamp: 'NI 6/9/2019 13:45:35'!
+!CreditCard class methodsFor: 'assertions' stamp: 'Nipo 6/10/2019 14:45:14'!
 assertOwnerIsValid: anOwner.
-	(anOwner isEmpty or: [anOwner isString not] or: [anOwner size > 30]) ifTrue: [ self error: self ownerCannotBeEmptyErrorDescription ].
+	(anOwner isEmpty or: [anOwner isString not]) ifTrue: [ self error: self ownerCannotBeEmptyErrorDescription ].
 		! !
 
 
@@ -663,16 +623,21 @@ assertCreditCard: aCreditCard hasFundsToPay: anAmount.
 assertCreditCardIsNotStolen: aCreditCard
 	(self class stolenCreditCards includes: aCreditCard idNumber) ifTrue: [self error: self class stolenCreditCardErrorDescription].! !
 
+!MerchantProcessorInternalSimulator methodsFor: 'assertions' stamp: 'Nipo 6/10/2019 14:44:51'!
+assertCreditCardOwnerHasLessThan30Characters: aCreditCard.
+	aCreditCard owner size > 30 ifTrue: [ self error: self class creditCardOwnerShouldHaveLessThan30CharactersErrorDescription].! !
+
 
 !MerchantProcessorInternalSimulator methodsFor: 'charging' stamp: 'NI 6/9/2019 14:00:20'!
 addChargeFor: anAmount.
 	charges add: anAmount.! !
 
 
-!MerchantProcessorInternalSimulator methodsFor: 'debit' stamp: 'NI 6/10/2019 10:16:26'!
+!MerchantProcessorInternalSimulator methodsFor: 'debit' stamp: 'Nipo 6/10/2019 14:43:04'!
 debit: anAmount to: aCreditCard
 	self assertCreditCardIsNotStolen: aCreditCard.
 	self assertCreditCard: aCreditCard hasFundsToPay: anAmount.
+	self assertCreditCardOwnerHasLessThan30Characters: aCreditCard.
 	
 	self addChargeFor: anAmount.! !
 
@@ -691,6 +656,10 @@ MerchantProcessorInternalSimulator class
 !MerchantProcessorInternalSimulator class methodsFor: 'error descriptions' stamp: 'NI 6/10/2019 10:19:38'!
 creditCardHasNoFundsErrorDescription
 	^'Pago inválido: la tarjeta de crédito no tiene suficiente dinero como para pagar ese monto'! !
+
+!MerchantProcessorInternalSimulator class methodsFor: 'error descriptions' stamp: 'Nipo 6/10/2019 14:30:32'!
+creditCardOwnerShouldHaveLessThan30CharactersErrorDescription
+	^'Pago inválido: El nombre del propietario debe tener menos de 30 caracteres'.! !
 
 !MerchantProcessorInternalSimulator class methodsFor: 'error descriptions' stamp: 'NI 6/9/2019 12:36:54'!
 stolenCreditCardErrorDescription
