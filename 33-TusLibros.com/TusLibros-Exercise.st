@@ -156,7 +156,7 @@ TestCase subclass: #CashierTest
 	poolDictionaries: ''
 	category: 'TusLibros-Exercise'!
 
-!CashierTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:32:56'!
+!CashierTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:29:23'!
 test01CashierShouldNotCheckOutEmptyCart
 	
 	| anEmptyCart saleBookBeforeCheckout merchantProcessorChargesAmount |
@@ -165,7 +165,7 @@ test01CashierShouldNotCheckOutEmptyCart
 	anEmptyCart := Cart acceptingItemsOf: testFacility defaultCatalog.
 	merchantProcessorChargesAmount := aMerchantProcessor chargesAmount copy.
 	
-	self should: [ Cashier checkout: anEmptyCart withSalesBook: anEmptySalesBook andMakePaymentWith: aValidCreditCard andProcessWith: aMerchantProcessor]
+	self should: [ Cashier checkout: anEmptyCart withSalesBook: anEmptySalesBook payingWith: aValidCreditCard andProcessingWith: aMerchantProcessor]
 	raise: Error 
 	withExceptionDo: [ :anError | 
 		self assert: anError messageText equals: Cashier cannotAcceptEmptyCartErrorDescription.
@@ -173,20 +173,20 @@ test01CashierShouldNotCheckOutEmptyCart
 		self assert: merchantProcessorChargesAmount equals: aMerchantProcessor chargesAmount.
 	].! !
 
-!CashierTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:33:04'!
+!CashierTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:29:23'!
 test02CashierForANonEmptyCartCalculatesCartTotalPriceCorrectly
 	
 	| cashier |
 	
-	cashier := Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook andMakePaymentWith: aValidCreditCard andProcessWith: aMerchantProcessor.
+	cashier := Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook payingWith: aValidCreditCard andProcessingWith: aMerchantProcessor.
 	
 	self assert: cashier totalPrice equals: (testFacility defaultCatalog at: testFacility itemSellByTheStore).
 	! !
 
-!CashierTest methodsFor: 'tests' stamp: 'NI 6/9/2019 14:33:41'!
+!CashierTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:29:23'!
 test03CashierForANonEmptyCartAddsANewSaleEntryCorrectly
 	
-	Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook andMakePaymentWith: aValidCreditCard andProcessWith: aMerchantProcessor.
+	Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook payingWith: aValidCreditCard andProcessingWith: aMerchantProcessor.
 	
 	self assert: anEmptySalesBook size equals: 1.
 	self assert: (anEmptySalesBook at: 1) equals: (OrderedCollection with: Date today with: aSingleCart generateSaleBody with: aSingleCart totalPrice).
@@ -194,7 +194,7 @@ test03CashierForANonEmptyCartAddsANewSaleEntryCorrectly
 	
 	! !
 
-!CashierTest methodsFor: 'tests' stamp: 'NI 6/9/2019 14:33:33'!
+!CashierTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:29:23'!
 test04CannotMakePaymentWithAnExpiredCreditCard
 	| salesBookBeforeSale merchantProcessorChargesAmount |
 	
@@ -202,7 +202,7 @@ test04CannotMakePaymentWithAnExpiredCreditCard
 	
 	merchantProcessorChargesAmount := aMerchantProcessor chargesAmount copy.
 	
-	self should: [Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook andMakePaymentWith: anExpiredCreditCard andProcessWith: aMerchantProcessor]
+	self should: [Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook payingWith: anExpiredCreditCard andProcessingWith: aMerchantProcessor]
 	raise: Error 
 	withExceptionDo: [:anError |
 		self assert: anError messageText equals: Cashier cannotMakePaymentWithExpiredCreditCardErrorDescription.
@@ -212,50 +212,50 @@ test04CannotMakePaymentWithAnExpiredCreditCard
 	
 	! !
 
-!CashierTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:33:17'!
-test05CannotMakePaymentWithStolenCreditCard
+!CashierTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:54:21'!
+test05CannotMakePaymentWithAStolenCreditCard
 	| salesBookBeforeSale aStolenCreditCard merchantProcessorChargesAmount |
 	
 	salesBookBeforeSale := anEmptySalesBook copy.
 	
-	aStolenCreditCard := CreditCard for: 'Juan Carlos' expiringOn: testFacility aValidExpirationDate anIDNumber: self anIDForStolenCreditCard.
+	aStolenCreditCard := CreditCard for: 'Juan Carlos' expiringOn: testFacility aValidExpirationDate withIDNumber: self anIDForStolenCreditCard.
 	merchantProcessorChargesAmount := aMerchantProcessor chargesAmount copy.
 	
-	self should: [Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook andMakePaymentWith: aStolenCreditCard andProcessWith: aMerchantProcessor]
+	self should: [Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook payingWith: aStolenCreditCard andProcessingWith: aMerchantProcessor]
 	raise: Error 
 	withExceptionDo: [:anError |
-		self assert: anError messageText equals: InternMerchantProcessorSimulator stolenCreditCardErrorDescription.
+		self assert: anError messageText equals: MerchantProcessorInternalSimulator stolenCreditCardErrorDescription.
 		self assert: anEmptySalesBook equals: salesBookBeforeSale.
 		self assert: merchantProcessorChargesAmount equals: aMerchantProcessor chargesAmount.
 	].
 	
 	! !
 
-!CashierTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:54:43'!
-test06CannotMakePaymentWithCardWithNoCredit
+!CashierTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:54:21'!
+test06CannotMakePaymentWithACardWithNoFunds
 	| salesBookBeforeSale aLowFundsCreditCard merchantProcessorChargesAmount |
 	
 	salesBookBeforeSale := anEmptySalesBook copy.
 	
-	aLowFundsCreditCard := CreditCard for: 'Juan Carlos' expiringOn: testFacility aValidExpirationDate anIDNumber: self anIDForALowFundsCreditCard.
+	aLowFundsCreditCard := CreditCard for: 'Juan Carlos' expiringOn: testFacility aValidExpirationDate withIDNumber: self anIDForALowFundsCreditCard.
 	merchantProcessorChargesAmount := aMerchantProcessor chargesAmount copy.
 	
-	self should: [Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook andMakePaymentWith: aLowFundsCreditCard andProcessWith: aMerchantProcessor]
+	self should: [Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook payingWith: aLowFundsCreditCard andProcessingWith: aMerchantProcessor]
 	raise: Error 
 	withExceptionDo: [:anError |
-		self assert: anError messageText equals: InternMerchantProcessorSimulator creditCardHasNoCreditErrorDescription.
+		self assert: anError messageText equals: MerchantProcessorInternalSimulator creditCardHasNoFundsErrorDescription.
 		self assert: anEmptySalesBook equals: salesBookBeforeSale.
 		self assert: merchantProcessorChargesAmount equals: aMerchantProcessor chargesAmount.
 	].
 	
 	! !
 
-!CashierTest methodsFor: 'tests' stamp: 'NI 6/9/2019 14:23:23'!
+!CashierTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:29:23'!
 test07CashierForANonEmptyCartChargesTotalPriceToCreditCard
 	
 	| cashier merchantProcessorChargesAmount |
 	
-	cashier := Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook andMakePaymentWith: aValidCreditCard andProcessWith: aMerchantProcessor.
+	cashier := Cashier checkout: aSingleCart withSalesBook: anEmptySalesBook payingWith: aValidCreditCard andProcessingWith: aMerchantProcessor.
 	
 	merchantProcessorChargesAmount := aMerchantProcessor chargesAmount copy.
 	
@@ -276,12 +276,12 @@ anIDForStolenCreditCard
 createEmptySalesBook
 	^OrderedCollection new.! !
 
-!CashierTest methodsFor: 'support' stamp: 'NI 6/9/2019 14:03:30'!
+!CashierTest methodsFor: 'support' stamp: 'NI 6/10/2019 10:54:21'!
 newMerchantProcessor
-	^ InternMerchantProcessorSimulator new.! !
+	^ MerchantProcessorInternalSimulator new.! !
 
 
-!CashierTest methodsFor: 'setup' stamp: 'NI 6/9/2019 15:32:36'!
+!CashierTest methodsFor: 'setup' stamp: 'NI 6/10/2019 10:17:00'!
 setUp
 
 	testFacility := TestFacility new.
@@ -295,8 +295,8 @@ setUp
 	
 	anEmptySalesBook := self createEmptySalesBook.
 	
-	anExpiredCreditCard := CreditCard for: testFacility ownerOfExpiredCreditCard expiringOn: testFacility anExpiredDate anIDNumber: testFacility anIDForExpiredCreditCard.
-	aValidCreditCard := CreditCard for: testFacility ownerOfValidCreditCard expiringOn: testFacility aValidExpirationDate anIDNumber: testFacility anIDForValidCreditCard.
+	anExpiredCreditCard := CreditCard for: testFacility ownerOfExpiredCreditCard expiringOn: testFacility anExpiredDate withIDNumber: testFacility anIDForExpiredCreditCard.
+	aValidCreditCard := CreditCard for: testFacility ownerOfValidCreditCard expiringOn: testFacility aValidExpirationDate withIDNumber: testFacility anIDForValidCreditCard.
 	
 	aMerchantProcessor := self newMerchantProcessor.! !
 
@@ -308,33 +308,33 @@ TestCase subclass: #CreditCardTest
 	poolDictionaries: ''
 	category: 'TusLibros-Exercise'!
 
-!CreditCardTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:34:54'!
+!CreditCardTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:17:00'!
 test01CreditCardShouldHaveAnOwner
 	| invalidCreditCard |
 	
-	self should: [ invalidCreditCard := CreditCard for: '' expiringOn: testFacility aValidExpirationDate anIDNumber: testFacility anIDForValidCreditCard ]
+	self should: [ invalidCreditCard := CreditCard for: '' expiringOn: testFacility aValidExpirationDate withIDNumber: testFacility anIDForValidCreditCard ]
 	raise: Error
 	withExceptionDo: [ :anError | 
 		CreditCard ownerCannotBeEmptyErrorDescription = anError messageText.
 		self assert: invalidCreditCard isNil.
 	].! !
 
-!CreditCardTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:34:59'!
+!CreditCardTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:17:00'!
 test02CreditCardOwnerShouldHaveNoMoreThan30Characters
 	| invalidCreditCard |
 	
-	self should: [ invalidCreditCard := CreditCard for: 'juan ignacio grandoso nicolas ippolito' expiringOn: testFacility aValidExpirationDate anIDNumber: testFacility anIDForValidCreditCard ]
+	self should: [ invalidCreditCard := CreditCard for: 'juan ignacio grandoso nicolas ippolito' expiringOn: testFacility aValidExpirationDate withIDNumber: testFacility anIDForValidCreditCard ]
 	raise: Error
 	withExceptionDo: [ :anError | 
 		CreditCard ownerShouldHaveLessThan30CharactersErrorDescription = anError messageText.
 		self assert: invalidCreditCard isNil.
 	].! !
 
-!CreditCardTest methodsFor: 'tests' stamp: 'NI 6/9/2019 15:35:13'!
+!CreditCardTest methodsFor: 'tests' stamp: 'NI 6/10/2019 10:17:00'!
 test03IdentificationNumberShouldBeValid
 	| invalidCreditCard |
 	
-	self should: [ invalidCreditCard := CreditCard for: testFacility ownerOfValidCreditCard expiringOn: testFacility aValidExpirationDate anIDNumber: '2423' ]
+	self should: [ invalidCreditCard := CreditCard for: testFacility ownerOfValidCreditCard expiringOn: testFacility aValidExpirationDate withIDNumber: '2423' ]
 	raise: Error
 	withExceptionDo: [ :anError | 
 		CreditCard ownerCannotBeEmptyErrorDescription = anError messageText.
@@ -352,13 +352,13 @@ test05AnCreditCardWithAFutureDateIsNotExpired
 	self assert: (aValidCreditCard isExpiredOn: currentMonthOfYear) not.! !
 
 
-!CreditCardTest methodsFor: 'setup' stamp: 'NI 6/9/2019 15:34:27'!
+!CreditCardTest methodsFor: 'setup' stamp: 'NI 6/10/2019 10:17:00'!
 setUp
 
 	testFacility := TestFacility new.
 
-	anExpiredCreditCard := CreditCard for: testFacility ownerOfExpiredCreditCard expiringOn: testFacility anExpiredDate anIDNumber: testFacility anIDForExpiredCreditCard.
-	aValidCreditCard := CreditCard for: testFacility ownerOfValidCreditCard expiringOn: testFacility aValidExpirationDate anIDNumber: testFacility anIDForValidCreditCard.
+	anExpiredCreditCard := CreditCard for: testFacility ownerOfExpiredCreditCard expiringOn: testFacility anExpiredDate withIDNumber: testFacility anIDForExpiredCreditCard.
+	aValidCreditCard := CreditCard for: testFacility ownerOfValidCreditCard expiringOn: testFacility aValidExpirationDate withIDNumber: testFacility anIDForValidCreditCard.
 	
 	currentMonthOfYear := self currentMonthOfYear.! !
 
@@ -492,8 +492,8 @@ Object subclass: #Cashier
 	poolDictionaries: ''
 	category: 'TusLibros-Exercise'!
 
-!Cashier methodsFor: 'initialization' stamp: 'NI 6/9/2019 13:28:33'!
-initializeFor: aCart withSalesBook: aSalesBook CreditCard: aCreditCard andMerchantProcessor: aMerchantProcessor 
+!Cashier methodsFor: 'initialization' stamp: 'NI 6/10/2019 10:29:47'!
+initializeFor: aCart withSalesBook: aSalesBook payingWith: aCreditCard andProcessingWith: aMerchantProcessor 
 	cart := aCart.
 	salesBook := aSalesBook.
 	creditCard := aCreditCard.
@@ -501,19 +501,16 @@ initializeFor: aCart withSalesBook: aSalesBook CreditCard: aCreditCard andMercha
 	self doCheckout.! !
 
 
-!Cashier methodsFor: 'operations' stamp: 'NI 6/9/2019 13:39:30'!
+!Cashier methodsFor: 'operations' stamp: 'NI 6/10/2019 10:53:01'!
 doCheckout
 	| saleBookEntry |
 	
 	self assertCartIsNotEmpty.	
 	self assertCardIsNotExpired.
 	
-	"Acá debiera comunicarse con el MP para que debite, ya que sino, no agregás la venta"
-	"Igual habría que testear que no agregue la venta si el MP devuelve excepción, obvio"
-	
 	merchantProcessor debit: self totalPrice to: creditCard.
 	
-	saleBookEntry := self createSaleBookEntry.
+	saleBookEntry := self createSalesBookEntry.
 	
 	salesBook add: saleBookEntry.! !
 
@@ -524,19 +521,19 @@ totalPrice
 	^cart totalPrice.! !
 
 
-!Cashier methodsFor: 'private' stamp: 'NI 6/8/2019 19:27:44'!
-createSaleBookEntry
-	| saleBody saleBookEntry |
+!Cashier methodsFor: 'private' stamp: 'NI 6/10/2019 10:53:06'!
+createSalesBookEntry
+	| saleBody salesBookEntry |
 	
 	saleBody := cart generateSaleBody.
 	
-	saleBookEntry := OrderedCollection new.
+	salesBookEntry := OrderedCollection new.
 	
-	saleBookEntry add: Date today.
-	saleBookEntry add: saleBody.
-	saleBookEntry add: cart totalPrice.
+	salesBookEntry add: Date today.
+	salesBookEntry add: saleBody.
+	salesBookEntry add: cart totalPrice.
 	
-	^saleBookEntry! !
+	^salesBookEntry! !
 
 !Cashier methodsFor: 'private' stamp: 'NI 6/8/2019 19:22:59'!
 currentMonthOfYear
@@ -569,9 +566,9 @@ cannotMakePaymentWithExpiredCreditCardErrorDescription
 	^'No se puede realizar un pago con una tarjeta de crédito vencida'.! !
 
 
-!Cashier class methodsFor: 'instance creation' stamp: 'NI 6/9/2019 13:28:33'!
-checkout: aCart withSalesBook: aSalesBook andMakePaymentWith: aCreditCard andProcessWith: aMerchantProcessor  
-	^self new initializeFor: aCart withSalesBook: aSalesBook CreditCard: aCreditCard andMerchantProcessor: aMerchantProcessor.! !
+!Cashier class methodsFor: 'instance creation' stamp: 'NI 6/10/2019 10:29:47'!
+checkout: aCart withSalesBook: aSalesBook payingWith: aCreditCard andProcessingWith: aMerchantProcessor  
+	^self new initializeFor: aCart withSalesBook: aSalesBook payingWith: aCreditCard andProcessingWith: aMerchantProcessor.! !
 
 
 !classDefinition: #CreditCard category: #'TusLibros-Exercise'!
@@ -581,8 +578,8 @@ Object subclass: #CreditCard
 	poolDictionaries: ''
 	category: 'TusLibros-Exercise'!
 
-!CreditCard methodsFor: 'initialization' stamp: 'JIG 6/7/2019 16:31:25'!
-initializeFor: anOwner expiringOn: anExpirationDate anIDNumber: anIdentificationNumber
+!CreditCard methodsFor: 'initialization' stamp: 'NI 6/10/2019 10:17:10'!
+initializeFor: anOwner expiringOn: anExpirationDate withIDNumber: anIdentificationNumber
 	owner := anOwner.
 	expirationDate := anExpirationDate.
 	idNumber := anIdentificationNumber.! !
@@ -607,12 +604,12 @@ owner
 CreditCard class
 	instanceVariableNames: ''!
 
-!CreditCard class methodsFor: 'instance creation' stamp: 'NI 6/8/2019 19:35:50'!
-for: anOwner expiringOn: anExpirationDate anIDNumber: anIdentificationNumber 
+!CreditCard class methodsFor: 'instance creation' stamp: 'NI 6/10/2019 10:17:10'!
+for: anOwner expiringOn: anExpirationDate withIDNumber: anIdentificationNumber 
 	self assertOwnerIsValid: anOwner.
 	self assertIdentificationNumberIsValid: anIdentificationNumber.
 	
-	^self new initializeFor: anOwner expiringOn: anExpirationDate anIDNumber: anIdentificationNumber.
+	^self new initializeFor: anOwner expiringOn: anExpirationDate withIDNumber: anIdentificationNumber.
 		! !
 
 
@@ -642,75 +639,75 @@ assertOwnerIsValid: anOwner.
 		! !
 
 
-!classDefinition: #InternMerchantProcessorSimulator category: #'TusLibros-Exercise'!
-Object subclass: #InternMerchantProcessorSimulator
+!classDefinition: #MerchantProcessorInternalSimulator category: #'TusLibros-Exercise'!
+Object subclass: #MerchantProcessorInternalSimulator
 	instanceVariableNames: 'charges'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Exercise'!
 
-!InternMerchantProcessorSimulator methodsFor: 'assertions' stamp: 'NI 6/9/2019 15:58:50'!
-assertCreditCardHasFunds: aCreditCard toPay: anAmount.
-	(self class lowFundsCreditCards at: aCreditCard idNumber ifAbsent: [^ nil]) < anAmount ifTrue: [self error: self class creditCardHasNoCreditErrorDescription].! !
-
-!InternMerchantProcessorSimulator methodsFor: 'assertions' stamp: 'NI 6/9/2019 13:37:54'!
-assertCreditCardIsNotStolen: aCreditCard
-	(self class stolenCreditCards includes: aCreditCard idNumber) ifTrue: [self error: self class stolenCreditCardErrorDescription].! !
-
-
-!InternMerchantProcessorSimulator methodsFor: 'debit' stamp: 'NI 6/9/2019 15:52:24'!
-debit: anAmount to: aCreditCard
-	self assertCreditCardIsNotStolen: aCreditCard.
-	self assertCreditCardHasFunds: aCreditCard toPay: anAmount.
-	
-	self addChargeFor: anAmount.! !
-
-
-!InternMerchantProcessorSimulator methodsFor: 'charging' stamp: 'NI 6/9/2019 14:00:20'!
-addChargeFor: anAmount.
-	charges add: anAmount.! !
-
-
-!InternMerchantProcessorSimulator methodsFor: 'accessing' stamp: 'NI 6/9/2019 14:11:19'!
+!MerchantProcessorInternalSimulator methodsFor: 'accessing' stamp: 'NI 6/9/2019 14:11:19'!
 chargesAmount
 	^charges size.! !
 
-!InternMerchantProcessorSimulator methodsFor: 'accessing' stamp: 'NI 6/9/2019 14:15:36'!
+!MerchantProcessorInternalSimulator methodsFor: 'accessing' stamp: 'NI 6/9/2019 14:15:36'!
 lastCharge
 	^ charges last.! !
 
 
-!InternMerchantProcessorSimulator methodsFor: 'initialization' stamp: 'NI 6/9/2019 14:00:57'!
+!MerchantProcessorInternalSimulator methodsFor: 'assertions' stamp: 'NI 6/10/2019 10:19:38'!
+assertCreditCard: aCreditCard hasFundsToPay: anAmount.
+	(self class lowFundsCreditCards at: aCreditCard idNumber ifAbsent: [^ nil]) < anAmount ifTrue: [self error: self class creditCardHasNoFundsErrorDescription].! !
+
+!MerchantProcessorInternalSimulator methodsFor: 'assertions' stamp: 'NI 6/9/2019 13:37:54'!
+assertCreditCardIsNotStolen: aCreditCard
+	(self class stolenCreditCards includes: aCreditCard idNumber) ifTrue: [self error: self class stolenCreditCardErrorDescription].! !
+
+
+!MerchantProcessorInternalSimulator methodsFor: 'charging' stamp: 'NI 6/9/2019 14:00:20'!
+addChargeFor: anAmount.
+	charges add: anAmount.! !
+
+
+!MerchantProcessorInternalSimulator methodsFor: 'debit' stamp: 'NI 6/10/2019 10:16:26'!
+debit: anAmount to: aCreditCard
+	self assertCreditCardIsNotStolen: aCreditCard.
+	self assertCreditCard: aCreditCard hasFundsToPay: anAmount.
+	
+	self addChargeFor: anAmount.! !
+
+
+!MerchantProcessorInternalSimulator methodsFor: 'initialization' stamp: 'NI 6/9/2019 14:00:57'!
 initialize
 	super initialize.
 	charges := OrderedCollection new.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'InternMerchantProcessorSimulator class' category: #'TusLibros-Exercise'!
-InternMerchantProcessorSimulator class
+!classDefinition: 'MerchantProcessorInternalSimulator class' category: #'TusLibros-Exercise'!
+MerchantProcessorInternalSimulator class
 	instanceVariableNames: ''!
 
-!InternMerchantProcessorSimulator class methodsFor: 'error descriptions' stamp: 'NI 6/9/2019 15:50:52'!
-creditCardHasNoCreditErrorDescription
+!MerchantProcessorInternalSimulator class methodsFor: 'error descriptions' stamp: 'NI 6/10/2019 10:19:38'!
+creditCardHasNoFundsErrorDescription
 	^'Pago inválido: la tarjeta de crédito no tiene suficiente dinero como para pagar ese monto'! !
 
-!InternMerchantProcessorSimulator class methodsFor: 'error descriptions' stamp: 'NI 6/9/2019 12:36:54'!
+!MerchantProcessorInternalSimulator class methodsFor: 'error descriptions' stamp: 'NI 6/9/2019 12:36:54'!
 stolenCreditCardErrorDescription
 	^'Pago inválido: la tarjeta de crédito es robada'! !
 
 
-!InternMerchantProcessorSimulator class methodsFor: 'stolen credit cards' stamp: 'NI 6/9/2019 13:24:16'!
-stolenCreditCards
-	^ OrderedCollection with: '1234123412341234' with: '1111000011110000'.! !
-
-
-!InternMerchantProcessorSimulator class methodsFor: 'low funds credit cards' stamp: 'NI 6/9/2019 15:58:50'!
+!MerchantProcessorInternalSimulator class methodsFor: 'low funds credit cards' stamp: 'NI 6/9/2019 15:58:50'!
 lowFundsCreditCards
 	| aDictionary |
 	aDictionary := Dictionary new.
 	aDictionary add: '0000111100001111'->1. 
 	^aDictionary! !
+
+
+!MerchantProcessorInternalSimulator class methodsFor: 'stolen credit cards' stamp: 'NI 6/9/2019 13:24:16'!
+stolenCreditCards
+	^ OrderedCollection with: '1234123412341234' with: '1111000011110000'.! !
 
 
 !classDefinition: #TestFacility category: #'TusLibros-Exercise'!
