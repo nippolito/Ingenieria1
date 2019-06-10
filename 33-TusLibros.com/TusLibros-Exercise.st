@@ -317,9 +317,9 @@ setUp
 	currentMonthOfYear := self currentMonthOfYear.! !
 
 
-!CreditCardTest methodsFor: 'support' stamp: 'NI 6/8/2019 19:38:06'!
+!CreditCardTest methodsFor: 'support' stamp: 'Nipo 6/10/2019 15:35:55'!
 currentMonthOfYear
-	^GregorianMonthOfYear year: Date today year yearNumber month: (GregorianMonth named: Date today monthName).! !
+	^GregorianMonthOfYear current.! !
 
 !CreditCardTest methodsFor: 'support' stamp: 'NI 6/10/2019 10:17:00'!
 test01CreditCardShouldHaveAnOwner
@@ -499,9 +499,9 @@ createSalesBookEntry
 	
 	^salesBookEntry! !
 
-!Cashier methodsFor: 'private' stamp: 'NI 6/8/2019 19:22:59'!
+!Cashier methodsFor: 'private' stamp: 'Nipo 6/10/2019 15:44:54'!
 currentMonthOfYear
-	^GregorianMonthOfYear year: Date today year yearNumber month: (GregorianMonth named: Date today monthName)! !
+	^GregorianMonthOfYear current.! !
 
 
 !Cashier methodsFor: 'assertions' stamp: 'NI 6/8/2019 19:24:17'!
@@ -702,13 +702,13 @@ defaultCatalog
 		}! !
 
 
-!TestFacility methodsFor: 'credit card dates' stamp: 'NI 6/9/2019 15:29:53'!
+!TestFacility methodsFor: 'credit card dates' stamp: 'Nipo 6/10/2019 15:39:40'!
 aValidExpirationDate
-	^June ofYear: (Date today + (Duration days: 365)) yearNumber.! !
+	^June ofYear: GregorianYear current next.! !
 
-!TestFacility methodsFor: 'credit card dates' stamp: 'NI 6/9/2019 15:30:00'!
+!TestFacility methodsFor: 'credit card dates' stamp: 'Nipo 6/10/2019 15:46:22'!
 anExpiredDate
-	^May ofYear: 2019.! !
+	^GregorianMonthOfYear current previous! !
 
 
 !TestFacility methodsFor: 'credit card ids' stamp: 'NI 6/9/2019 15:30:07'!
