@@ -296,10 +296,10 @@ TestCase subclass: #TusLibrosRestSystemTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'Nico 6/13/2019 16:30:43'!
+!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'Nico 6/13/2019 19:41:38'!
 test01CannotCreateCartWhenInvalidAuthentication
 
-	self should: [ tusLibrosController createCartWithUser: testFactory anInvalidClientUserID andPassword: testFactory anInvalidPassword ]
+	self should: [ tusLibrosController createCartFor: testFactory anInvalidClientUserID authenticatedWith: testFactory anInvalidPassword ]
 	raise: Error
 	withExceptionDo: [ :anError |
 		self assert: 
@@ -308,17 +308,17 @@ test01CannotCreateCartWhenInvalidAuthentication
 		"OJO, creería que estamos violando encapsulamiento si nos metemos en la interfaz REST para preguntarle esto, que es lo que precisamente dijo Wilkinson que no había que hacer. En el caso positivo es fácil, pero acá cómo assertamos que el carrito no se creó? Testeamos que lo que devolvió el createCart sea nil?"
 	]! !
 
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'Nico 6/13/2019 16:30:47'!
+!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'Nico 6/13/2019 19:41:38'!
 test02ValidClientShouldCreateACart
 	| aCartID |
-	aCartID := tusLibrosController createCartWithUser: testFactory aFirstClientValidUserID andPassword: testFactory aFirstClientValidPassword.
+	aCartID := tusLibrosController createCartFor: testFactory aFirstClientValidUserID authenticatedWith: testFactory aFirstClientValidPassword.
 	
 	self assert: (tusLibrosController listCart: aCartID) isEmpty.! !
 
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'Nico 6/13/2019 16:30:48'!
+!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'Nico 6/13/2019 19:41:38'!
 test03CreatedCartShouldBeEmpty
 	| aCartID cartContent |
-	aCartID := tusLibrosController createCartWithUser: testFactory aFirstClientValidUserID andPassword: testFactory aFirstClientValidPassword.
+	aCartID := tusLibrosController createCartFor: testFactory aFirstClientValidUserID authenticatedWith: testFactory aFirstClientValidPassword.
 	
 	cartContent := tusLibrosController listCart: aCartID.
 	
@@ -337,10 +337,10 @@ test04CannotListAnInvalidCartID
 		self assert: anError messageText = TusLibrosRestSystem invalidCartIDErrorDescription
 	].! !
 
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'Nico 6/13/2019 16:30:47'!
+!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'Nico 6/13/2019 19:41:38'!
 test05ValidCartCanAddItemsFromCatalogue
 	| aCartID cartContent |
-	aCartID := tusLibrosController createCartWithUser: testFactory aFirstClientValidUserID andPassword: testFactory aFirstClientValidPassword.
+	aCartID := tusLibrosController createCartFor: testFactory aFirstClientValidUserID authenticatedWith: testFactory aFirstClientValidPassword.
 	
 	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: aCartID.
 	
@@ -551,7 +551,7 @@ creditCardHasNoCreditErrorMessage
 
 !classDefinition: #CreditCard category: #TusLibros!
 Object subclass: #CreditCard
-	instanceVariableNames: 'expiration'
+	instanceVariableNames: 'expiration owner idNumber'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -562,10 +562,12 @@ isExpiredOn: aDate
 	^expiration start < (Month month: aDate monthIndex year: aDate yearNumber) start ! !
 
 
-!CreditCard methodsFor: 'initialization' stamp: 'HernanWilkinson 6/17/2013 18:38'!
-initializeExpiringOn: aMonth 
+!CreditCard methodsFor: 'initialization' stamp: 'Nico 6/13/2019 16:47:57'!
+initializeFor: anOwner expiringOn: aMonth withIDNumber: anIDNumber  
 	
-	expiration := aMonth ! !
+	owner := anOwner.
+	expiration := aMonth. 
+	idNumber := anIDNumber ! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -573,10 +575,10 @@ initializeExpiringOn: aMonth
 CreditCard class
 	instanceVariableNames: ''!
 
-!CreditCard class methodsFor: 'instance creation' stamp: 'HernanWilkinson 6/17/2013 18:38'!
-expiringOn: aMonth 
+!CreditCard class methodsFor: 'instance creation' stamp: 'Nico 6/13/2019 16:47:37'!
+for: anOwner expiringOn: aMonth withIDNumber: anIDNumber  
 	
-	^self new initializeExpiringOn: aMonth! !
+	^self new initializeFor: anOwner expiringOn: aMonth withIDNumber: anIDNumber! !
 
 
 !classDefinition: #Sale category: #TusLibros!
@@ -617,58 +619,6 @@ Object subclass: #StoreTestObjectsFactory
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!StoreTestObjectsFactory methodsFor: 'items' stamp: 'HernanWilkinson 6/17/2013 18:08'!
-itemNotSellByTheStore
-	
-	^'invalidBook'! !
-
-!StoreTestObjectsFactory methodsFor: 'items' stamp: 'HernanWilkinson 6/17/2013 18:08'!
-itemSellByTheStore
-	
-	^ 'validBook'! !
-
-!StoreTestObjectsFactory methodsFor: 'items' stamp: 'HernanWilkinson 6/17/2013 18:08'!
-itemSellByTheStorePrice
-	
-	^10! !
-
-
-!StoreTestObjectsFactory methodsFor: 'cart' stamp: 'HernanWilkinson 6/17/2013 18:08'!
-createCart
-	
-	^Cart acceptingItemsOf: self defaultCatalog! !
-
-!StoreTestObjectsFactory methodsFor: 'cart' stamp: 'HernanWilkinson 6/17/2013 18:08'!
-defaultCatalog
-	
-	^ Dictionary new
-		at: self itemSellByTheStore put: self itemSellByTheStorePrice;
-		yourself ! !
-
-
-!StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'HernanWilkinson 6/17/2013 18:37'!
-expiredCreditCard
-	
-	^CreditCard expiringOn: (Month month: today monthIndex year: today yearNumber - 1)! !
-
-!StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'HernanWilkinson 6/17/2013 18:36'!
-notExpiredCreditCard
-	
-	^CreditCard expiringOn: (Month month: today monthIndex year: today yearNumber + 1)! !
-
-
-!StoreTestObjectsFactory methodsFor: 'initialization' stamp: 'HernanWilkinson 6/17/2013 18:37'!
-initialize
-
-	today := DateAndTime now! !
-
-
-!StoreTestObjectsFactory methodsFor: 'date' stamp: 'HernanWilkinson 6/17/2013 18:37'!
-today
-	
-	^ today! !
-
-
 !StoreTestObjectsFactory methodsFor: 'authentication' stamp: 'Nico 6/13/2019 14:45:22'!
 aFirstClientValidPassword
 	^'Sr. Smalltalk'.! !
@@ -693,6 +643,76 @@ anInvalidClientUserID
 !StoreTestObjectsFactory methodsFor: 'authentication' stamp: 'Nico 6/13/2019 14:45:41'!
 anInvalidPassword
 	^'NoSmallTalk'! !
+
+
+!StoreTestObjectsFactory methodsFor: 'cart' stamp: 'HernanWilkinson 6/17/2013 18:08'!
+createCart
+	
+	^Cart acceptingItemsOf: self defaultCatalog! !
+
+!StoreTestObjectsFactory methodsFor: 'cart' stamp: 'HernanWilkinson 6/17/2013 18:08'!
+defaultCatalog
+	
+	^ Dictionary new
+		at: self itemSellByTheStore put: self itemSellByTheStorePrice;
+		yourself ! !
+
+
+!StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'Nico 6/13/2019 16:46:42'!
+expiredCreditCard
+	
+	^CreditCard for: self ownerOfExpiredCreditCard expiringOn: (Month month: today monthIndex year: today yearNumber - 1) withIDNumber: self anIDForExpiredCreditCard ! !
+
+!StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'Nico 6/13/2019 16:46:46'!
+notExpiredCreditCard
+	
+	^CreditCard for: self ownerOfValidCreditCard expiringOn: (Month month: today monthIndex year: today yearNumber + 1) withIDNumber: self anIDForValidCreditCard! !
+
+
+!StoreTestObjectsFactory methodsFor: 'credit card ids' stamp: 'Nico 6/13/2019 16:42:48'!
+anIDForExpiredCreditCard
+	^'4700000034541234'! !
+
+!StoreTestObjectsFactory methodsFor: 'credit card ids' stamp: 'Nico 6/13/2019 16:42:41'!
+anIDForValidCreditCard
+	^'4700000034540007'! !
+
+
+!StoreTestObjectsFactory methodsFor: 'credit card owners' stamp: 'Nico 6/13/2019 16:43:54'!
+ownerOfExpiredCreditCard
+	^'Jose'.! !
+
+!StoreTestObjectsFactory methodsFor: 'credit card owners' stamp: 'Nico 6/13/2019 16:44:08'!
+ownerOfValidCreditCard
+	^'Nico'.! !
+
+
+!StoreTestObjectsFactory methodsFor: 'date' stamp: 'HernanWilkinson 6/17/2013 18:37'!
+today
+	
+	^ today! !
+
+
+!StoreTestObjectsFactory methodsFor: 'initialization' stamp: 'HernanWilkinson 6/17/2013 18:37'!
+initialize
+
+	today := DateAndTime now! !
+
+
+!StoreTestObjectsFactory methodsFor: 'items' stamp: 'HernanWilkinson 6/17/2013 18:08'!
+itemNotSellByTheStore
+	
+	^'invalidBook'! !
+
+!StoreTestObjectsFactory methodsFor: 'items' stamp: 'HernanWilkinson 6/17/2013 18:08'!
+itemSellByTheStore
+	
+	^ 'validBook'! !
+
+!StoreTestObjectsFactory methodsFor: 'items' stamp: 'HernanWilkinson 6/17/2013 18:08'!
+itemSellByTheStorePrice
+	
+	^10! !
 
 
 !classDefinition: #TusLibrosAuthenticator category: #TusLibros!
@@ -777,8 +797,8 @@ add: aBookQuantity of: aBookFromStore toCart: aCartID
 	currentCart := activeCarts at: aCartID.
 	currentCart add: aBookQuantity of: aBookFromStore. ! !
 
-!TusLibrosRestSystem methodsFor: 'operations - cart' stamp: 'Nico 6/13/2019 15:18:57'!
-createCartWithUser: aClientID andPassword: aPassword
+!TusLibrosRestSystem methodsFor: 'operations - cart' stamp: 'Nico 6/13/2019 19:41:38'!
+createCartFor: aClientID authenticatedWith: aPassword
 	| newCartID |
 	
 	self authenticateClient: aClientID withPassword: aPassword.
