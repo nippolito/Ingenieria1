@@ -232,6 +232,57 @@ test06CashierDoesNotSaleWhenTheCreditCardHasNoCredit
 			self assert: anError messageText = Cashier creditCardHasNoCreditErrorMessage.
 			self assert: salesBook isEmpty ]! !
 
+!CashierTest methodsFor: 'tests' stamp: 'asd 6/14/2019 12:53:01'!
+test07CashierDoesNotSaleIfTheCreditCardIsStolen
+
+	| cart cashier salesBook creditCard |
+
+	cart := testObjectsFactory createCart.
+	cart add: testObjectsFactory itemSellByTheStore.
+	creditCard := testObjectsFactory notExpiredCreditCard.
+	salesBook := OrderedCollection new.
+ 	debitBehavior := [ :anAmount :aCreditCard | self error: Cashier creditCardIsStolenErrorMessage].
+	
+	cashier:= Cashier 
+		toCheckout: cart 
+		charging: creditCard
+		throught: self
+		on: testObjectsFactory today
+		registeringOn: salesBook.
+		
+	self 
+		should: [cashier checkOut ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Cashier creditCardIsStolenErrorMessage.
+			self assert: salesBook isEmpty ]! !
+
+!CashierTest methodsFor: 'tests' stamp: 'asd 6/14/2019 13:03:09'!
+test08CashierDoesNotSaleIfCreditCardOwnerIsMoreThan30CharactersLong
+
+	| cart cashier salesBook creditCard |
+
+	cart := testObjectsFactory createCart.
+	cart add: testObjectsFactory itemSellByTheStore.
+	creditCard := CreditCard for: 'juan ignazakipati grandosinhoskitamo' expiringOn: (Month month: testObjectsFactory today monthIndex year: testObjectsFactory today yearNumber + 1) withIDNumber: testObjectsFactory anIDForExpiredCreditCard .
+	salesBook := OrderedCollection new.
+ 	debitBehavior := [ :anAmount :aCreditCard | 
+		aCreditCard owner size > 30 ifTrue: [self error: Cashier creditCardOwnerShouldHaveLessThan30CharactersErrorMessage]].
+	
+	cashier:= Cashier 
+		toCheckout: cart 
+		charging: creditCard
+		throught: self
+		on: testObjectsFactory today
+		registeringOn: salesBook.
+		
+	self 
+		should: [cashier checkOut ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Cashier creditCardOwnerShouldHaveLessThan30CharactersErrorMessage.
+			self assert: salesBook isEmpty ]! !
+
 
 !CashierTest methodsFor: 'setup' stamp: 'HernanWilkinson 6/17/2013 19:03'!
 setUp 
@@ -244,6 +295,42 @@ setUp
 debit: anAmount from: aCreditCard 
 
 	^debitBehavior value: anAmount value: aCreditCard ! !
+
+
+!classDefinition: #CreditCardTest category: #TusLibros!
+TestCase subclass: #CreditCardTest
+	instanceVariableNames: 'testFactory validExpirationDate'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!CreditCardTest methodsFor: 'setup' stamp: 'asd 6/14/2019 12:45:57'!
+setUp
+	testFactory := StoreTestObjectsFactory new.
+	validExpirationDate := Month month: testFactory today monthIndex year: testFactory today yearNumber + 1.! !
+
+
+!CreditCardTest methodsFor: 'tests' stamp: 'asd 6/14/2019 12:45:40'!
+test01CreditCardShouldHaveAnOwner
+	| invalidCreditCard |
+	
+	self should: [ invalidCreditCard := CreditCard for: '' expiringOn: validExpirationDate withIDNumber: testFactory anIDForValidCreditCard ]
+	raise: Error
+	withExceptionDo: [ :anError | 
+		self assert: CreditCard ownerCannotBeEmptyErrorDescription = anError messageText.
+		self assert: invalidCreditCard isNil.
+	].! !
+
+!CreditCardTest methodsFor: 'tests' stamp: 'asd 6/14/2019 12:45:49'!
+test02IdentificationNumberShouldBeValid
+	| invalidCreditCard |
+	
+	self should: [ invalidCreditCard := CreditCard for: testFactory ownerOfValidCreditCard expiringOn: validExpirationDate withIDNumber: '2423' ]
+	raise: Error
+	withExceptionDo: [ :anError | 
+		self assert: CreditCard identificationNumberMustBeValidErrorDescription = anError messageText.
+		self assert: invalidCreditCard isNil.
+	].! !
 
 
 !classDefinition: #TusLibrosAuthenticatorTest category: #TusLibros!
@@ -533,20 +620,29 @@ toCheckout: aCart charging: aCreditCard throught: aMerchantProcessor on: aDate r
 	^self new initializeToCheckout: aCart charging: aCreditCard throught: aMerchantProcessor registeringOn: aSalesBook! !
 
 
-!Cashier class methodsFor: 'error messages' stamp: 'HernanWilkinson 6/17/2013 18:21'!
+!Cashier class methodsFor: 'error messages' stamp: 'asd 6/14/2019 12:54:50'!
 canNotChargeAnExpiredCreditCardErrorMessage
 	
-	^'Can not charge an expired credit card'! !
+	^'No se puede debitar a una tarjeta expirada'! !
 
-!Cashier class methodsFor: 'error messages' stamp: 'HernanWilkinson 6/17/2013 17:56'!
+!Cashier class methodsFor: 'error messages' stamp: 'asd 6/14/2019 12:54:30'!
 cartCanNotBeEmptyErrorMessage
 	
-	^'Can not check out an empty cart'! !
+	^'No se puede hacer checkout de un carrito vacío'! !
 
-!Cashier class methodsFor: 'error messages' stamp: 'HernanWilkinson 6/17/2013 19:02'!
+!Cashier class methodsFor: 'error messages' stamp: 'asd 6/14/2019 12:54:20'!
 creditCardHasNoCreditErrorMessage
 	
-	^'Credit card has no credit'! !
+	^'La tarjeta de crédito no tiene fondos'! !
+
+!Cashier class methodsFor: 'error messages' stamp: 'asd 6/14/2019 12:54:09'!
+creditCardIsStolenErrorMessage
+	
+	^'La tarjeta de crédito es robada'! !
+
+!Cashier class methodsFor: 'error messages' stamp: 'asd 6/14/2019 13:02:27'!
+creditCardOwnerShouldHaveLessThan30CharactersErrorMessage
+	^'El nombre del propietario de la tarjeta debe tener menos de 30 caracteres'! !
 
 
 !classDefinition: #CreditCard category: #TusLibros!
@@ -556,10 +652,9 @@ Object subclass: #CreditCard
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CreditCard methodsFor: 'testing' stamp: 'HernanWilkinson 6/17/2013 18:39'!
-isExpiredOn: aDate 
-	
-	^expiration start < (Month month: aDate monthIndex year: aDate yearNumber) start ! !
+!CreditCard methodsFor: 'accessing' stamp: 'asd 6/14/2019 12:58:28'!
+owner
+	^owner.! !
 
 
 !CreditCard methodsFor: 'initialization' stamp: 'Nico 6/13/2019 16:47:57'!
@@ -569,16 +664,44 @@ initializeFor: anOwner expiringOn: aMonth withIDNumber: anIDNumber
 	expiration := aMonth. 
 	idNumber := anIDNumber ! !
 
+
+!CreditCard methodsFor: 'testing' stamp: 'HernanWilkinson 6/17/2013 18:39'!
+isExpiredOn: aDate 
+	
+	^expiration start < (Month month: aDate monthIndex year: aDate yearNumber) start ! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'CreditCard class' category: #TusLibros!
 CreditCard class
 	instanceVariableNames: ''!
 
-!CreditCard class methodsFor: 'instance creation' stamp: 'Nico 6/13/2019 16:47:37'!
+!CreditCard class methodsFor: 'instance creation' stamp: 'asd 6/14/2019 12:44:11'!
 for: anOwner expiringOn: aMonth withIDNumber: anIDNumber  
+	self assertOwnerIsValid: anOwner.
+	self assertIdentificationNumberIsValid: anIDNumber.
 	
 	^self new initializeFor: anOwner expiringOn: aMonth withIDNumber: anIDNumber! !
+
+
+!CreditCard class methodsFor: 'assertions' stamp: 'asd 6/14/2019 12:44:24'!
+assertIdentificationNumberIsValid: anIdentificationNumber.
+	(anIdentificationNumber isString 
+		and: [ (anIdentificationNumber allSatisfy: [:aCharacter | aCharacter isDigit ]) 
+		and: [ anIdentificationNumber size = 16 ]]) ifFalse: [ self error: self identificationNumberMustBeValidErrorDescription ].! !
+
+!CreditCard class methodsFor: 'assertions' stamp: 'asd 6/14/2019 12:38:23'!
+assertOwnerIsValid: anOwner
+	(anOwner isEmpty or: [anOwner isString not]) ifTrue: [ self error: self ownerCannotBeEmptyErrorDescription ].! !
+
+
+!CreditCard class methodsFor: 'error descriptions' stamp: 'asd 6/14/2019 12:44:33'!
+identificationNumberMustBeValidErrorDescription
+	^'El número de la tarjeta de crédito debe poseer 16 digitos'.! !
+
+!CreditCard class methodsFor: 'error descriptions' stamp: 'asd 6/14/2019 12:38:58'!
+ownerCannotBeEmptyErrorDescription
+	^'La tarjeta debe tener propietario'.! !
 
 
 !classDefinition: #Sale category: #TusLibros!
@@ -605,7 +728,7 @@ initializeTotal: aTotal
 Sale class
 	instanceVariableNames: ''!
 
-!Sale class methodsFor: 'instance creation' stamp: 'HernanWilkinson 6/17/2013 18:47'!
+!Sale class methodsFor: 'instance creation' stamp: 'asd 6/14/2019 13:05:15'!
 of: aTotal
 
 	"should assert total is not negative or 0!!"
