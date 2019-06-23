@@ -10,7 +10,7 @@ test01NewCartsAreCreatedEmpty
 
 	self assert: testObjectsFactory createCart isEmpty! !
 
-!CartTest methodsFor: 'tests' stamp: 'HernanWilkinson 6/17/2013 18:10'!
+!CartTest methodsFor: 'tests' stamp: 'NI 6/22/2019 21:02:16'!
 test02CanNotAddItemsThatDoNotBelongToStore
 
 	| cart |
@@ -21,7 +21,7 @@ test02CanNotAddItemsThatDoNotBelongToStore
 		should: [ cart add: testObjectsFactory itemNotSellByTheStore ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = cart invalidItemErrorMessage.
+			self assert: anError messageText = Cart invalidItemErrorDescription.
 			self assert: cart isEmpty ]! !
 
 !CartTest methodsFor: 'tests' stamp: 'HernanWilkinson 6/17/2013 18:10'!
@@ -34,7 +34,7 @@ test03AfterAddingAnItemTheCartIsNotEmptyAnymore
 	cart add: testObjectsFactory itemSellByTheStore.
 	self deny: cart isEmpty ! !
 
-!CartTest methodsFor: 'tests' stamp: 'HernanWilkinson 6/17/2013 18:10'!
+!CartTest methodsFor: 'tests' stamp: 'NI 6/22/2019 21:02:28'!
 test04CanNotAddNonPositiveNumberOfItems
 
 	| cart |
@@ -45,10 +45,10 @@ test04CanNotAddNonPositiveNumberOfItems
 		should: [cart add: 0 of: testObjectsFactory itemSellByTheStore ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = cart invalidQuantityErrorMessage.
+			self assert: anError messageText = Cart invalidQuantityErrorDescription.
 			self assert: cart isEmpty ]! !
 
-!CartTest methodsFor: 'tests' stamp: 'HernanWilkinson 6/17/2013 18:10'!
+!CartTest methodsFor: 'tests' stamp: 'NI 6/22/2019 21:02:37'!
 test05CanNotAddMoreThanOneItemNotSellByTheStore
 
 	| cart |
@@ -59,7 +59,7 @@ test05CanNotAddMoreThanOneItemNotSellByTheStore
 		should: [cart add: 2 of: testObjectsFactory itemNotSellByTheStore  ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = cart invalidItemErrorMessage.
+			self assert: anError messageText = Cart invalidItemErrorDescription.
 			self assert: cart isEmpty ]! !
 
 !CartTest methodsFor: 'tests' stamp: 'HernanWilkinson 6/17/2013 18:11'!
@@ -383,359 +383,6 @@ TestCase subclass: #TusLibrosRestSystemTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 19:45:53'!
-test01CannotCreateCartWhenInvalidAuthentication
-
-	self should: [ tusLibrosController createCartFor: testFactory anInvalidClientUserID authenticatedWith: testFactory anInvalidPassword ]
-	raise: Error
-	withExceptionDo: [ :anError |
-		self assert: 
-			(anError messageText = TusLibrosAuthenticator invalidPasswordErrorDescription or: [anError messageText = TusLibrosAuthenticator unknownUserErrorDescription ]).
-	]! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'Nico 6/13/2019 19:41:38'!
-test02ValidClientShouldCreateACart
-	| aCartID |
-	aCartID := tusLibrosController createCartFor: testFactory aFirstClientValidUserID authenticatedWith: testFactory aFirstClientValidPassword.
-	
-	self assert: (tusLibrosController listCart: aCartID) isEmpty.! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:07:52'!
-test03CannotListAnInvalidCart
-	| aCartID |
-	aCartID := 'InvalidCartID'.
-	
-	self should: [ tusLibrosController listCart: aCartID ] 
-	raise: Error
-	withExceptionDo: [:anError |
-		self assert: anError messageText = TusLibrosRestSystem invalidCartIDErrorDescription
-	].! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'JIG 6/21/2019 16:27:48'!
-test04ValidCartCanAddItemsFromCatalogue
-	| aCartID cartItems |
-	aCartID := tusLibrosController createCartFor: testFactory aFirstClientValidUserID authenticatedWith: testFactory aFirstClientValidPassword.
-	
-	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: aCartID.
-	
-	cartItems := tusLibrosController listCart: aCartID.
-	
-	self assert: cartItems size = 1.
-	self assert: (cartItems includes: testFactory itemSellByTheStore).
-	self assert: (cartItems occurrencesOf: testFactory itemSellByTheStore) = 1.! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'JIG 6/20/2019 17:03:00'!
-test05CannotAddItemsToInvalidCart
-	| aCartID |
-	aCartID := 'anInvalidCartID'.
-	
-	self should: [ tusLibrosController add: 2 of: testFactory itemSellByTheStore toCart: aCartID] 
-	raise: Error
-	withExceptionDo: [:anError |
-		self assert: anError messageText = TusLibrosRestSystem invalidCartIDErrorDescription
-	].! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'JIG 6/20/2019 17:24:46'!
-test06ClientWithoutTransactionsHasNoPurchases
-	| purchasesContent |
-	
-	purchasesContent := tusLibrosController listPurchasesOf: testFactory aFirstClientValidUserID authenticatedWith: testFactory aFirstClientValidPassword.
-	
-	self assert: purchasesContent isEmpty.
-	
-	! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'JIG 6/20/2019 17:42:05'!
-test07CannotListPurchasesWhenInvalidAuthentication
-	
-	self should: [ tusLibrosController listPurchasesOf: testFactory anInvalidClientUserID authenticatedWith: testFactory aFirstClientValidPassword. ]
-	raise: Error 
-	withExceptionDo: [ :anError |
-		self assert: (anError messageText = TusLibrosAuthenticator invalidPasswordErrorDescription or: [anError messageText = TusLibrosAuthenticator unknownUserErrorDescription ]).
-	]. 
-	
-	
-	
-	
-	
-	! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:11:50'!
-test08CannotCheckoutWhenCartIsEmpty
-	| listPurchasesBefore newCartID |
-	
-	listPurchasesBefore := (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword) copy.
-	
-	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
-	
-	self should: [ tusLibrosController checkoutFor: newCartID payingWith: testFactory notExpiredCreditCard ]
-	raise: Error 
-	withExceptionDo: [ :anError |
-		self assert: anError messageText = Cashier cartCanNotBeEmptyErrorDescription.
-		self assert: listPurchasesBefore equals: (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword).
-	]. 
-	
-	
-	
-	
-	
-	! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 19:47:06'!
-test09CannotCheckoutAnInvalidCart
-	| invalidCart |
-	
-	invalidCart := 'Not valid cart'.
-	
-	self should: [ tusLibrosController checkoutFor: invalidCart payingWith: testFactory notExpiredCreditCard ]
-	raise: Error 
-	withExceptionDo: [ :anError |
-		self assert: anError messageText = TusLibrosRestSystem invalidCartIDErrorDescription.
-	]. 
-		
-	
-	! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:11:42'!
-test10CannotCheckoutWithExpiredCreditCard
-	| listPurchasesBefore newCartID |
-	
-	listPurchasesBefore := (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword) copy.
-	
-	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
-	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
-		
-	self should: [ tusLibrosController checkoutFor: newCartID payingWith: testFactory expiredCreditCard ]
-	raise: Error 
-	withExceptionDo: [ :anError |
-		self assert: anError messageText = Cashier canNotChargeAnExpiredCreditCardErrorDescription.
-		self assert: listPurchasesBefore equals: (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword).
-	]. 
-	
-	! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:11:56'!
-test11CannotCheckoutWhenTheCreditCardHasNoFunds
-	| listPurchasesBefore newCartID |
-	
-	listPurchasesBefore := (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword) copy.
-	
-	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
-	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
-	debitBehavior := [ :anAmount :aCreditCard | self error: Cashier creditCardHasNoCreditErrorDescription].
-	
-	self should: [ tusLibrosController checkoutFor: newCartID payingWith: testFactory notExpiredCreditCard ]
-	raise: Error 
-	withExceptionDo: [ :anError |
-		self assert: anError messageText = Cashier creditCardHasNoCreditErrorDescription.
-		self assert: listPurchasesBefore equals: (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword).
-	]. 
-	
-	! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:12:00'!
-test12CannotCheckoutWhenTheCreditCardIsStolen
-	| listPurchasesBefore newCartID |
-	
-	listPurchasesBefore := (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword) copy.
-	
-	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
-	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
-	debitBehavior := [ :anAmount :aCreditCard | self error: Cashier creditCardIsStolenErrorDescription ].
-	
-	self should: [ tusLibrosController checkoutFor: newCartID payingWith: testFactory notExpiredCreditCard ]
-	raise: Error 
-	withExceptionDo: [ :anError |
-		self assert: anError messageText = Cashier creditCardIsStolenErrorDescription.
-		self assert: listPurchasesBefore equals: (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword).
-	]. 
-	
-	! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:12:06'!
-test13CannotCheckoutIfCreditCardOwnerIsMoreThan30CharactersLong
-	| listPurchasesBefore newCartID aCreditCardWithInvalidOwner |
-	
-	listPurchasesBefore := (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword) copy.
-	
-	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
-	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
-	debitBehavior := [ :anAmount :aCreditCard | self error: Cashier creditCardOwnerShouldHaveLessThan30CharactersErrorDescription ].
-	aCreditCardWithInvalidOwner := CreditCard for: 'juan ignazakipati grandosinhoskitamo' expiringOn: (Month month: testFactory today monthIndex year: testFactory today yearNumber + 1) withIDNumber: testFactory anIDForValidCreditCard.
-	
-	self should: [ tusLibrosController checkoutFor: newCartID payingWith: aCreditCardWithInvalidOwner ]
-	raise: Error 
-	withExceptionDo: [ :anError |
-		self assert: anError messageText = Cashier creditCardOwnerShouldHaveLessThan30CharactersErrorDescription.
-		self assert: listPurchasesBefore equals: (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword).
-	]. 
-	
-	! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:02:50'!
-test14CheckoutChargesCreditCardUsingMerchantProcessor
-	| newCartID debitedAmout debitedCreditCard creditCard sale |
-	
-	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
-	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
-	debitBehavior := [ :anAmount :aCreditCard |
-		debitedAmout := anAmount.
-		debitedCreditCard := aCreditCard ].
-
-	creditCard := testFactory notExpiredCreditCard.
-	
-	sale := tusLibrosController checkoutFor: newCartID payingWith: creditCard.
-	
-	self assert: debitedCreditCard = creditCard.
-	self assert: debitedAmout = sale total.! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:07:16'!
-test15SystemAddsANewPurchaseAfterCheckout
-	| listPurchasesBefore newCartID listPurchasesAfter successfulSale |
-	
-	listPurchasesBefore := (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword) copy.
-	
-	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
-	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
-	
-	successfulSale := tusLibrosController checkoutFor: newCartID payingWith: testFactory notExpiredCreditCard.
-	
-	listPurchasesAfter := tusLibrosController listPurchasesOf: validClient  authenticatedWith: validPassword .
-	
-	self assert: listPurchasesAfter last equals: successfulSale.
-	self assert: listPurchasesBefore size equals: listPurchasesAfter size - 1.
-	! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:03:30'!
-test16CheckoutRemovesCart
-	| newCartID |
-	
-	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
-	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
-	
-	tusLibrosController checkoutFor: newCartID payingWith: testFactory notExpiredCreditCard.
-	
-	self should: [ tusLibrosController listCart: newCartID ]  
-	raise: Error 
-	withExceptionDo: [ :anError |
-		self assert: anError messageText = TusLibrosRestSystem invalidCartIDErrorDescription ].! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:03:48'!
-test17CheckoutAddedSalePersistsWithCartContent
-	| newCartID sale cartItems |
-	
-	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
-	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
-	
-	cartItems := (tusLibrosController listCart: newCartID) copy.
-	sale := tusLibrosController checkoutFor: newCartID payingWith: testFactory notExpiredCreditCard.
-	
-	self assert: sale items = cartItems.
-	self assert: sale owner = validClient.! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:06:19'!
-test18SystemAddsPurchaseOnlyToClientPurchaseList
-	| newCartID listPurchaseOfOtherClient listPurchasesAfter secondClient successfulSale secondPassword |
-		
-	secondClient := testFactory aSecondClientValidUserID.
-	secondPassword := testFactory aSecondClientValidPassword.
-		
-	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
-	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
-	
-	successfulSale := tusLibrosController checkoutFor: newCartID payingWith: testFactory notExpiredCreditCard.
-	
-	listPurchasesAfter := tusLibrosController listPurchasesOf: validClient  authenticatedWith: validPassword .
-	listPurchaseOfOtherClient := tusLibrosController listPurchasesOf: secondClient authenticatedWith: secondPassword.
-	
-	self assert: listPurchasesAfter last equals: successfulSale.
-	self assert: listPurchasesAfter size = 1.
-	self assert: listPurchaseOfOtherClient size = 0.! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:06:01'!
-test19CannotAddItemsToExpiredCart
-	| newCartID |	
-
-	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
-	
-	tusLibrosController clock advanceTime: 31 minutes.
-		
-	self should: [ tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID ]
-	raise: Error
-	withExceptionDo: [ :anError | 
-		self assert: anError messageText = TusLibrosRestSystem cartIsExpiredErrorDescription
-	]
-	! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:05:54'!
-test20CannotListAnExpiredCart
-	| newCartID |	
-
-	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
-	
-	tusLibrosController clock advanceTime: 31 minutes.
-		
-	self should: [ tusLibrosController listCart: newCartID ]
-	raise: Error
-	withExceptionDo: [ :anError | 
-		self assert: anError messageText = TusLibrosRestSystem cartIsExpiredErrorDescription
-	]
-	! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:05:43'!
-test21CannotCheckoutAnExpiredCart
-	| newCartID |	
-
-	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
-	
-	tusLibrosController clock advanceTime: 31 minutes.
-		
-	self should: [ tusLibrosController listCart: newCartID ]
-	raise: Error
-	withExceptionDo: [ :anError | 
-		self assert: anError messageText = TusLibrosRestSystem cartIsExpiredErrorDescription
-	]
-	! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:04:49'!
-test22CartSessionTimeRenovatesAfterAdding
-	| newCartID cartItems |	
-
-	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
-	
-	tusLibrosController clock advanceTime: 28 minutes.
-		
-	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
-	
-	tusLibrosController clock advanceTime: 28 minutes.
-	
-	cartItems := tusLibrosController listCart: newCartID.
-	
-	self assert: cartItems size = 1.
-	
-
-	! !
-
-!TusLibrosRestSystemTest methodsFor: 'tests' stamp: 'NI 6/22/2019 20:05:00'!
-test23CartSessionTimeRenovatesAfterListing
-	| newCartID cartItems |	
-
-	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
-	
-	tusLibrosController clock advanceTime: 28 minutes.
-		
-	tusLibrosController listCart: newCartID.
-	
-	tusLibrosController clock advanceTime: 28 minutes.
-	
-	cartItems := tusLibrosController listCart: newCartID.
-	
-	self assert: cartItems isEmpty.
-	
-
-	! !
-
-
 !TusLibrosRestSystemTest methodsFor: 'setup' stamp: 'NI 6/22/2019 19:49:53'!
 setUp
 	clock := Clock on: DateAndTime now.
@@ -759,6 +406,388 @@ debit: anAmount from: aCreditCard
 
 	^debitBehavior value: anAmount value: aCreditCard ! !
 
+
+!TusLibrosRestSystemTest methodsFor: 'tests - cart creation' stamp: 'NI 6/22/2019 19:45:53'!
+test01CannotCreateCartWhenInvalidAuthentication
+
+	self should: [ tusLibrosController createCartFor: testFactory anInvalidClientUserID authenticatedWith: testFactory anInvalidPassword ]
+	raise: Error
+	withExceptionDo: [ :anError |
+		self assert: 
+			(anError messageText = TusLibrosAuthenticator invalidPasswordErrorDescription or: [anError messageText = TusLibrosAuthenticator unknownUserErrorDescription ]).
+	]! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - cart creation' stamp: 'NI 6/22/2019 20:57:55'!
+test02ValidClientCanCreateACart
+	| aCartID |
+	aCartID := tusLibrosController createCartFor: testFactory aFirstClientValidUserID authenticatedWith: testFactory aFirstClientValidPassword.
+	
+	self assert: (tusLibrosController listCart: aCartID) isEmpty.! !
+
+
+!TusLibrosRestSystemTest methodsFor: 'tests - cart listing' stamp: 'NI 6/22/2019 20:07:52'!
+test03CannotListAnInvalidCart
+	| aCartID |
+	aCartID := 'InvalidCartID'.
+	
+	self should: [ tusLibrosController listCart: aCartID ] 
+	raise: Error
+	withExceptionDo: [:anError |
+		self assert: anError messageText = TusLibrosRestSystem invalidCartIDErrorDescription
+	].! !
+
+
+!TusLibrosRestSystemTest methodsFor: 'tests - adding items' stamp: 'JIG 6/21/2019 16:27:48'!
+test04ValidCartCanAddItemsFromCatalogue
+	| aCartID cartItems |
+	aCartID := tusLibrosController createCartFor: testFactory aFirstClientValidUserID authenticatedWith: testFactory aFirstClientValidPassword.
+	
+	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: aCartID.
+	
+	cartItems := tusLibrosController listCart: aCartID.
+	
+	self assert: cartItems size = 1.
+	self assert: (cartItems includes: testFactory itemSellByTheStore).
+	self assert: (cartItems occurrencesOf: testFactory itemSellByTheStore) = 1.! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - adding items' stamp: 'NI 6/22/2019 21:04:11'!
+test05CannotAddItemsToCartThatDoNotBelongToStore
+	| aCartID |
+	aCartID := tusLibrosController createCartFor: testFactory aFirstClientValidUserID authenticatedWith: testFactory aFirstClientValidPassword.
+	
+	self should: [ tusLibrosController add: 1 of: testFactory itemNotSellByTheStore toCart: aCartID ] 
+	raise: Error - MessageNotUnderstood
+	withExceptionDo: [:anError |
+		self assert: anError messageText = Cart invalidItemErrorDescription.
+		self assert: (tusLibrosController listCart: aCartID) isEmpty
+	].! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - adding items' stamp: 'NI 6/22/2019 21:05:13'!
+test06CannotAddToCartNonPositiveNumberOfItems
+	| aCartID |
+	aCartID := tusLibrosController createCartFor: testFactory aFirstClientValidUserID authenticatedWith: testFactory aFirstClientValidPassword.
+	
+	self should: [ tusLibrosController add: -1 of: testFactory itemSellByTheStore toCart: aCartID ] 
+	raise: Error - MessageNotUnderstood
+	withExceptionDo: [:anError |
+		self assert: anError messageText = Cart invalidQuantityErrorDescription.
+		self assert: (tusLibrosController listCart: aCartID) isEmpty
+	].! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - adding items' stamp: 'NI 6/22/2019 21:06:21'!
+test07CannotAddItemsToInvalidCart
+	| aCartID |
+	aCartID := 'anInvalidCartID'.
+	
+	self should: [ tusLibrosController add: 2 of: testFactory itemSellByTheStore toCart: aCartID] 
+	raise: Error
+	withExceptionDo: [:anError |
+		self assert: anError messageText = TusLibrosRestSystem invalidCartIDErrorDescription
+	].! !
+
+
+!TusLibrosRestSystemTest methodsFor: 'tests - purchase listing' stamp: 'NI 6/22/2019 21:06:17'!
+test08ClientWithoutTransactionsHasNoPurchases
+	| purchasesContent |
+	
+	purchasesContent := tusLibrosController listPurchasesOf: testFactory aFirstClientValidUserID authenticatedWith: testFactory aFirstClientValidPassword.
+	
+	self assert: purchasesContent isEmpty.
+	
+	! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - purchase listing' stamp: 'NI 6/22/2019 21:06:14'!
+test09CannotListPurchasesWhenInvalidAuthentication
+	
+	self should: [ tusLibrosController listPurchasesOf: testFactory anInvalidClientUserID authenticatedWith: testFactory aFirstClientValidPassword. ]
+	raise: Error 
+	withExceptionDo: [ :anError |
+		self assert: (anError messageText = TusLibrosAuthenticator invalidPasswordErrorDescription or: [anError messageText = TusLibrosAuthenticator unknownUserErrorDescription ]).
+	]. 
+	
+	
+	
+	
+	
+	! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - purchase listing' stamp: 'NI 6/22/2019 21:05:36'!
+test20SystemAddsPurchaseOnlyToClientPurchaseList
+	| newCartID listPurchaseOfOtherClient listPurchasesAfter secondClient successfulSale secondPassword |
+		
+	secondClient := testFactory aSecondClientValidUserID.
+	secondPassword := testFactory aSecondClientValidPassword.
+		
+	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
+	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
+	
+	successfulSale := tusLibrosController checkoutFor: newCartID payingWith: testFactory notExpiredCreditCard.
+	
+	listPurchasesAfter := tusLibrosController listPurchasesOf: validClient  authenticatedWith: validPassword .
+	listPurchaseOfOtherClient := tusLibrosController listPurchasesOf: secondClient authenticatedWith: secondPassword.
+	
+	self assert: listPurchasesAfter last equals: successfulSale.
+	self assert: listPurchasesAfter size = 1.
+	self assert: listPurchaseOfOtherClient size = 0.! !
+
+
+!TusLibrosRestSystemTest methodsFor: 'tests - cart checkout' stamp: 'NI 6/22/2019 21:06:11'!
+test10CannotCheckoutAnEmptyCart
+	| listPurchasesBefore newCartID |
+	
+	listPurchasesBefore := (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword) copy.
+	
+	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
+	
+	self should: [ tusLibrosController checkoutFor: newCartID payingWith: testFactory notExpiredCreditCard ]
+	raise: Error 
+	withExceptionDo: [ :anError |
+		self assert: anError messageText = Cashier cartCanNotBeEmptyErrorDescription.
+		self assert: listPurchasesBefore equals: (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword).
+	]. 
+	
+	
+	
+	
+	
+	! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - cart checkout' stamp: 'NI 6/22/2019 21:06:06'!
+test11CannotCheckoutAnInvalidCart
+	| invalidCart |
+	
+	invalidCart := 'Not valid cart'.
+	
+	self should: [ tusLibrosController checkoutFor: invalidCart payingWith: testFactory notExpiredCreditCard ]
+	raise: Error 
+	withExceptionDo: [ :anError |
+		self assert: anError messageText = TusLibrosRestSystem invalidCartIDErrorDescription.
+	]. 
+		
+	
+	! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - cart checkout' stamp: 'NI 6/22/2019 21:06:01'!
+test12CannotCheckoutWithExpiredCreditCard
+	| listPurchasesBefore newCartID |
+	
+	listPurchasesBefore := (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword) copy.
+	
+	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
+	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
+		
+	self should: [ tusLibrosController checkoutFor: newCartID payingWith: testFactory expiredCreditCard ]
+	raise: Error 
+	withExceptionDo: [ :anError |
+		self assert: anError messageText = Cashier canNotChargeAnExpiredCreditCardErrorDescription.
+		self assert: listPurchasesBefore equals: (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword).
+	]. 
+	
+	! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - cart checkout' stamp: 'NI 6/22/2019 21:05:58'!
+test13CannotCheckoutWhenTheCreditCardHasNoFunds
+	| listPurchasesBefore newCartID |
+	
+	listPurchasesBefore := (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword) copy.
+	
+	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
+	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
+	debitBehavior := [ :anAmount :aCreditCard | self error: Cashier creditCardHasNoCreditErrorDescription].
+	
+	self should: [ tusLibrosController checkoutFor: newCartID payingWith: testFactory notExpiredCreditCard ]
+	raise: Error 
+	withExceptionDo: [ :anError |
+		self assert: anError messageText = Cashier creditCardHasNoCreditErrorDescription.
+		self assert: listPurchasesBefore equals: (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword).
+	]. 
+	
+	! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - cart checkout' stamp: 'NI 6/22/2019 21:05:56'!
+test14CannotCheckoutWhenTheCreditCardIsStolen
+	| listPurchasesBefore newCartID |
+	
+	listPurchasesBefore := (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword) copy.
+	
+	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
+	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
+	debitBehavior := [ :anAmount :aCreditCard | self error: Cashier creditCardIsStolenErrorDescription ].
+	
+	self should: [ tusLibrosController checkoutFor: newCartID payingWith: testFactory notExpiredCreditCard ]
+	raise: Error 
+	withExceptionDo: [ :anError |
+		self assert: anError messageText = Cashier creditCardIsStolenErrorDescription.
+		self assert: listPurchasesBefore equals: (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword).
+	]. 
+	
+	! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - cart checkout' stamp: 'NI 6/22/2019 21:05:52'!
+test15CannotCheckoutIfCreditCardOwnerIsMoreThan30CharactersLong
+	| listPurchasesBefore newCartID aCreditCardWithInvalidOwner |
+	
+	listPurchasesBefore := (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword) copy.
+	
+	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
+	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
+	debitBehavior := [ :anAmount :aCreditCard | self error: Cashier creditCardOwnerShouldHaveLessThan30CharactersErrorDescription ].
+	aCreditCardWithInvalidOwner := CreditCard for: 'juan ignazakipati grandosinhoskitamo' expiringOn: (Month month: testFactory today monthIndex year: testFactory today yearNumber + 1) withIDNumber: testFactory anIDForValidCreditCard.
+	
+	self should: [ tusLibrosController checkoutFor: newCartID payingWith: aCreditCardWithInvalidOwner ]
+	raise: Error 
+	withExceptionDo: [ :anError |
+		self assert: anError messageText = Cashier creditCardOwnerShouldHaveLessThan30CharactersErrorDescription.
+		self assert: listPurchasesBefore equals: (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword).
+	]. 
+	
+	! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - cart checkout' stamp: 'NI 6/22/2019 21:05:49'!
+test16CheckoutChargesCreditCardUsingMerchantProcessor
+	| newCartID debitedAmout debitedCreditCard creditCard sale |
+	
+	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
+	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
+	debitBehavior := [ :anAmount :aCreditCard |
+		debitedAmout := anAmount.
+		debitedCreditCard := aCreditCard ].
+
+	creditCard := testFactory notExpiredCreditCard.
+	
+	sale := tusLibrosController checkoutFor: newCartID payingWith: creditCard.
+	
+	self assert: debitedCreditCard = creditCard.
+	self assert: debitedAmout = sale total.! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - cart checkout' stamp: 'NI 6/22/2019 21:05:45'!
+test17SystemAddsANewPurchaseAfterCheckout
+	| listPurchasesBefore newCartID listPurchasesAfter successfulSale |
+	
+	listPurchasesBefore := (tusLibrosController listPurchasesOf: validClient authenticatedWith: validPassword) copy.
+	
+	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
+	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
+	
+	successfulSale := tusLibrosController checkoutFor: newCartID payingWith: testFactory notExpiredCreditCard.
+	
+	listPurchasesAfter := tusLibrosController listPurchasesOf: validClient  authenticatedWith: validPassword .
+	
+	self assert: listPurchasesAfter last equals: successfulSale.
+	self assert: listPurchasesBefore size equals: listPurchasesAfter size - 1.
+	! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - cart checkout' stamp: 'NI 6/22/2019 21:05:42'!
+test18CheckoutRemovesCart
+	| newCartID |
+	
+	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
+	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
+	
+	tusLibrosController checkoutFor: newCartID payingWith: testFactory notExpiredCreditCard.
+	
+	self should: [ tusLibrosController listCart: newCartID ]  
+	raise: Error 
+	withExceptionDo: [ :anError |
+		self assert: anError messageText = TusLibrosRestSystem invalidCartIDErrorDescription ].! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - cart checkout' stamp: 'NI 6/22/2019 21:05:39'!
+test19CheckoutAddedSalePersistsWithCartContent
+	| newCartID sale cartItems |
+	
+	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
+	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
+	
+	cartItems := (tusLibrosController listCart: newCartID) copy.
+	sale := tusLibrosController checkoutFor: newCartID payingWith: testFactory notExpiredCreditCard.
+	
+	self assert: sale items = cartItems.
+	self assert: sale owner = validClient.! !
+
+
+!TusLibrosRestSystemTest methodsFor: 'tests - session time' stamp: 'NI 6/22/2019 21:05:33'!
+test21CannotAddItemsToExpiredCart
+	| newCartID |	
+
+	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
+	
+	tusLibrosController clock advanceTime: 31 minutes.
+		
+	self should: [ tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID ]
+	raise: Error
+	withExceptionDo: [ :anError | 
+		self assert: anError messageText = TusLibrosRestSystem cartIsExpiredErrorDescription
+	]
+	! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - session time' stamp: 'NI 6/22/2019 21:05:30'!
+test22CannotListAnExpiredCart
+	| newCartID |	
+
+	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
+	
+	tusLibrosController clock advanceTime: 31 minutes.
+		
+	self should: [ tusLibrosController listCart: newCartID ]
+	raise: Error
+	withExceptionDo: [ :anError | 
+		self assert: anError messageText = TusLibrosRestSystem cartIsExpiredErrorDescription
+	]
+	! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - session time' stamp: 'NI 6/22/2019 21:05:28'!
+test23CannotCheckoutAnExpiredCart
+	| newCartID |	
+
+	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
+	
+	tusLibrosController clock advanceTime: 31 minutes.
+		
+	self should: [ tusLibrosController listCart: newCartID ]
+	raise: Error
+	withExceptionDo: [ :anError | 
+		self assert: anError messageText = TusLibrosRestSystem cartIsExpiredErrorDescription
+	]
+	! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - session time' stamp: 'NI 6/22/2019 21:05:24'!
+test24CartSessionTimeRenovatesAfterAdding
+	| newCartID cartItems |	
+
+	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
+	
+	tusLibrosController clock advanceTime: 28 minutes.
+		
+	tusLibrosController add: 1 of: testFactory itemSellByTheStore toCart: newCartID.
+	
+	tusLibrosController clock advanceTime: 28 minutes.
+	
+	cartItems := tusLibrosController listCart: newCartID.
+	
+	self assert: cartItems size = 1.
+	
+
+	! !
+
+!TusLibrosRestSystemTest methodsFor: 'tests - session time' stamp: 'NI 6/22/2019 21:05:22'!
+test25CartSessionTimeRenovatesAfterListing
+	| newCartID cartItems |	
+
+	newCartID := tusLibrosController createCartFor: validClient authenticatedWith: validPassword.
+	
+	tusLibrosController clock advanceTime: 28 minutes.
+		
+	tusLibrosController listCart: newCartID.
+	
+	tusLibrosController clock advanceTime: 28 minutes.
+	
+	cartItems := tusLibrosController listCart: newCartID.
+	
+	self assert: cartItems isEmpty.
+	
+
+	! !
+
 
 !classDefinition: #Cart category: #TusLibros!
 Object subclass: #Cart
@@ -767,26 +796,15 @@ Object subclass: #Cart
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Cart methodsFor: 'error messages' stamp: 'HernanWilkinson 6/17/2013 17:45'!
-invalidItemErrorMessage
-	
-	^'Item is not in catalog'! !
-
-!Cart methodsFor: 'error messages' stamp: 'HernanWilkinson 6/17/2013 17:45'!
-invalidQuantityErrorMessage
-	
-	^'Invalid number of items'! !
-
-
-!Cart methodsFor: 'assertions' stamp: 'HernanWilkinson 6/17/2013 18:06'!
+!Cart methodsFor: 'assertions' stamp: 'NI 6/22/2019 21:03:07'!
 assertIsValidItem: anItem
 
-	(catalog includesKey: anItem) ifFalse: [ self error: self invalidItemErrorMessage ]! !
+	(catalog includesKey: anItem) ifFalse: [ self error: self class invalidItemErrorDescription ]! !
 
-!Cart methodsFor: 'assertions' stamp: 'HernanWilkinson 6/17/2013 17:51'!
+!Cart methodsFor: 'assertions' stamp: 'NI 6/22/2019 21:03:13'!
 assertIsValidQuantity: aQuantity
 
-	aQuantity strictlyPositive ifFalse: [ self error: self invalidQuantityErrorMessage ]! !
+	aQuantity strictlyPositive ifFalse: [ self error: self class invalidQuantityErrorDescription]! !
 
 
 !Cart methodsFor: 'initialization' stamp: 'HernanWilkinson 6/17/2013 17:48'!
@@ -845,6 +863,17 @@ Cart class
 acceptingItemsOf: aCatalog
 
 	^self new initializeAcceptingItemsOf: aCatalog ! !
+
+
+!Cart class methodsFor: 'error descriptions' stamp: 'NI 6/22/2019 21:01:43'!
+invalidItemErrorDescription
+	
+	^'Item is not in catalog'! !
+
+!Cart class methodsFor: 'error descriptions' stamp: 'NI 6/22/2019 21:02:04'!
+invalidQuantityErrorDescription
+	
+	^'Invalid number of items'! !
 
 
 !classDefinition: #Cashier category: #TusLibros!
