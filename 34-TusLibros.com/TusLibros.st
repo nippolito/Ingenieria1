@@ -383,16 +383,16 @@ TestCase subclass: #TusLibrosRestSystemTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosRestSystemTest methodsFor: 'setup' stamp: 'NI 6/22/2019 19:49:53'!
+!TusLibrosRestSystemTest methodsFor: 'setup' stamp: 'Nipo 6/24/2019 14:59:32'!
 setUp
 	clock := Clock on: DateAndTime now.
 	testFactory := StoreTestObjectsFactory new.
 	anAuthenticator := TusLibrosAuthenticator withUserDatabase: (testFactory aGenericUserDatabase).
 	tusLibrosController := TusLibrosRestSystem 
-								withAuthenticator: anAuthenticator
-								throught: self 
-								andCatalogue: (testFactory defaultCatalog)
-								andClock: clock.
+								throught: self
+								authenticatingWith: anAuthenticator
+								acceptingItemsOf: (testFactory defaultCatalog)
+								withClock: clock.
 	debitBehavior := [ :anAmount :aCreditCard | ].
 	
 	expirationTime := 30 minutes.
@@ -1357,7 +1357,19 @@ authenticateClient: aClientID withPassword: aPassword
 	authenticator authenticateClient: aClientID withPassword: aPassword! !
 
 
-!TusLibrosRestSystem methodsFor: 'cart creation - private' stamp: 'JIG 6/21/2019 19:11:28'!
+!TusLibrosRestSystem methodsFor: 'cart - private' stamp: 'JIG 6/21/2019 19:05:02'!
+add: aBookQuantity of: aBookFromStore to: aCartID
+	| currentCart |
+	currentCart := self cartOf: aCartID.
+	currentCart add: aBookQuantity of: aBookFromStore.
+	! !
+
+!TusLibrosRestSystem methodsFor: 'cart - private' stamp: 'JIG 6/21/2019 17:06:46'!
+addToActiveCarts: aCart withID: aCartID ownedBy: aClientID on: aCreationTime 
+	 
+	activeCarts at: aCartID put: (OrderedCollection with: aCart with: aClientID with: aCreationTime).! !
+
+!TusLibrosRestSystem methodsFor: 'cart - private' stamp: 'JIG 6/21/2019 19:11:28'!
 createCartIDFor: aClientID
 	| newAmount newCartID |
 
@@ -1367,41 +1379,27 @@ createCartIDFor: aClientID
 	newCartID := aClientID , newAmount asString.
 	^newCartID! !
 
-!TusLibrosRestSystem methodsFor: 'cart creation - private' stamp: 'JIG 6/20/2019 16:59:32'!
+!TusLibrosRestSystem methodsFor: 'cart - private' stamp: 'JIG 6/20/2019 16:59:32'!
 createNewCart.
 	^Cart acceptingItemsOf: catalogue.! !
 
-!TusLibrosRestSystem methodsFor: 'cart creation - private' stamp: 'JIG 6/21/2019 18:53:21'!
-updateHistoricalClientCartsAmount: aClientID
-	| currentAmountOfCarts |
-	
-	currentAmountOfCarts := historicalCartsAmountPerClient at: aClientID ifAbsent: [0].
-	historicalCartsAmountPerClient at: aClientID put: (currentAmountOfCarts + 1).! !
-
-
-!TusLibrosRestSystem methodsFor: 'cart operations - private' stamp: 'JIG 6/21/2019 19:05:02'!
-add: aBookQuantity of: aBookFromStore to: aCartID
-	| currentCart |
-	currentCart := self cartOf: aCartID.
-	currentCart add: aBookQuantity of: aBookFromStore.
-	! !
-
-!TusLibrosRestSystem methodsFor: 'cart operations - private' stamp: 'JIG 6/21/2019 17:06:46'!
-addToActiveCarts: aCart withID: aCartID ownedBy: aClientID on: aCreationTime 
-	 
-	activeCarts at: aCartID put: (OrderedCollection with: aCart with: aClientID with: aCreationTime).! !
-
-!TusLibrosRestSystem methodsFor: 'cart operations - private' stamp: 'JIG 6/21/2019 19:08:51'!
+!TusLibrosRestSystem methodsFor: 'cart - private' stamp: 'JIG 6/21/2019 19:08:51'!
 removeFromActiveCarts: aCartID
 	activeCarts removeKey: aCartID.! !
 
-
-!TusLibrosRestSystem methodsFor: 'cart session - private' stamp: 'JIG 6/21/2019 18:38:25'!
+!TusLibrosRestSystem methodsFor: 'cart - private' stamp: 'JIG 6/21/2019 18:38:25'!
 renewCartExpiration: aCartID
 	| cartInfo |
 	
 	cartInfo := (activeCarts at: aCartID).  
 	cartInfo at: 3 put: clock now.! !
+
+!TusLibrosRestSystem methodsFor: 'cart - private' stamp: 'JIG 6/21/2019 18:53:21'!
+updateHistoricalClientCartsAmount: aClientID
+	| currentAmountOfCarts |
+	
+	currentAmountOfCarts := historicalCartsAmountPerClient at: aClientID ifAbsent: [0].
+	historicalCartsAmountPerClient at: aClientID put: (currentAmountOfCarts + 1).! !
 
 
 !TusLibrosRestSystem methodsFor: 'cashier operations - private' stamp: 'JIG 6/21/2019 19:07:49'!
@@ -1415,8 +1413,8 @@ cashierCheckoutFor: aCartID payingWith: aCreditCart
 ! !
 
 
-!TusLibrosRestSystem methodsFor: 'initialization' stamp: 'JIG 6/21/2019 18:53:21'!
-initializeWithAuthenticator: anAuthenticator processingWith: aMerchantProcessor andCatalogue: aCatalogue andClock: aClock
+!TusLibrosRestSystem methodsFor: 'initialization' stamp: 'Nipo 6/24/2019 14:59:57'!
+initializeProcessingWith: aMerchantProcessor authenticatingWith: anAuthenticator acceptingItemsOf: aCatalogue withClock: aClock
 	authenticator := anAuthenticator.
 	catalogue := aCatalogue.
 	merchantProcessor := aMerchantProcessor.
@@ -1493,9 +1491,9 @@ isClientIDWithActiveCart: aClientID
 TusLibrosRestSystem class
 	instanceVariableNames: ''!
 
-!TusLibrosRestSystem class methodsFor: 'instance creation' stamp: 'JIG 6/21/2019 16:48:32'!
-withAuthenticator: anAuthenticator throught: aMerchantProcessor andCatalogue: aCatalogue andClock: aClock
-	^self new initializeWithAuthenticator: anAuthenticator processingWith: aMerchantProcessor andCatalogue: aCatalogue andClock: aClock.! !
+!TusLibrosRestSystem class methodsFor: 'instance creation' stamp: 'Nipo 6/24/2019 14:59:51'!
+throught: aMerchantProcessor authenticatingWith: anAuthenticator acceptingItemsOf: aCatalogue withClock: aClock
+	^self new initializeProcessingWith: aMerchantProcessor authenticatingWith: anAuthenticator acceptingItemsOf: aCatalogue withClock: aClock.! !
 
 
 !TusLibrosRestSystem class methodsFor: 'error descriptions' stamp: 'NI 6/22/2019 20:12:38'!
