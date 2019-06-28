@@ -791,12 +791,12 @@ test25CartSessionTimeRenovatesAfterListing
 
 !classDefinition: #TusLibrosServerControllerTest category: #TusLibros!
 TestCase subclass: #TusLibrosServerControllerTest
-	instanceVariableNames: 'testFactory tusLibrosController anAuthenticator clock'
+	instanceVariableNames: 'testFactory tusLibrosController anAuthenticator clock server'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosServerControllerTest methodsFor: 'setup' stamp: 'Nico 6/28/2019 15:49:08'!
+!TusLibrosServerControllerTest methodsFor: 'setup' stamp: 'Nico 6/28/2019 18:00:36'!
 setUp
 	testFactory := StoreTestObjectsFactory new.
 	
@@ -806,15 +806,14 @@ setUp
 								throught: self
 								authenticatingWith: anAuthenticator
 								acceptingItemsOf: (testFactory defaultCatalog)
-								withClock: clock.! !
+								withClock: clock.
+								
+	server := self createServer.! !
 
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 6/28/2019 16:02:35'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 6/28/2019 18:00:28'!
 test01CannotCreateCartWhenInvalidAuthentication
 	|response|
-	
-	self stopListeningAndDestroyServer.
-	self createServer.
 
 	response := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory anInvalidClientUserID ,'&password=', testFactory anInvalidPassword.
 	self assert: response content equals: '1|', TusLibrosServerController invalidAuthenticationDescription.
@@ -822,7 +821,7 @@ test01CannotCreateCartWhenInvalidAuthentication
 	self stopListeningAndDestroyServer.! !
 
 
-!TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'Nico 6/28/2019 15:58:36'!
+!TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'Nico 6/28/2019 17:22:17'!
 createServer
 	TusLibrosServerController new initializeWith: tusLibrosController.! !
 
@@ -1558,28 +1557,8 @@ Object subclass: #TusLibrosServerController
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosServerController methodsFor: 'initialization' stamp: 'Nico 6/28/2019 15:48:18'!
-initialize
-	
-	webServer := WebServer new listenOn: self port.
-	
-	webServer addService: '/createCart' action:[:request | |substringsAsJson clientId password |
-		
-	[password := (request fields at:'password').
-	clientId := (request fields at: 'clientId').
-	"substringsAsJson:= WebUtils jsonEncode: (substrings)."
-	request send200Response: (clientId, password)
-	] 
-	on: Error 
-	do: [ :anError |
-		request send404Response: (anError messageText) ]].
-	
-! !
-
-!TusLibrosServerController methodsFor: 'initialization' stamp: 'Nico 6/28/2019 15:58:46'!
+!TusLibrosServerController methodsFor: 'initialization' stamp: 'Nico 6/28/2019 17:18:23'!
 initializeWith: anInternalSystem
-	
-	super initialize.
 	
 	webServer := WebServer new listenOn: self port.
 	
@@ -1633,6 +1612,6 @@ stopListening
 TusLibrosServerController class
 	instanceVariableNames: ''!
 
-!TusLibrosServerController class methodsFor: 'as yet unclassified' stamp: 'Nico 6/28/2019 15:30:37'!
+!TusLibrosServerController class methodsFor: 'as yet unclassified' stamp: 'Nico 6/28/2019 17:27:56'!
 invalidAuthenticationDescription
-	^'Autenticación inválida'! !
+	^'Autenticacion invalida'! !
