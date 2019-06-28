@@ -811,23 +811,26 @@ setUp
 	server := self createServer.! !
 
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 6/28/2019 18:00:28'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 6/28/2019 20:21:21'!
 test01CannotCreateCartWhenInvalidAuthentication
 	|response|
 
+	"Cualquier cosa podemos fijarnos si cuando arranca el test el server se creó correctamente y hay un proceso escuchando, dado que lo creamos en el setUp"
 	response := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory anInvalidClientUserID ,'&password=', testFactory anInvalidPassword.
 	self assert: response content equals: '1|', TusLibrosServerController invalidAuthenticationDescription.
 	
 	self stopListeningAndDestroyServer.! !
 
 
-!TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'Nico 6/28/2019 17:22:17'!
+!TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'Nico 6/28/2019 20:14:52'!
 createServer
-	TusLibrosServerController new initializeWith: tusLibrosController.! !
+	^TusLibrosServerController new initializeWith: tusLibrosController.! !
 
-!TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'Nico 6/28/2019 15:56:50'!
+!TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'Nico 6/28/2019 20:13:47'!
 stopListeningAndDestroyServer
-	TusLibrosServerController allInstances do: [:aServer | aServer stopListening. aServer destroy].! !
+	"TusLibrosServerController allInstances do: [:aServer | aServer stopListening. aServer destroy]."
+	server stopListening.
+	server destroy.! !
 
 
 !classDefinition: #Cart category: #TusLibros!
