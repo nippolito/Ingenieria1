@@ -811,20 +811,18 @@ setUp
 	server := self createServer.! !
 
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 17:08:44'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'nico 6/30/2019 20:05:08'!
 test01CannotCreateCartWhenInvalidAuthentication
 	|response|
 
-	"Cualquier cosa podemos fijarnos si cuando arranca el test el server se creó correctamente y hay un proceso escuchando, dado que lo creamos en el setUp"
 	response := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory anInvalidClientUserID ,'&password=', testFactory anInvalidPassword.
 	self assert: response content equals: '1|', TusLibrosServerController invalidAuthenticationErrorDescription .
 	! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 13:35:47'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'nico 6/30/2019 20:05:03'!
 test02ValidClientCanCreateACart
 	|response|
 
-	"Cualquier cosa podemos fijarnos si cuando arranca el test el server se creó correctamente y hay un proceso escuchando, dado que lo creamos en el setUp"
 	response := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory aFirstClientValidUserID ,'&password=', testFactory aFirstClientValidPassword.
 	
 	self assert: response content equals: '0|Wilkinson1'.
@@ -945,11 +943,9 @@ test11CannotCheckoutAnInvalidCart
 createServer
 	^TusLibrosServerController new initializeWith: tusLibrosController.! !
 
-!TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'JIG 6/30/2019 13:36:02'!
+!TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'nico 6/30/2019 20:04:43'!
 stopListeningAndDestroyServer
-	TusLibrosServerController allInstances do: [:aServer | aServer stopListening. aServer destroy].
-	"server stopListening.
-	server destroy."! !
+	TusLibrosServerController allInstances do: [:aServer | aServer stopListening. aServer destroy].! !
 
 
 !TusLibrosServerControllerTest methodsFor: 'tear down' stamp: 'JIG 6/30/2019 13:35:42'!
@@ -1711,60 +1707,18 @@ Object subclass: #TusLibrosServerController
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosServerController methodsFor: 'initialization' stamp: 'JIG 6/30/2019 17:53:20'!
-initializeWith: anInternalSystem
-	
-	webServer := WebServer new listenOn: self port.
-	
-	internalSystem := anInternalSystem.
-	
-	webServer addService: '/createCart' action:[:request | |clientId password cartID |
-		
-	[
-		password := (request fields at:'password').
-		clientId := (request fields at: 'clientId').
-		"substringsAsJson:= WebUtils jsonEncode: (substrings)."
-
-		[
-			cartID := internalSystem createCartFor: clientId authenticatedWith: password.
-			request send200Response: '0|', cartID.
-		]
-		on: Error
-		do: [:anError | 
-			request send200Response: '1|', self class invalidAuthenticationErrorDescription ].
-	] 
-	on: Error 
-	do: [ :anError |
-		request send404Response: (anError messageText) ]].
-
-	webServer addService: '/listCart' action:[:request | |cartID items|
-		
-	[
-		cartID := (request fields at: 'cartId').
-		[ | parsedItemsResult |
-			items := internalSystem listCart: cartID.
-			parsedItemsResult := '0'.
-			items do: [:item | parsedItemsResult := parsedItemsResult, '|', item, '|', (items occurrencesOf: item) asString ].
-			request send200Response: parsedItemsResult.
-		]
-		on: Error
-		do: [:anError | 
-			request send200Response: '1|', TusLibrosRestSystem invalidCartIDErrorDescription.
-		]
-	] 
-	on: Error 
-	do: [ :anError |
-		request send404Response: (anError messageText) ]].
+!TusLibrosServerController methodsFor: 'adding services' stamp: 'nico 6/30/2019 19:57:31'!
+addCartCheckOutService
 
 	webServer addService: '/checkOutCart' action:[:request | |cartID transactionID creditExpiration creditNumber creditOwner|
 		
 	[
-		cartID := (request fields at: 'cartId').
-		creditNumber := (request fields at: 'cnn').
-		creditExpiration := (request fields at: 'cced').
-		creditOwner := (request fields at: 'cco').
+		cartID := request fields at: self cartIdField.
+		creditNumber := request fields at: self creditNumberField.
+		creditExpiration := request fields at: self creditExpirationField.
+		creditOwner := request fields at: self creditOwnerField.
 		[ | parsedCreditCard |
-			"self halt."
+			
 			parsedCreditCard := self parseCreditCard: creditNumber expiringOn: creditExpiration ownedBy: creditOwner.
 			
 			transactionID := internalSystem checkoutFor: cartID payingWith: parsedCreditCard.
@@ -1773,52 +1727,61 @@ initializeWith: anInternalSystem
 		]
 		on: Error
 		do: [:anError | 
-			
-			anError messageText = Cashier cartCanNotBeEmptyErrorDescription ifTrue: [request send200Response: '1|', Cashier cartCanNotBeEmptyErrorDescription].
-			anError messageText = TusLibrosRestSystem invalidCartIDErrorDescription ifTrue: [request send200Response: '1|', TusLibrosRestSystem invalidCartIDErrorDescription]
-			ifFalse: [request send200Response: '1| Hubo un error no contemplado'].
+			self from: request sendErrorResponse: anError messageText.
 		]
 	] 
 	on: Error 
 	do: [ :anError |
 		request send404Response: (anError messageText) ]].
+	
+! !
+
+!TusLibrosServerController methodsFor: 'adding services' stamp: 'nico 6/30/2019 19:56:24'!
+addCartCreationService
+
+	webServer addService: '/createCart' action:[:request | |clientId password cartID |
+		
+	[
+		password := request fields at: self passwordField.
+		clientId := request fields at: self clientIdField.
+		"substringsAsJson:= WebUtils jsonEncode: (substrings)."
+
+		[
+			cartID := internalSystem createCartFor: clientId authenticatedWith: password.
+			request send200Response: '0|', cartID.
+		]
+		on: Error
+		do: [:anError | 
+			self from: request sendErrorResponse: self class invalidAuthenticationErrorDescription
+			].
+	] 
+	on: Error 
+	do: [ :anError |
+		request send404Response: (anError messageText) ]].
+	
+	
+! !
+
+!TusLibrosServerController methodsFor: 'adding services' stamp: 'nico 6/30/2019 20:02:52'!
+addCartItemAddingService
 
 	webServer addService: '/addToCart' action:[:request | |cartID bookISBN items bookQuantity|
 	[
-
-		cartID := request fields at: 'cartId'.
-		bookISBN  := request fields at: 'bookIsbn'.
-		bookQuantity  := (request fields at: 'bookQuantity').
-		bookQuantity := bookQuantity asNumber.
+		cartID := request fields at: self cartIdField.
+		bookISBN  := request fields at: self bookIsbnField.
+		bookQuantity  := (request fields at: self bookQuantityField) asNumber.
 		[
 			items := internalSystem add: bookQuantity of: bookISBN toCart: cartID.
 			request send200Response: '0|OK'
 		]
 		on: Error
 		do: [:anError |
-			anError messageText = Cart invalidItemErrorDescription ifTrue: [ request send200Response: '1|', Cart invalidItemErrorDescription ].
+			self from: request sendErrorResponse: anError messageText.
+			"anError messageText = Cart invalidItemErrorDescription ifTrue: [ request send200Response: '1|', Cart invalidItemErrorDescription ].
 			anError messageText = Cart invalidQuantityErrorDescription ifTrue: [request send200Response: '1|', Cart invalidQuantityErrorDescription ].
 			anError messageText = TusLibrosRestSystem invalidCartIDErrorDescription ifTrue: [request send200Response: '1|',  TusLibrosRestSystem invalidCartIDErrorDescription ]
-			ifFalse: [request send200Response: '1| Hubo un error no contemplado'].
+			ifFalse: [request send200Response: '1| Hubo un error no contemplado']."
 		]
-	] 
-	on: Error 
-	do: [ :anError |
-		request send404Response: (anError messageText) ]].
-
-	webServer addService: '/listPurchases' action:[:request | |clientId password |
-		
-	[
-		password := (request fields at:'password').
-		clientId := (request fields at: 'clientId').
-
-		[
-			internalSystem listPurchasesOf: clientId authenticatedWith: password.
-			request send200Response: '0'.
-		]
-		on: Error
-		do: [:anError | 
-			request send200Response: '1|', self class invalidAuthenticationErrorDescription ].
 	] 
 	on: Error 
 	do: [ :anError |
@@ -1828,10 +1791,63 @@ initializeWith: anInternalSystem
 	
 ! !
 
-!TusLibrosServerController methodsFor: 'initialization' stamp: 'Nico 6/28/2019 15:35:22'!
-port
-	^ port ifNil: [port:=8080].
+!TusLibrosServerController methodsFor: 'adding services' stamp: 'nico 6/30/2019 20:02:18'!
+addCartListingService.
 
+	webServer addService: '/listCart' action:[:request | |cartID items|
+		
+	[
+		cartID := request fields at: self cartIdField.
+		[ | parsedItems |
+			
+			items := internalSystem listCart: cartID.
+			parsedItems := self parseItemsListed: items.
+			request send200Response: parsedItems.
+		]
+		on: Error
+		do: [:anError | 
+			self from: request sendErrorResponse: TusLibrosRestSystem invalidCartIDErrorDescription.
+		]
+	] 
+	on: Error 
+	do: [ :anError |
+		request send404Response: (anError messageText) ]].
+! !
+
+!TusLibrosServerController methodsFor: 'adding services' stamp: 'nico 6/30/2019 19:58:36'!
+addPurchasesListingService
+
+	webServer addService: '/listPurchases' action:[:request | |clientId password |
+		
+	[
+		password := request fields at: self passwordField.
+		clientId := request fields at: self clientIdField.
+
+		[
+			internalSystem listPurchasesOf: clientId authenticatedWith: password.
+			request send200Response: '0'.
+		]
+		on: Error
+		do: [:anError | 
+			self from: request sendErrorResponse: self class invalidAuthenticationErrorDescription
+			].
+	] 
+	on: Error 
+	do: [ :anError |
+		request send404Response: (anError messageText) ]].
+
+	
+	
+! !
+
+!TusLibrosServerController methodsFor: 'adding services' stamp: 'nico 6/30/2019 19:36:21'!
+addServices
+	self addCartCreationService.
+	self addCartListingService.
+	self addCartCheckOutService.
+	self addCartItemAddingService.
+	self addPurchasesListingService.
+	
 ! !
 
 
@@ -1851,16 +1867,98 @@ stopListening
 	webServer stopListener! !
 
 
-!TusLibrosServerController methodsFor: 'private - parsing' stamp: 'JIG 6/30/2019 17:53:11'!
-parseCreditCard: aCreditNumber expiringOn: aCreditExpiration ownedBy: aCreditOwner
-	| monthOfCreditExpiration yearOfCreditExpiration parsedCreditExpiration |
+!TusLibrosServerController methodsFor: 'initialization' stamp: 'nico 6/30/2019 19:36:12'!
+initializeWith: anInternalSystem
 	
+	webServer := WebServer new listenOn: self port.
+	
+	internalSystem := anInternalSystem.
+	
+	self addServices.
+
+	
+	
+! !
+
+!TusLibrosServerController methodsFor: 'initialization' stamp: 'Nico 6/28/2019 15:35:22'!
+port
+	^ port ifNil: [port:=8080].
+
+! !
+
+
+!TusLibrosServerController methodsFor: 'private - parameter fields' stamp: 'nico 6/30/2019 19:45:13'!
+bookIsbnField
+	^'bookIsbn'	
+! !
+
+!TusLibrosServerController methodsFor: 'private - parameter fields' stamp: 'nico 6/30/2019 19:45:21'!
+bookQuantityField
+	^'bookQuantity'	
+! !
+
+!TusLibrosServerController methodsFor: 'private - parameter fields' stamp: 'nico 6/30/2019 19:42:08'!
+cartIdField
+	^'cartId'
+	
+! !
+
+!TusLibrosServerController methodsFor: 'private - parameter fields' stamp: 'nico 6/30/2019 19:43:45'!
+clientIdField
+	^'clientId'
+! !
+
+!TusLibrosServerController methodsFor: 'private - parameter fields' stamp: 'nico 6/30/2019 19:48:02'!
+creditExpirationField
+	^'cced'! !
+
+!TusLibrosServerController methodsFor: 'private - parameter fields' stamp: 'nico 6/30/2019 19:47:53'!
+creditNumberField
+	^'cnn'! !
+
+!TusLibrosServerController methodsFor: 'private - parameter fields' stamp: 'nico 6/30/2019 19:48:08'!
+creditOwnerField
+	^'cco'! !
+
+!TusLibrosServerController methodsFor: 'private - parameter fields' stamp: 'nico 6/30/2019 19:43:15'!
+passwordField
+	^'password'
+	
+! !
+
+
+!TusLibrosServerController methodsFor: 'private - parsing' stamp: 'nico 6/30/2019 20:04:23'!
+parseCreditCard: aCreditNumber expiringOn: aCreditExpiration ownedBy: aCreditOwner
+	| parsedExpirationDate |
+	
+	parsedExpirationDate := self parseExpirationDate: aCreditExpiration.
+
+	^CreditCard for: aCreditOwner expiringOn: parsedExpirationDate withIDNumber: aCreditNumber.! !
+
+!TusLibrosServerController methodsFor: 'private - parsing' stamp: 'nico 6/30/2019 19:38:55'!
+parseExpirationDate: aCreditExpiration
+	| monthOfCreditExpiration yearOfCreditExpiration |
 	
 	monthOfCreditExpiration := (aCreditExpiration copyFrom: 1 to: 2) asNumber.
 	yearOfCreditExpiration := (aCreditExpiration copyFrom: 3 to: 6) asNumber.
-	parsedCreditExpiration := Month month: monthOfCreditExpiration year: yearOfCreditExpiration.
+	^ Month month: monthOfCreditExpiration year: yearOfCreditExpiration.! !
 
-	^CreditCard for: aCreditOwner expiringOn: parsedCreditExpiration withIDNumber: aCreditNumber.! !
+!TusLibrosServerController methodsFor: 'private - parsing' stamp: 'nico 6/30/2019 20:01:31'!
+parseItemsListed: items
+	| parsedItemsResult |
+	
+	parsedItemsResult := '0'.
+	items do: [:item | parsedItemsResult := parsedItemsResult, '|', item, '|', (items occurrencesOf: item) asString ].
+	
+	^parsedItemsResult
+
+! !
+
+
+!TusLibrosServerController methodsFor: 'private - error response' stamp: 'nico 6/30/2019 19:52:30'!
+from: request sendErrorResponse: anErrorResponse
+	request send200Response: '1|', anErrorResponse
+! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
