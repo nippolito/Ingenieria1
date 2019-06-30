@@ -821,16 +821,56 @@ test01CannotCreateCartWhenInvalidAuthentication
 	
 	self stopListeningAndDestroyServer.! !
 
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 13:35:47'!
+test02ValidClientCanCreateACart
+	|response|
+
+	"Cualquier cosa podemos fijarnos si cuando arranca el test el server se creó correctamente y hay un proceso escuchando, dado que lo creamos en el setUp"
+	response := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory aFirstClientValidUserID ,'&password=', testFactory aFirstClientValidPassword.
+	
+	self assert: response content equals: '0|Wilkinson1'.
+! !
+
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 13:54:15'!
+test03CannotListAnInvalidCart
+	| aCartID responseListCart |
+	
+	aCartID := 'InvalidCartID'.
+		
+	"responseCreateCart := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory aFirstClientValidUserID ,'&password=', testFactory aFirstClientValidPassword."
+	responseListCart := WebClient httpGet: 'http://localhost:8080/listCart?cartId=', aCartID.
+	
+	self assert: responseListCart content equals: '1|', TusLibrosServerController cannotCheckoutInvalidCartErrorDescription.
+! !
+
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 14:02:48'!
+test04ValidCartCanAddItemsFromCatalogue
+	| aCartID responseCreateCart responseListCart |
+		
+	responseCreateCart := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory aFirstClientValidUserID ,'&password=', testFactory aFirstClientValidPassword.
+	aCartID := responseCreateCart content.
+	WebClient httpGet: 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', testFactory itemSellByTheStore,'&bookQuantity=1'. 
+	responseListCart := WebClient httpGet: 'http://localhost:8080/listCart?cartId=', aCartID.
+	
+	self assert: responseListCart content equals: '0|', testFactory itemSellByTheStore, '|1'.
+! !
+
 
 !TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'Nico 6/28/2019 20:14:52'!
 createServer
 	^TusLibrosServerController new initializeWith: tusLibrosController.! !
 
-!TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'Nico 6/28/2019 20:13:47'!
+!TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'JIG 6/30/2019 13:36:02'!
 stopListeningAndDestroyServer
-	"TusLibrosServerController allInstances do: [:aServer | aServer stopListening. aServer destroy]."
-	server stopListening.
-	server destroy.! !
+	TusLibrosServerController allInstances do: [:aServer | aServer stopListening. aServer destroy].
+	"server stopListening.
+	server destroy."! !
+
+
+!TusLibrosServerControllerTest methodsFor: 'tear down' stamp: 'JIG 6/30/2019 13:35:42'!
+tearDown
+	self stopListeningAndDestroyServer.
+! !
 
 
 !classDefinition: #Cart category: #TusLibros!
@@ -851,11 +891,11 @@ assertIsValidQuantity: aQuantity
 	aQuantity strictlyPositive ifFalse: [ self error: self class invalidQuantityErrorDescription]! !
 
 
-!Cart methodsFor: 'initialization' stamp: 'HernanWilkinson 6/17/2013 17:48'!
+!Cart methodsFor: 'initialization' stamp: 'JIG 6/30/2019 14:11:57'!
 initializeAcceptingItemsOf: aCatalog
 
 	catalog := aCatalog.
-	items := OrderedCollection new.! !
+	items := Bag new.! !
 
 
 !Cart methodsFor: 'testing' stamp: 'HernanWilkinson 6/17/2013 17:44'!
@@ -1202,21 +1242,21 @@ Object subclass: #StoreTestObjectsFactory
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!StoreTestObjectsFactory methodsFor: 'authentication' stamp: 'Nico 6/13/2019 14:45:22'!
+!StoreTestObjectsFactory methodsFor: 'authentication' stamp: 'JIG 6/30/2019 13:46:03'!
 aFirstClientValidPassword
-	^'Sr. Smalltalk'.! !
+	^'Sr.Smalltalk'.! !
 
 !StoreTestObjectsFactory methodsFor: 'authentication' stamp: 'Nico 6/13/2019 16:30:47'!
 aFirstClientValidUserID
 	^'Wilkinson'.! !
 
-!StoreTestObjectsFactory methodsFor: 'authentication' stamp: 'Nico 6/13/2019 14:45:29'!
+!StoreTestObjectsFactory methodsFor: 'authentication' stamp: 'JIG 6/30/2019 13:46:58'!
 aGenericUserDatabase
 	^Dictionary 
 		newFromPairs: { 
 			'Juan'. 'CasiSmalltalk'. 
 			'Nico'. 'SmalltalkCreo'. 
-			'Wilkinson'. 'Sr. Smalltalk'.
+			'Wilkinson'. 'Sr.Smalltalk'.
 		}.! !
 
 !StoreTestObjectsFactory methodsFor: 'authentication' stamp: 'JIG 6/21/2019 16:39:11'!
@@ -1560,30 +1600,51 @@ Object subclass: #TusLibrosServerController
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosServerController methodsFor: 'initialization' stamp: 'Nico 6/28/2019 17:18:23'!
+!TusLibrosServerController methodsFor: 'initialization' stamp: 'JIG 6/30/2019 14:08:13'!
 initializeWith: anInternalSystem
 	
 	webServer := WebServer new listenOn: self port.
 	
 	internalSystem := anInternalSystem.
 	
-	webServer addService: '/createCart' action:[:request | |substringsAsJson clientId password cartID |
+	webServer addService: '/createCart' action:[:request | |clientId password cartID |
 		
 	[
 		password := (request fields at:'password').
 		clientId := (request fields at: 'clientId').
 		"substringsAsJson:= WebUtils jsonEncode: (substrings)."
-		
-		[cartID := internalSystem createCartFor: clientId authenticatedWith: password]
+
+		[
+			cartID := internalSystem createCartFor: clientId authenticatedWith: password.
+			request send200Response: '0|', cartID.
+		]
 		on: Error
 		do: [:anError | 
 			request send200Response: '1|', self class invalidAuthenticationDescription].
-		
-		"request send200Response: '0|', cartID."
 	] 
 	on: Error 
 	do: [ :anError |
 		request send404Response: (anError messageText) ]].
+
+
+	webServer addService: '/listCart' action:[:request | |cartID items|
+		
+	[
+		cartID := (request fields at: 'cartId').
+		[ | parsedItemsResult |
+			items := TusLibrosRestSystem listCart: cartID.
+			parsedItemsResult := '0|'.
+			items do: [:item | parsedItemsResult := parsedItemsResult, item, '|']. 
+		]
+		on: Error
+		do: [:anError | 
+			request send200Response: '1|', self class cannotCheckoutInvalidCartErrorDescription.
+		]
+	] 
+	on: Error 
+	do: [ :anError |
+		request send404Response: (anError messageText) ]].
+	
 	
 ! !
 
@@ -1615,6 +1676,10 @@ stopListening
 TusLibrosServerController class
 	instanceVariableNames: ''!
 
-!TusLibrosServerController class methodsFor: 'as yet unclassified' stamp: 'Nico 6/28/2019 17:27:56'!
+!TusLibrosServerController class methodsFor: 'errors' stamp: 'JIG 6/30/2019 13:53:56'!
+cannotCheckoutInvalidCartErrorDescription
+	^TusLibrosRestSystem cannotCheckoutInvalidCartErrorDescription.! !
+
+!TusLibrosServerController class methodsFor: 'errors' stamp: 'Nico 6/28/2019 17:27:56'!
 invalidAuthenticationDescription
 	^'Autenticacion invalida'! !
