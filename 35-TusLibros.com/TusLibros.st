@@ -811,15 +811,14 @@ setUp
 	server := self createServer.! !
 
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 6/28/2019 20:21:21'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 17:08:44'!
 test01CannotCreateCartWhenInvalidAuthentication
 	|response|
 
 	"Cualquier cosa podemos fijarnos si cuando arranca el test el server se creó correctamente y hay un proceso escuchando, dado que lo creamos en el setUp"
 	response := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory anInvalidClientUserID ,'&password=', testFactory anInvalidPassword.
-	self assert: response content equals: '1|', TusLibrosServerController invalidAuthenticationDescription.
-	
-	self stopListeningAndDestroyServer.! !
+	self assert: response content equals: '1|', TusLibrosServerController invalidAuthenticationErrorDescription .
+	! !
 
 !TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 13:35:47'!
 test02ValidClientCanCreateACart
@@ -831,7 +830,7 @@ test02ValidClientCanCreateACart
 	self assert: response content equals: '0|Wilkinson1'.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 13:54:15'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 16:53:02'!
 test03CannotListAnInvalidCart
 	| aCartID responseListCart |
 	
@@ -840,20 +839,106 @@ test03CannotListAnInvalidCart
 	"responseCreateCart := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory aFirstClientValidUserID ,'&password=', testFactory aFirstClientValidPassword."
 	responseListCart := WebClient httpGet: 'http://localhost:8080/listCart?cartId=', aCartID.
 	
-	self assert: responseListCart content equals: '1|', TusLibrosServerController cannotCheckoutInvalidCartErrorDescription.
+	self assert: responseListCart content equals: '1|', TusLibrosRestSystem invalidCartIDErrorDescription.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 14:02:48'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 16:15:04'!
 test04ValidCartCanAddItemsFromCatalogue
-	| aCartID responseCreateCart responseListCart |
+	| aCartID responseCreateCart responseListCart responseAddToCart |
 		
 	responseCreateCart := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory aFirstClientValidUserID ,'&password=', testFactory aFirstClientValidPassword.
-	aCartID := responseCreateCart content.
-	WebClient httpGet: 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', testFactory itemSellByTheStore,'&bookQuantity=1'. 
+	aCartID := self extractCartIDFrom: responseCreateCart content.
+	responseAddToCart := WebClient httpGet: 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', testFactory itemSellByTheStore,'&bookQuantity=1'. 
 	responseListCart := WebClient httpGet: 'http://localhost:8080/listCart?cartId=', aCartID.
 	
+	self assert: responseAddToCart content equals: '0|OK'.
 	self assert: responseListCart content equals: '0|', testFactory itemSellByTheStore, '|1'.
 ! !
+
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 16:38:10'!
+test05CannotAddItemsToCartThatDoNotBelongToStore
+	| aCartID responseCreateCart responseListCart responseAddToCart |
+		
+	responseCreateCart := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory aFirstClientValidUserID ,'&password=', testFactory aFirstClientValidPassword.
+	aCartID := self extractCartIDFrom: responseCreateCart content.
+	responseAddToCart := WebClient httpGet: 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', testFactory itemNotSellByTheStore,'&bookQuantity=1'. 
+	responseListCart := WebClient httpGet: 'http://localhost:8080/listCart?cartId=', aCartID.
+	
+	self assert: responseAddToCart content equals: '1|', Cart invalidItemErrorDescription.
+	self assert: responseListCart content equals: '0'.
+! !
+
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 16:41:08'!
+test06CannotAddToCartNonPositiveNumberOfItems
+	| aCartID responseCreateCart responseListCart responseAddToCart |
+		
+	responseCreateCart := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory aFirstClientValidUserID ,'&password=', testFactory aFirstClientValidPassword.
+	aCartID := self extractCartIDFrom: responseCreateCart content.
+	responseAddToCart := WebClient httpGet: 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', testFactory itemSellByTheStore,'&bookQuantity=-1'. 
+	responseListCart := WebClient httpGet: 'http://localhost:8080/listCart?cartId=', aCartID.
+	
+	self assert: responseAddToCart content equals: '1|', Cart invalidQuantityErrorDescription.
+	self assert: responseListCart content equals: '0'.
+! !
+
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 17:00:28'!
+test07CannotAddItemsToInvalidCart
+	| aCartID responseAddToCart |
+
+	aCartID := 'invalidCart'.
+	responseAddToCart := WebClient httpGet: 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', testFactory itemSellByTheStore,'&bookQuantity=2'.
+	
+	self assert: responseAddToCart content equals: '1|', TusLibrosRestSystem invalidCartIDErrorDescription.
+! !
+
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 17:04:38'!
+test08ClientWithoutTransactionsHasNoPurchases
+	| responseListPurchases |
+	
+	responseListPurchases := WebClient httpGet: 'http://localhost:8080/listPurchases?clientId=', testFactory aFirstClientValidUserID, '&password=', testFactory aFirstClientValidPassword.
+	
+	self assert: responseListPurchases content equals: '0'.
+	
+	! !
+
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 17:09:39'!
+test09CannotListPurchasesWhenInvalidAuthentication
+	| responseListPurchases |
+	
+	responseListPurchases := WebClient httpGet: 'http://localhost:8080/listPurchases?clientId=', testFactory anInvalidClientUserID, '&password=', testFactory aFirstClientValidPassword.
+	self assert: responseListPurchases content equals: '1|', TusLibrosServerController invalidAuthenticationErrorDescription.
+	
+	! !
+
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 17:36:52'!
+test10CannotCheckoutAnEmptyCart
+	| responseCheckout aCartID responseCreateCart responseAfterCheckoutListPurchases responseBeforeCheckoutListPurchases |
+			
+	responseCreateCart := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory aFirstClientValidUserID ,'&password=', testFactory aFirstClientValidPassword.
+	aCartID := self extractCartIDFrom: responseCreateCart content.
+	responseBeforeCheckoutListPurchases := WebClient httpGet: 'http://localhost:8080/listPurchases?clientId=', testFactory anInvalidClientUserID, '&password=', testFactory aFirstClientValidPassword.
+	
+	responseCheckout := WebClient httpGet: 'http://localhost:8080/checkOutCart?cartId=', aCartID, '&cnn=', testFactory anIDForValidCreditCard, '&cced=', testFactory aValidExpirationDate, 
+		'&cco=', testFactory ownerOfValidCreditCard.
+	
+	responseAfterCheckoutListPurchases := WebClient httpGet: 'http://localhost:8080/listPurchases?clientId=', testFactory anInvalidClientUserID, '&password=', testFactory aFirstClientValidPassword.
+	
+	self assert: responseCheckout content equals: '1|', Cashier cartCanNotBeEmptyErrorDescription.
+	self assert: responseBeforeCheckoutListPurchases content equals: responseAfterCheckoutListPurchases content.
+	
+	! !
+
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 17:42:05'!
+test11CannotCheckoutAnInvalidCart
+	| responseCheckout aCartID |
+
+	aCartID := 'invalidCart'.	
+	responseCheckout := WebClient httpGet: 'http://localhost:8080/checkOutCart?cartId=', aCartID, '&cnn=',  testFactory anIDForValidCreditCard, '&cced=', testFactory aValidExpirationDate, 
+		'&cco=', testFactory ownerOfValidCreditCard.
+	
+	self assert: responseCheckout content equals: '1|', TusLibrosRestSystem invalidCartIDErrorDescription.
+	
+	! !
 
 
 !TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'Nico 6/28/2019 20:14:52'!
@@ -871,6 +956,11 @@ stopListeningAndDestroyServer
 tearDown
 	self stopListeningAndDestroyServer.
 ! !
+
+
+!TusLibrosServerControllerTest methodsFor: 'parsing' stamp: 'JIG 6/30/2019 16:14:44'!
+extractCartIDFrom: aCartCreationResponse
+	^aCartCreationResponse copyFrom: 3 to: aCartCreationResponse size.! !
 
 
 !classDefinition: #Cart category: #TusLibros!
@@ -891,7 +981,7 @@ assertIsValidQuantity: aQuantity
 	aQuantity strictlyPositive ifFalse: [ self error: self class invalidQuantityErrorDescription]! !
 
 
-!Cart methodsFor: 'initialization' stamp: 'JIG 6/30/2019 14:11:57'!
+!Cart methodsFor: 'initialization' stamp: 'JIG 6/30/2019 16:08:25'!
 initializeAcceptingItemsOf: aCatalog
 
 	catalog := aCatalog.
@@ -1074,10 +1164,10 @@ canNotChargeAnExpiredCreditCardErrorDescription
 	
 	^'No se puede debitar a una tarjeta expirada'! !
 
-!Cashier class methodsFor: 'error descriptions' stamp: 'NI 6/22/2019 20:11:50'!
+!Cashier class methodsFor: 'error descriptions' stamp: 'JIG 6/30/2019 17:36:31'!
 cartCanNotBeEmptyErrorDescription
 	
-	^'No se puede hacer checkout de un carrito vacío'! !
+	^'No se puede hacer checkout de un carrito vacio'! !
 
 !Cashier class methodsFor: 'error descriptions' stamp: 'NI 6/22/2019 20:11:56'!
 creditCardHasNoCreditErrorDescription
@@ -1250,7 +1340,7 @@ aFirstClientValidPassword
 aFirstClientValidUserID
 	^'Wilkinson'.! !
 
-!StoreTestObjectsFactory methodsFor: 'authentication' stamp: 'JIG 6/30/2019 13:46:58'!
+!StoreTestObjectsFactory methodsFor: 'authentication' stamp: 'JIG 6/30/2019 16:21:25'!
 aGenericUserDatabase
 	^Dictionary 
 		newFromPairs: { 
@@ -1287,6 +1377,27 @@ defaultCatalog
 	^ Dictionary new
 		at: self itemSellByTheStore put: self itemSellByTheStorePrice;
 		yourself ! !
+
+
+!StoreTestObjectsFactory methodsFor: 'credit card expirations' stamp: 'JIG 6/30/2019 17:49:20'!
+aValidExpirationDate
+	| validDate monthParsed yearParsed |
+	
+	validDate := (Month month: today monthIndex year: today yearNumber + 1).
+	validDate monthIndex < 10 ifTrue: [monthParsed := '0', validDate monthIndex asString] ifFalse: [monthParsed := validDate monthIndex asString].
+	yearParsed := validDate yearNumber asString.
+	
+	^monthParsed , yearParsed.! !
+
+!StoreTestObjectsFactory methodsFor: 'credit card expirations' stamp: 'JIG 6/30/2019 17:25:00'!
+anInvalidExpirationDate
+	| validDate monthParsed yearParsed |
+	
+	validDate := (Month month: today monthIndex year: today yearNumber - 1).
+	validDate monthIndex < 10 ifFalse: [monthParsed := '0', validDate monthIndex asString] ifTrue: [monthParsed := validDate monthIndex asString].
+	yearParsed := validDate yearNumber asString.
+	
+	^monthParsed , yearParsed.! !
 
 
 !StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'Nico 6/13/2019 16:46:42'!
@@ -1588,9 +1699,9 @@ cannotCheckoutInvalidCartErrorDescription
 cartIsExpiredErrorDescription
 	^'El carrito esta expirado'.! !
 
-!TusLibrosRestSystem class methodsFor: 'error descriptions' stamp: 'Nico 6/13/2019 16:10:03'!
+!TusLibrosRestSystem class methodsFor: 'error descriptions' stamp: 'JIG 6/30/2019 16:56:54'!
 invalidCartIDErrorDescription
-	^'El ID del carrito es inválido'! !
+	^'El ID del carrito es invalido'! !
 
 
 !classDefinition: #TusLibrosServerController category: #TusLibros!
@@ -1600,7 +1711,7 @@ Object subclass: #TusLibrosServerController
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosServerController methodsFor: 'initialization' stamp: 'JIG 6/30/2019 14:08:13'!
+!TusLibrosServerController methodsFor: 'initialization' stamp: 'JIG 6/30/2019 17:53:20'!
 initializeWith: anInternalSystem
 	
 	webServer := WebServer new listenOn: self port.
@@ -1620,30 +1731,99 @@ initializeWith: anInternalSystem
 		]
 		on: Error
 		do: [:anError | 
-			request send200Response: '1|', self class invalidAuthenticationDescription].
+			request send200Response: '1|', self class invalidAuthenticationErrorDescription ].
 	] 
 	on: Error 
 	do: [ :anError |
 		request send404Response: (anError messageText) ]].
-
 
 	webServer addService: '/listCart' action:[:request | |cartID items|
 		
 	[
 		cartID := (request fields at: 'cartId').
 		[ | parsedItemsResult |
-			items := TusLibrosRestSystem listCart: cartID.
-			parsedItemsResult := '0|'.
-			items do: [:item | parsedItemsResult := parsedItemsResult, item, '|']. 
+			items := internalSystem listCart: cartID.
+			parsedItemsResult := '0'.
+			items do: [:item | parsedItemsResult := parsedItemsResult, '|', item, '|', (items occurrencesOf: item) asString ].
+			request send200Response: parsedItemsResult.
 		]
 		on: Error
 		do: [:anError | 
-			request send200Response: '1|', self class cannotCheckoutInvalidCartErrorDescription.
+			request send200Response: '1|', TusLibrosRestSystem invalidCartIDErrorDescription.
 		]
 	] 
 	on: Error 
 	do: [ :anError |
 		request send404Response: (anError messageText) ]].
+
+	webServer addService: '/checkOutCart' action:[:request | |cartID transactionID creditExpiration creditNumber creditOwner|
+		
+	[
+		cartID := (request fields at: 'cartId').
+		creditNumber := (request fields at: 'cnn').
+		creditExpiration := (request fields at: 'cced').
+		creditOwner := (request fields at: 'cco').
+		[ | parsedCreditCard |
+			"self halt."
+			parsedCreditCard := self parseCreditCard: creditNumber expiringOn: creditExpiration ownedBy: creditOwner.
+			
+			transactionID := internalSystem checkoutFor: cartID payingWith: parsedCreditCard.
+			
+			request send200Response: '0'.
+		]
+		on: Error
+		do: [:anError | 
+			
+			anError messageText = Cashier cartCanNotBeEmptyErrorDescription ifTrue: [request send200Response: '1|', Cashier cartCanNotBeEmptyErrorDescription].
+			anError messageText = TusLibrosRestSystem invalidCartIDErrorDescription ifTrue: [request send200Response: '1|', TusLibrosRestSystem invalidCartIDErrorDescription]
+			ifFalse: [request send200Response: '1| Hubo un error no contemplado'].
+		]
+	] 
+	on: Error 
+	do: [ :anError |
+		request send404Response: (anError messageText) ]].
+
+	webServer addService: '/addToCart' action:[:request | |cartID bookISBN items bookQuantity|
+	[
+
+		cartID := request fields at: 'cartId'.
+		bookISBN  := request fields at: 'bookIsbn'.
+		bookQuantity  := (request fields at: 'bookQuantity').
+		bookQuantity := bookQuantity asNumber.
+		[
+			items := internalSystem add: bookQuantity of: bookISBN toCart: cartID.
+			request send200Response: '0|OK'
+		]
+		on: Error
+		do: [:anError |
+			anError messageText = Cart invalidItemErrorDescription ifTrue: [ request send200Response: '1|', Cart invalidItemErrorDescription ].
+			anError messageText = Cart invalidQuantityErrorDescription ifTrue: [request send200Response: '1|', Cart invalidQuantityErrorDescription ].
+			anError messageText = TusLibrosRestSystem invalidCartIDErrorDescription ifTrue: [request send200Response: '1|',  TusLibrosRestSystem invalidCartIDErrorDescription ]
+			ifFalse: [request send200Response: '1| Hubo un error no contemplado'].
+		]
+	] 
+	on: Error 
+	do: [ :anError |
+		request send404Response: (anError messageText) ]].
+
+	webServer addService: '/listPurchases' action:[:request | |clientId password |
+		
+	[
+		password := (request fields at:'password').
+		clientId := (request fields at: 'clientId').
+
+		[
+			internalSystem listPurchasesOf: clientId authenticatedWith: password.
+			request send200Response: '0'.
+		]
+		on: Error
+		do: [:anError | 
+			request send200Response: '1|', self class invalidAuthenticationErrorDescription ].
+	] 
+	on: Error 
+	do: [ :anError |
+		request send404Response: (anError messageText) ]].
+
 	
 	
 ! !
@@ -1670,6 +1850,18 @@ stopListening
 	
 	webServer stopListener! !
 
+
+!TusLibrosServerController methodsFor: 'private - parsing' stamp: 'JIG 6/30/2019 17:53:11'!
+parseCreditCard: aCreditNumber expiringOn: aCreditExpiration ownedBy: aCreditOwner
+	| monthOfCreditExpiration yearOfCreditExpiration parsedCreditExpiration |
+	
+	
+	monthOfCreditExpiration := (aCreditExpiration copyFrom: 1 to: 2) asNumber.
+	yearOfCreditExpiration := (aCreditExpiration copyFrom: 3 to: 6) asNumber.
+	parsedCreditExpiration := Month month: monthOfCreditExpiration year: yearOfCreditExpiration.
+
+	^CreditCard for: aCreditOwner expiringOn: parsedCreditExpiration withIDNumber: aCreditNumber.! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'TusLibrosServerController class' category: #TusLibros!
@@ -1680,6 +1872,6 @@ TusLibrosServerController class
 cannotCheckoutInvalidCartErrorDescription
 	^TusLibrosRestSystem cannotCheckoutInvalidCartErrorDescription.! !
 
-!TusLibrosServerController class methodsFor: 'errors' stamp: 'Nico 6/28/2019 17:27:56'!
-invalidAuthenticationDescription
-	^'Autenticacion invalida'! !
+!TusLibrosServerController class methodsFor: 'errors' stamp: 'JIG 6/30/2019 17:07:58'!
+invalidAuthenticationErrorDescription
+	^'Usuario y/o password invalido.'! !
