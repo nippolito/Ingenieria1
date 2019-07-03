@@ -811,128 +811,156 @@ setUp
 	server := self createServer.! !
 
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'nico 6/30/2019 20:05:08'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 14:16:41'!
 test01CannotCreateCartWhenInvalidAuthentication
-	|response|
+	|response createCartHttpRequest |
 
-	response := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory anInvalidClientUserID ,'&password=', testFactory anInvalidPassword.
+	createCartHttpRequest := self createCartHttpRequestFor: testFactory anInvalidClientUserID authenticatingWith: testFactory anInvalidPassword.
+
+	response := WebClient httpGet: createCartHttpRequest.
 	self assert: response content equals: '1|', TusLibrosServerController invalidAuthenticationErrorDescription .
 	! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'nico 6/30/2019 20:05:03'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 14:19:57'!
 test02ValidClientCanCreateACart
-	|response|
+	|response createCartHttpRequest |
+	
+	createCartHttpRequest := self createCartHttpRequestFor: testFactory aFirstClientValidUserID authenticatingWith: testFactory aFirstClientValidPassword.
 
-	response := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory aFirstClientValidUserID ,'&password=', testFactory aFirstClientValidPassword.
+	response := WebClient httpGet: createCartHttpRequest.
 	
 	self assert: response content equals: '0|Wilkinson1'.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 16:53:02'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 14:21:03'!
 test03CannotListAnInvalidCart
-	| aCartID responseListCart |
+	| aCartID responseListCart listCartHttpRequest |
 	
 	aCartID := 'InvalidCartID'.
-		
-	"responseCreateCart := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory aFirstClientValidUserID ,'&password=', testFactory aFirstClientValidPassword."
-	responseListCart := WebClient httpGet: 'http://localhost:8080/listCart?cartId=', aCartID.
+
+	listCartHttpRequest := self listCartHttpRequestFor: aCartID.
+
+	responseListCart := WebClient httpGet: listCartHttpRequest.
 	
 	self assert: responseListCart content equals: '1|', TusLibrosRestSystem invalidCartIDErrorDescription.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 16:15:04'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 14:30:48'!
 test04ValidCartCanAddItemsFromCatalogue
-	| aCartID responseCreateCart responseListCart responseAddToCart |
-		
-	responseCreateCart := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory aFirstClientValidUserID ,'&password=', testFactory aFirstClientValidPassword.
+	| aCartID responseCreateCart responseListCart responseAddToCart createCartHttpRequest addToCartHttpRequest listCartHttpRequest |
+	
+	createCartHttpRequest := self createCartHttpRequestFor: testFactory aFirstClientValidUserID authenticatingWith: testFactory aFirstClientValidPassword.		
+	responseCreateCart := WebClient httpGet: createCartHttpRequest.
+	
 	aCartID := self extractCartIDFrom: responseCreateCart content.
-	responseAddToCart := WebClient httpGet: 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', testFactory itemSellByTheStore,'&bookQuantity=1'. 
-	responseListCart := WebClient httpGet: 'http://localhost:8080/listCart?cartId=', aCartID.
+	addToCartHttpRequest := self addToCartHttpRequest: aCartID book: testFactory itemSellByTheStore quantity: 1.
+	responseAddToCart := WebClient httpGet: addToCartHttpRequest. 
+	
+	listCartHttpRequest := self listCartHttpRequestFor: aCartID.
+	responseListCart := WebClient httpGet: listCartHttpRequest.
 	
 	self assert: responseAddToCart content equals: '0|OK'.
 	self assert: responseListCart content equals: '0|', testFactory itemSellByTheStore, '|1'.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 16:38:10'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 14:40:26'!
 test05CannotAddItemsToCartThatDoNotBelongToStore
-	| aCartID responseCreateCart responseListCart responseAddToCart |
+	| aCartID responseCreateCart responseListCart responseAddToCart createCartHttpRequest addToCartHttpRequest listCartHttpRequest |
 		
-	responseCreateCart := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory aFirstClientValidUserID ,'&password=', testFactory aFirstClientValidPassword.
+	createCartHttpRequest := self createCartHttpRequestFor: testFactory aFirstClientValidUserID authenticatingWith: testFactory aFirstClientValidPassword.
+	responseCreateCart := WebClient httpGet: createCartHttpRequest.
+	
 	aCartID := self extractCartIDFrom: responseCreateCart content.
-	responseAddToCart := WebClient httpGet: 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', testFactory itemNotSellByTheStore,'&bookQuantity=1'. 
-	responseListCart := WebClient httpGet: 'http://localhost:8080/listCart?cartId=', aCartID.
+	addToCartHttpRequest := self addToCartHttpRequest: aCartID book: testFactory itemNotSellByTheStore quantity: 1. 
+	responseAddToCart := WebClient httpGet: addToCartHttpRequest. 
+	
+	listCartHttpRequest := self listCartHttpRequestFor: aCartID.
+	responseListCart := WebClient httpGet: listCartHttpRequest.
 	
 	self assert: responseAddToCart content equals: '1|', Cart invalidItemErrorDescription.
 	self assert: responseListCart content equals: '0'.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 16:41:08'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 14:50:42'!
 test06CannotAddToCartNonPositiveNumberOfItems
-	| aCartID responseCreateCart responseListCart responseAddToCart |
+	| aCartID responseCreateCart responseListCart responseAddToCart createCartHttpRequest addToCartHttpRequest listCartHttpRequest |
 		
-	responseCreateCart := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory aFirstClientValidUserID ,'&password=', testFactory aFirstClientValidPassword.
+	createCartHttpRequest := self createCartHttpRequestFor: testFactory aFirstClientValidUserID authenticatingWith: testFactory aFirstClientValidPassword.
+	responseCreateCart := WebClient httpGet: createCartHttpRequest.
+	
 	aCartID := self extractCartIDFrom: responseCreateCart content.
-	responseAddToCart := WebClient httpGet: 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', testFactory itemSellByTheStore,'&bookQuantity=-1'. 
-	responseListCart := WebClient httpGet: 'http://localhost:8080/listCart?cartId=', aCartID.
+	addToCartHttpRequest := self addToCartHttpRequest: aCartID book: testFactory itemSellByTheStore quantity: -1.
+	responseAddToCart := WebClient httpGet: addToCartHttpRequest. 
+	
+	listCartHttpRequest := self listCartHttpRequestFor: aCartID.
+	responseListCart := WebClient httpGet: listCartHttpRequest.
 	
 	self assert: responseAddToCart content equals: '1|', Cart invalidQuantityErrorDescription.
 	self assert: responseListCart content equals: '0'.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 17:00:28'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 14:52:22'!
 test07CannotAddItemsToInvalidCart
-	| aCartID responseAddToCart |
+	| aCartID responseAddToCart addToCartHttpRequest |
 
 	aCartID := 'invalidCart'.
-	responseAddToCart := WebClient httpGet: 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', testFactory itemSellByTheStore,'&bookQuantity=2'.
+	addToCartHttpRequest := self addToCartHttpRequest: aCartID book: testFactory itemSellByTheStore quantity: 2. 
+	responseAddToCart := WebClient httpGet: addToCartHttpRequest.
 	
 	self assert: responseAddToCart content equals: '1|', TusLibrosRestSystem invalidCartIDErrorDescription.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 17:04:38'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 14:53:42'!
 test08ClientWithoutTransactionsHasNoPurchases
-	| responseListPurchases |
+	| responseListPurchases listPurchasesHttpRequest |
 	
-	responseListPurchases := WebClient httpGet: 'http://localhost:8080/listPurchases?clientId=', testFactory aFirstClientValidUserID, '&password=', testFactory aFirstClientValidPassword.
+	listPurchasesHttpRequest := self listPurchasesHttpRequestFor: testFactory aFirstClientValidUserID authenticatingWith: testFactory aFirstClientValidPassword.
+	responseListPurchases := WebClient httpGet: listPurchasesHttpRequest.
 	
 	self assert: responseListPurchases content equals: '0'.
 	
 	! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 17:09:39'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 14:56:57'!
 test09CannotListPurchasesWhenInvalidAuthentication
-	| responseListPurchases |
+	| responseListPurchases listPurchasesHttpRequest |
 	
-	responseListPurchases := WebClient httpGet: 'http://localhost:8080/listPurchases?clientId=', testFactory anInvalidClientUserID, '&password=', testFactory aFirstClientValidPassword.
+	listPurchasesHttpRequest := self listPurchasesHttpRequestFor: testFactory anInvalidClientUserID authenticatingWith: testFactory aFirstClientValidPassword.
+	responseListPurchases := WebClient httpGet: listPurchasesHttpRequest.
+	
 	self assert: responseListPurchases content equals: '1|', TusLibrosServerController invalidAuthenticationErrorDescription.
 	
 	! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 17:36:52'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 15:26:12'!
 test10CannotCheckoutAnEmptyCart
-	| responseCheckout aCartID responseCreateCart responseAfterCheckoutListPurchases responseBeforeCheckoutListPurchases |
+	| responseCheckout aCartID responseCreateCart responseAfterCheckoutListPurchases responseBeforeCheckoutListPurchases createCartHttpRequest listPurchasesBeforeHttpRequest checkoutHttpRequest listPurchasesAfterHttpRequest |
 			
-	responseCreateCart := WebClient httpGet: 'http://localhost:8080/createCart?clientId=', testFactory aFirstClientValidUserID ,'&password=', testFactory aFirstClientValidPassword.
+	createCartHttpRequest := self createCartHttpRequestFor: testFactory aFirstClientValidUserID authenticatingWith: testFactory aFirstClientValidPassword.
+	responseCreateCart := WebClient httpGet: createCartHttpRequest.
+	
 	aCartID := self extractCartIDFrom: responseCreateCart content.
-	responseBeforeCheckoutListPurchases := WebClient httpGet: 'http://localhost:8080/listPurchases?clientId=', testFactory anInvalidClientUserID, '&password=', testFactory aFirstClientValidPassword.
+	listPurchasesBeforeHttpRequest := self listPurchasesHttpRequestFor: testFactory aFirstClientValidUserID authenticatingWith: testFactory aFirstClientValidPassword.
+	responseBeforeCheckoutListPurchases := WebClient httpGet: listPurchasesBeforeHttpRequest.
 	
-	responseCheckout := WebClient httpGet: 'http://localhost:8080/checkOutCart?cartId=', aCartID, '&cnn=', testFactory anIDForValidCreditCard, '&cced=', testFactory aValidExpirationDate, 
-		'&cco=', testFactory ownerOfValidCreditCard.
+	checkoutHttpRequest := self checkoutCartHttpRequestFor: aCartID card: testFactory anIDForValidCreditCard expDate: testFactory aValidExpirationDate owner: testFactory ownerOfValidCreditCard.
+	responseCheckout := WebClient httpGet: checkoutHttpRequest.
 	
-	responseAfterCheckoutListPurchases := WebClient httpGet: 'http://localhost:8080/listPurchases?clientId=', testFactory anInvalidClientUserID, '&password=', testFactory aFirstClientValidPassword.
+	listPurchasesAfterHttpRequest := self listPurchasesHttpRequestFor: testFactory aFirstClientValidUserID authenticatingWith: testFactory aFirstClientValidPassword.
+	responseAfterCheckoutListPurchases := WebClient httpGet: listPurchasesAfterHttpRequest.
 	
 	self assert: responseCheckout content equals: '1|', Cashier cartCanNotBeEmptyErrorDescription.
 	self assert: responseBeforeCheckoutListPurchases content equals: responseAfterCheckoutListPurchases content.
 	
 	! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 6/30/2019 17:42:05'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 15:27:09'!
 test11CannotCheckoutAnInvalidCart
-	| responseCheckout aCartID |
+	| responseCheckout aCartID checkoutHttpRequest |
 
-	aCartID := 'invalidCart'.	
-	responseCheckout := WebClient httpGet: 'http://localhost:8080/checkOutCart?cartId=', aCartID, '&cnn=',  testFactory anIDForValidCreditCard, '&cced=', testFactory aValidExpirationDate, 
-		'&cco=', testFactory ownerOfValidCreditCard.
+	aCartID := 'invalidCart'.
+	checkoutHttpRequest :=  self checkoutCartHttpRequestFor: aCartID card: testFactory anIDForValidCreditCard expDate: testFactory aValidExpirationDate owner: testFactory ownerOfValidCreditCard.	
+	responseCheckout := WebClient httpGet: checkoutHttpRequest.
 	
 	self assert: responseCheckout content equals: '1|', TusLibrosRestSystem invalidCartIDErrorDescription.
 	
@@ -957,6 +985,35 @@ tearDown
 !TusLibrosServerControllerTest methodsFor: 'parsing' stamp: 'JIG 6/30/2019 16:14:44'!
 extractCartIDFrom: aCartCreationResponse
 	^aCartCreationResponse copyFrom: 3 to: aCartCreationResponse size.! !
+
+
+!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 14:46:23'!
+addToCartHttpRequest: aCartID book: anItem quantity: anAmount
+	^ 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', anItem ,'&bookQuantity=', anAmount asString! !
+
+!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 15:24:41'!
+checkoutCartHttpRequestFor: aCartID card: aCreditCardNumber expDate: anExpirationDate owner: anOwner
+	^'http://localhost:8080/checkOutCart?cartId=', aCartID, '&cnn=',  aCreditCardNumber, '&cced=', anExpirationDate, '&cco=', anOwner
+	
+	! !
+
+!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 14:16:19'!
+createCartHttpRequestFor: anUserID authenticatingWith: aPassword
+
+	^ 'http://localhost:8080/createCart?clientId=', anUserID ,'&password=', aPassword.
+	! !
+
+!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 14:21:20'!
+listCartHttpRequestFor: aCartID
+
+	^ 'http://localhost:8080/listCart?cartId=', aCartID
+! !
+
+!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 14:55:50'!
+listPurchasesHttpRequestFor: anUserID authenticatingWith: aPassword
+	^'http://localhost:8080/listPurchases?clientId=', anUserID, '&password=', aPassword
+	
+	! !
 
 
 !classDefinition: #Cart category: #TusLibros!
