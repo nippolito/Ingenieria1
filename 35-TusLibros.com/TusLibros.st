@@ -1,3 +1,207 @@
+!classDefinition: #Window category: #TusLibros!
+Panel subclass: #Window
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+
+!classDefinition: #TusLibrosBuyWindow category: #TusLibros!
+Window subclass: #TusLibrosBuyWindow
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'JIG 7/6/2019 16:19:09'!
+build1stRow
+	| firstRowLayout |
+	
+	"sendRequestButton := PluggableButtonMorph model: self model stateGetter: nil  action: #sendSubtringsRequest  label: 'Send Request To Server'."
+	
+	"usernameTextBox := TextModelMorph textProvider: self model textGetter: #usernameText textSetter: #usernameText:. 
+	usernameTextBox textMorph setProperty: #keyStroke: toValue: [ :key | usernameTextBox textMorph acceptContents ].
+	usernameTextBox	
+		borderWidth: 1; borderColor: Color skyBlue;
+	 	morphExtent: (200@30).
+	
+	firstRowLayout := LayoutMorph newRow.
+	firstRowLayout separation: 15;
+	padding: #left;
+	addMorph: (StringMorph contents:'Usuario: ');
+	addMorph: usernameTextBox.
+	
+	^firstRowLayout."! !
+
+!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'JIG 7/6/2019 16:29:00'!
+buildMorphicWindow
+		
+	self layoutMorph beColumn;
+	separation: 5;
+	padding: #left.
+	"addMorph: self build1stRow;
+	addMorph: self build2ndRow;
+	addMorph: self build3rdRow."
+	! !
+
+!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'JIG 7/6/2019 16:18:49'!
+defaultExtent
+
+	^ 600@400
+	! !
+
+!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'JIG 7/6/2019 16:16:13'!
+initializeWith: aTitle
+
+	self titleMorph showButtonsNamed: #( close collapse ).
+	self setLabel: aTitle.
+	self model: (TusLibrosClientWindowModel new).
+	self morphExtent: (self defaultExtent).
+	self buildMorphicWindow.
+	self openInWorld.
+	self yourself.
+			
+	"self model when: #cartCreationSuccessful send: #createSecondWindow to: self."! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TusLibrosBuyWindow class' category: #TusLibros!
+TusLibrosBuyWindow class
+	instanceVariableNames: ''!
+
+!TusLibrosBuyWindow class methodsFor: 'as yet unclassified' stamp: 'JIG 7/6/2019 16:27:40'!
+open
+	
+	^self new initializeWith: 'TusLibros - Ventana de compra'.! !
+
+
+!classDefinition: #TusLibrosClientWindow category: #TusLibros!
+Window subclass: #TusLibrosClientWindow
+	instanceVariableNames: 'substringsList usernameTextBox passwordTextBox'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!TusLibrosClientWindow methodsFor: 'GUI building' stamp: 'JIG 7/6/2019 15:46:46'!
+build1stRow
+	| firstRowLayout |
+	
+	"sendRequestButton := PluggableButtonMorph model: self model stateGetter: nil  action: #sendSubtringsRequest  label: 'Send Request To Server'."
+	
+	usernameTextBox := TextModelMorph textProvider: self model textGetter: #usernameText textSetter: #usernameText:. 
+	usernameTextBox textMorph setProperty: #keyStroke: toValue: [ :key | usernameTextBox textMorph acceptContents ].
+	usernameTextBox	
+		borderWidth: 1; borderColor: Color skyBlue;
+	 	morphExtent: (200@30).
+	
+	firstRowLayout := LayoutMorph newRow.
+	firstRowLayout separation: 15;
+	padding: #left;
+	addMorph: (StringMorph contents:'Usuario: ');
+	addMorph: usernameTextBox.
+	
+	^firstRowLayout.! !
+
+!TusLibrosClientWindow methodsFor: 'GUI building' stamp: 'JIG 7/6/2019 15:47:01'!
+build2ndRow
+	| secondRowLayout |
+	
+	passwordTextBox := TextModelMorph textProvider: self model textGetter: #passwordText textSetter: #passwordText:. 
+	passwordTextBox textMorph setProperty: #keyStroke: toValue: [ :key | passwordTextBox textMorph acceptContents ] .
+	passwordTextBox	
+		borderWidth: 1; borderColor: Color skyBlue;
+	 	morphExtent: (200@30).
+			
+	secondRowLayout := LayoutMorph newRow.
+	secondRowLayout separation: 15;
+	padding: #left;
+	addMorph: (StringMorph contents:'Password:');
+	addMorph: passwordTextBox.
+	
+	^secondRowLayout.
+	
+	"showInTranscriptButton := PluggableButtonMorph model: self model stateGetter: nil  action: #showWordInTranscript label: 'Show Selected Word In Transcript'."	
+	
+	"secondRowLayout := LayoutMorph newRow.
+	secondRowLayout separation: 25;
+	padding: #left;
+	addMorph: self build1stColumn2ndRow;
+	addMorph: showInTranscriptButton."
+	
+	! !
+
+!TusLibrosClientWindow methodsFor: 'GUI building' stamp: 'JIG 7/6/2019 15:56:06'!
+build3rdRow
+	| thirdRowLayout createCartRequest |
+	
+	createCartRequest := PluggableButtonMorph model: self model stateGetter: nil  action: #sendCreateCartRequest  label: 'Crear carrito'.
+		
+	thirdRowLayout := LayoutMorph newRow.
+	thirdRowLayout separation: 25;
+	padding: #left;
+	addMorph: createCartRequest.
+	
+	^thirdRowLayout.
+	
+	"showInTranscriptButton := PluggableButtonMorph model: self model stateGetter: nil  action: #showWordInTranscript label: 'Show Selected Word In Transcript'."	
+	
+	"secondRowLayout := LayoutMorph newRow.
+	secondRowLayout separation: 25;
+	padding: #left;
+	addMorph: self build1stColumn2ndRow;
+	addMorph: showInTranscriptButton."
+	
+	! !
+
+!TusLibrosClientWindow methodsFor: 'GUI building' stamp: 'JIG 7/6/2019 15:53:20'!
+buildMorphicWindow
+		
+	self layoutMorph beColumn;
+	separation: 5;
+	padding: #left;
+	addMorph: self build1stRow;
+	addMorph: self build2ndRow;
+	addMorph: self build3rdRow.
+	! !
+
+
+!TusLibrosClientWindow methodsFor: 'initialization' stamp: 'JIG 7/6/2019 15:54:47'!
+defaultExtent
+
+	^ 500@330
+	! !
+
+!TusLibrosClientWindow methodsFor: 'initialization' stamp: 'JIG 7/6/2019 16:13:12'!
+initializeWith: aTitle
+
+	self titleMorph showButtonsNamed: #( close collapse ).
+	self setLabel: aTitle.
+	self model: (TusLibrosClientWindowModel new).
+	self morphExtent: (self defaultExtent).
+	self buildMorphicWindow.
+	self openInWorld.
+	self yourself.
+			
+	self model when: #cartCreationSuccessful send: #createSecondWindow to: self.! !
+
+
+!TusLibrosClientWindow methodsFor: 'panels-add/remove' stamp: 'JIG 7/6/2019 16:17:56'!
+createSecondWindow
+	TusLibrosBuyWindow open.
+	"self delete."! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TusLibrosClientWindow class' category: #TusLibros!
+TusLibrosClientWindow class
+	instanceVariableNames: ''!
+
+!TusLibrosClientWindow class methodsFor: 'instance creation' stamp: 'JIG 7/6/2019 15:29:28'!
+open
+	
+	^self new initializeWith: 'TusLibros - Creacion de carrito'.! !
+
+
 !classDefinition: #CartTest category: #TusLibros!
 TestCase subclass: #CartTest
 	instanceVariableNames: 'testObjectsFactory'
@@ -796,7 +1000,7 @@ TestCase subclass: #TusLibrosServerControllerTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosServerControllerTest methodsFor: 'setup' stamp: 'Nico 6/28/2019 18:00:36'!
+!TusLibrosServerControllerTest methodsFor: 'setup' stamp: 'JIG 7/6/2019 15:10:39'!
 setUp
 	testFactory := StoreTestObjectsFactory new.
 	
@@ -805,13 +1009,13 @@ setUp
 	tusLibrosController := TusLibrosRestSystem 
 								throught: self
 								authenticatingWith: anAuthenticator
-								acceptingItemsOf: (testFactory defaultCatalog)
+								acceptingItemsOf: (testFactory fullCatalog)
 								withClock: clock.
 								
 	server := self createServer.! !
 
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 14:16:41'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 7/6/2019 16:31:06'!
 test01CannotCreateCartWhenInvalidAuthentication
 	|response createCartHttpRequest |
 
@@ -954,7 +1158,7 @@ test10CannotCheckoutAnEmptyCart
 	
 	! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 15:27:09'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 7/6/2019 15:04:38'!
 test11CannotCheckoutAnInvalidCart
 	| responseCheckout aCartID checkoutHttpRequest |
 
@@ -1431,6 +1635,14 @@ defaultCatalog
 		at: self itemSellByTheStore put: self itemSellByTheStorePrice;
 		yourself ! !
 
+!StoreTestObjectsFactory methodsFor: 'cart' stamp: 'JIG 7/6/2019 15:09:53'!
+fullCatalog
+	
+	^ Dictionary new
+		at: self itemSellByTheStore put: self itemSellByTheStorePrice;
+		at: self anotherItemSellByTheStore put: self anotherItemSellByTheStorePrice;
+		yourself ! !
+
 
 !StoreTestObjectsFactory methodsFor: 'credit card expirations' stamp: 'JIG 6/30/2019 17:49:20'!
 aValidExpirationDate
@@ -1493,6 +1705,15 @@ initialize
 
 	today := DateAndTime now! !
 
+
+!StoreTestObjectsFactory methodsFor: 'items' stamp: 'JIG 7/6/2019 15:10:20'!
+anotherItemSellByTheStore
+	
+	^ 'anotherValidBook'! !
+
+!StoreTestObjectsFactory methodsFor: 'items' stamp: 'JIG 7/6/2019 15:10:03'!
+anotherItemSellByTheStorePrice
+	^15! !
 
 !StoreTestObjectsFactory methodsFor: 'items' stamp: 'HernanWilkinson 6/17/2013 18:08'!
 itemNotSellByTheStore
@@ -1559,6 +1780,92 @@ invalidPasswordErrorDescription
 !TusLibrosAuthenticator class methodsFor: 'error descriptions' stamp: 'Nico 6/13/2019 14:58:23'!
 unknownUserErrorDescription
 	^'El cliente nombrado es inexistente'.! !
+
+
+!classDefinition: #TusLibrosClientWindowModel category: #TusLibros!
+Object subclass: #TusLibrosClientWindowModel
+	instanceVariableNames: 'listOfWords selectedIndex webClient idCart username password'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'NR 6/24/2019 06:26:32'!
+substringList
+	
+	^listOfWords.
+! !
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'NR 6/25/2019 21:44:28'!
+substringsListIndex
+	
+	^selectedIndex.! !
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'NR 6/25/2019 21:45:21'!
+substringsListIndex: anIndex
+	
+	selectedIndex := anIndex.! !
+
+
+!TusLibrosClientWindowModel methodsFor: 'initialization' stamp: 'JIG 7/6/2019 16:21:51'!
+initialize
+
+	listOfWords := OrderedCollection new.
+	username:=''.
+	password := ''.
+	idCart := 0.
+	selectedIndex:=0.
+	webClient := TusLibrosWebClient new.! !
+
+
+!TusLibrosClientWindowModel methodsFor: 'TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:22'!
+passwordText
+	
+	^password.! !
+
+!TusLibrosClientWindowModel methodsFor: 'TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:18'!
+passwordText: aPassword
+
+	password :=aPassword.
+	^true.! !
+
+!TusLibrosClientWindowModel methodsFor: 'TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:57:56'!
+usernameText
+	
+	^username.! !
+
+!TusLibrosClientWindowModel methodsFor: 'TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:07'!
+usernameText: aUsername
+
+	username:=aUsername.
+	^true.! !
+
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'JIG 7/6/2019 16:10:27'!
+sendCreateCartRequest
+		
+	idCart := webClient sendCreateCartRequestWithUser: username authenticatedWith: password.
+	
+	self triggerEvent: #cartCreationSuccessful with: self.
+	! !
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'JIG 7/6/2019 15:57:56'!
+sendSubtringsRequest
+		
+	listOfWords := webClient sendRequest: username.
+	
+	self triggerEvent: #newSubstringsArrived with: self.
+	! !
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'NR 6/25/2019 22:13:32'!
+showWordInTranscript
+	
+	(selectedIndex = 0) ifFalse: 
+		[TranscriptWindow openTranscript.
+		Transcript clear.
+		Transcript show: 'The word selected is: '.
+		Transcript show: (listOfWords at: selectedIndex).
+		Transcript show: ' '.].
+! !
 
 
 !classDefinition: #TusLibrosRestSystem category: #TusLibros!
@@ -1717,6 +2024,10 @@ listCart: aCartID
 	
 	^(self cartOf: aCartID) items.! !
 
+!TusLibrosRestSystem methodsFor: 'operations - cart' stamp: 'JIG 7/6/2019 14:59:36'!
+listCatalogue
+	^catalogue.! !
+
 
 !TusLibrosRestSystem methodsFor: 'operations - purchases' stamp: 'JIG 6/21/2019 16:41:13'!
 listPurchasesOf: aClientID authenticatedWith: aPassword
@@ -1871,6 +2182,27 @@ addCartListingService.
 		request send404Response: (anError messageText) ]].
 ! !
 
+!TusLibrosServerController methodsFor: 'adding services' stamp: 'JIG 7/6/2019 15:09:06'!
+addListCatalogue
+	webServer addService: '/listCatalogue' action:[:request | |items|
+	[
+	
+		[ | parsedItems |
+			
+			items := internalSystem listCatalogue.
+			parsedItems := self parseCatalogueItems: items.
+			request send200Response: parsedItems.
+		]
+		on: Error
+		do: [:anError | 
+			self from: request sendErrorResponse: anError messageText.
+		]
+	] 
+	on: Error 
+	do: [ :anError |
+		request send404Response: (anError messageText) ]].
+! !
+
 !TusLibrosServerController methodsFor: 'adding services' stamp: 'nico 6/30/2019 19:58:36'!
 addPurchasesListingService
 
@@ -1897,13 +2229,14 @@ addPurchasesListingService
 	
 ! !
 
-!TusLibrosServerController methodsFor: 'adding services' stamp: 'nico 6/30/2019 19:36:21'!
+!TusLibrosServerController methodsFor: 'adding services' stamp: 'JIG 7/6/2019 15:00:11'!
 addServices
 	self addCartCreationService.
 	self addCartListingService.
 	self addCartCheckOutService.
 	self addCartItemAddingService.
 	self addPurchasesListingService.
+	self addListCatalogue.
 	
 ! !
 
@@ -1984,6 +2317,18 @@ passwordField
 ! !
 
 
+!TusLibrosServerController methodsFor: 'private - parsing' stamp: 'JIG 7/6/2019 15:11:24'!
+parseCatalogueItems: items
+	| parsedItemsResult |
+	
+	parsedItemsResult := '0'.
+	items keysDo: [:item | parsedItemsResult := parsedItemsResult, '|', item ].
+	parsedItemsResult := parsedItemsResult , '|'.
+	
+	^parsedItemsResult
+
+! !
+
 !TusLibrosServerController methodsFor: 'private - parsing' stamp: 'nico 6/30/2019 20:04:23'!
 parseCreditCard: aCreditNumber expiringOn: aCreditExpiration ownedBy: aCreditOwner
 	| parsedExpirationDate |
@@ -2012,7 +2357,7 @@ parseItemsListed: items
 ! !
 
 
-!TusLibrosServerController methodsFor: 'private - error response' stamp: 'nico 6/30/2019 19:52:30'!
+!TusLibrosServerController methodsFor: 'private - error response' stamp: 'JIG 7/6/2019 16:37:38'!
 from: request sendErrorResponse: anErrorResponse
 	request send200Response: '1|', anErrorResponse
 ! !
@@ -2030,3 +2375,65 @@ cannotCheckoutInvalidCartErrorDescription
 !TusLibrosServerController class methodsFor: 'errors' stamp: 'JIG 6/30/2019 17:07:58'!
 invalidAuthenticationErrorDescription
 	^'Usuario y/o password invalido.'! !
+
+
+!classDefinition: #TusLibrosWebClient category: #TusLibros!
+Object subclass: #TusLibrosWebClient
+	instanceVariableNames: 'port'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'NR 6/25/2019 22:25:36'!
+correctlyEncodeSpacesForUrlRequestParameter: aParameter
+	
+	^ aParameter copyReplaceAll: ' ' with: '%20'. ! !
+
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'JIG 7/6/2019 16:02:14'!
+createCartHttpRequestFor: anUserID authenticatingWith: aPassword
+	^ 'http://localhost:8080/createCart?clientId=', anUserID ,'&password=', aPassword.
+	! !
+
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'JIG 7/6/2019 16:39:33'!
+isSuccess: responseContent
+	^((responseContent at: 1) = $1) not.! !
+
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'JIG 7/6/2019 16:39:40'!
+sendCreateCartRequestWithUser: username authenticatedWith: password
+	| usernameEncodedString passwordEncodedString createCartRequest responseCreateCart |
+	
+	usernameEncodedString := (self correctlyEncodeSpacesForUrlRequestParameter: username) asString.
+	passwordEncodedString := (self correctlyEncodeSpacesForUrlRequestParameter: password) asString .
+	
+	createCartRequest := self createCartHttpRequestFor: usernameEncodedString authenticatingWith: passwordEncodedString.
+	
+	responseCreateCart := WebClient httpGet: createCartRequest.
+
+	(self isSuccess: responseCreateCart content)
+		ifTrue:[^responseCreateCart content] 
+		ifFalse:[^self error: responseCreateCart content].! !
+
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'NR 6/25/2019 22:25:21'!
+sendRequest: sentence
+
+	| fieldDict resp urlEncodedSentence |
+	
+	urlEncodedSentence := self correctlyEncodeSpacesForUrlRequestParameter: sentence.	
+	fieldDict := Dictionary newFromPairs: {'sentence'. urlEncodedSentence.}.		
+	
+	resp:= WebClient htmlSubmit: (self url,'/substrings') fields: fieldDict.
+	
+	resp isSuccess 
+		ifTrue:[^(WebUtils jsonDecode: ((resp content) readStream)) asOrderedCollection .] 
+		ifFalse:[^self error: resp content].! !
+
+
+!TusLibrosWebClient methodsFor: 'initialization' stamp: 'NR 6/25/2019 22:15:16'!
+port
+	
+	^port ifNil: [port:=8080].! !
+
+!TusLibrosWebClient methodsFor: 'initialization' stamp: 'NR 6/24/2019 06:52:37'!
+url
+	
+	^'http://localhost:', self port asString! !
