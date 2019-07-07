@@ -1,5 +1,5 @@
-!classDefinition: #Window category: #TusLibros!
-Panel subclass: #Window
+!classDefinition: #TusLibrosWindow category: #TusLibros!
+Panel subclass: #TusLibrosWindow
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -7,42 +7,11 @@ Panel subclass: #Window
 
 
 !classDefinition: #TusLibrosBuyWindow category: #TusLibros!
-Window subclass: #TusLibrosBuyWindow
-	instanceVariableNames: ''
+TusLibrosWindow subclass: #TusLibrosBuyWindow
+	instanceVariableNames: 'catalogueList cartList'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
-
-!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'JIG 7/6/2019 16:19:09'!
-build1stRow
-	| firstRowLayout |
-	
-	"sendRequestButton := PluggableButtonMorph model: self model stateGetter: nil  action: #sendSubtringsRequest  label: 'Send Request To Server'."
-	
-	"usernameTextBox := TextModelMorph textProvider: self model textGetter: #usernameText textSetter: #usernameText:. 
-	usernameTextBox textMorph setProperty: #keyStroke: toValue: [ :key | usernameTextBox textMorph acceptContents ].
-	usernameTextBox	
-		borderWidth: 1; borderColor: Color skyBlue;
-	 	morphExtent: (200@30).
-	
-	firstRowLayout := LayoutMorph newRow.
-	firstRowLayout separation: 15;
-	padding: #left;
-	addMorph: (StringMorph contents:'Usuario: ');
-	addMorph: usernameTextBox.
-	
-	^firstRowLayout."! !
-
-!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'JIG 7/6/2019 16:29:00'!
-buildMorphicWindow
-		
-	self layoutMorph beColumn;
-	separation: 5;
-	padding: #left.
-	"addMorph: self build1stRow;
-	addMorph: self build2ndRow;
-	addMorph: self build3rdRow."
-	! !
 
 !TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'JIG 7/6/2019 16:18:49'!
 defaultExtent
@@ -50,18 +19,75 @@ defaultExtent
 	^ 600@400
 	! !
 
-!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'JIG 7/6/2019 16:16:13'!
-initializeWith: aTitle
+!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'Nico 7/7/2019 15:23:06'!
+initializeWith: aTitle andModel: aModel
 
 	self titleMorph showButtonsNamed: #( close collapse ).
 	self setLabel: aTitle.
-	self model: (TusLibrosClientWindowModel new).
+	self model: aModel.
 	self morphExtent: (self defaultExtent).
 	self buildMorphicWindow.
 	self openInWorld.
 	self yourself.
 			
-	"self model when: #cartCreationSuccessful send: #createSecondWindow to: self."! !
+	self model when: #addingItemSuccessfull send: #refreshCatalogueListIndex to: self.! !
+
+
+!TusLibrosBuyWindow methodsFor: 'access' stamp: 'Nico 7/7/2019 16:01:05'!
+refreshCatalogueListIndex
+	
+	catalogueList setSelectionIndex: 0.
+	cartList updateList.! !
+
+
+!TusLibrosBuyWindow methodsFor: 'GUI building' stamp: 'Nico 7/7/2019 15:07:43'!
+build1stRow
+	| addToCartButton firstRowLayout  |
+	
+	catalogueList := PluggableListMorph model: self model listGetter: #catalogue indexGetter: #catalogueListIndex indexSetter: #catalogueListIndex:.
+	catalogueList  borderColor: Color skyBlue.
+	catalogueList  borderWidth: 1.
+	
+	addToCartButton := PluggableButtonMorph model: self model stateGetter: nil  action: #sendCartAddingItemRequest  label: 'Add product to cart'.
+		
+	firstRowLayout := LayoutMorph newRow.
+	firstRowLayout separation: 5;
+	padding: #left;
+	addMorph: (StringMorph contents:'Catálogo');
+	addMorph: catalogueList;
+ 	addMorph: addToCartButton.
+	
+	^firstRowLayout.! !
+
+!TusLibrosBuyWindow methodsFor: 'GUI building' stamp: 'Nico 7/7/2019 15:36:14'!
+build2ndRow
+	| secondRowLayout  |
+	
+	cartList := PluggableListMorph model: self model listGetter: #cartListItems indexGetter: #cartListItemsIndex indexSetter: #cartListItemsIndex:.
+	cartList  borderColor: Color skyBlue.
+	cartList  borderWidth: 1.
+	
+	"addToCartButton := PluggableButtonMorph model: self model stateGetter: nil  action: #sendCartAddingItemRequest  label: 'Add product to cart'."
+		
+	secondRowLayout := LayoutMorph newRow.
+	secondRowLayout separation: 5;
+	padding: #left;
+	addMorph: (StringMorph contents:'Carrito');
+	addMorph: cartList.
+ 	"addMorph: addToCartButton."
+	
+	^secondRowLayout.! !
+
+!TusLibrosBuyWindow methodsFor: 'GUI building' stamp: 'Nico 7/7/2019 15:34:53'!
+buildMorphicWindow
+		
+	self layoutMorph beColumn;
+	separation: 5;
+	padding: #left;
+	addMorph: self build1stRow;
+	addMorph: self build2ndRow.
+	"addMorph: self build3rdRow."
+	! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -69,14 +95,14 @@ initializeWith: aTitle
 TusLibrosBuyWindow class
 	instanceVariableNames: ''!
 
-!TusLibrosBuyWindow class methodsFor: 'as yet unclassified' stamp: 'JIG 7/6/2019 16:27:40'!
-open
+!TusLibrosBuyWindow class methodsFor: 'instance creation' stamp: 'Nico 7/7/2019 15:22:38'!
+openWith: aModel
 	
-	^self new initializeWith: 'TusLibros - Ventana de compra'.! !
+	^self new initializeWith: 'TusLibros - Ventana de compra' andModel: aModel.! !
 
 
 !classDefinition: #TusLibrosClientWindow category: #TusLibros!
-Window subclass: #TusLibrosClientWindow
+TusLibrosWindow subclass: #TusLibrosClientWindow
 	instanceVariableNames: 'substringsList usernameTextBox passwordTextBox'
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -185,9 +211,9 @@ initializeWith: aTitle
 	self model when: #cartCreationSuccessful send: #createSecondWindow to: self.! !
 
 
-!TusLibrosClientWindow methodsFor: 'panels-add/remove' stamp: 'JIG 7/6/2019 16:17:56'!
+!TusLibrosClientWindow methodsFor: 'panels-add/remove' stamp: 'Nico 7/7/2019 15:20:24'!
 createSecondWindow
-	TusLibrosBuyWindow open.
+	TusLibrosBuyWindow openWith: model.
 	"self delete."! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
@@ -1049,7 +1075,7 @@ test03CannotListAnInvalidCart
 	self assert: responseListCart content equals: '1|', TusLibrosRestSystem invalidCartIDErrorDescription.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 14:30:48'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 7/7/2019 15:42:49'!
 test04ValidCartCanAddItemsFromCatalogue
 	| aCartID responseCreateCart responseListCart responseAddToCart createCartHttpRequest addToCartHttpRequest listCartHttpRequest |
 	
@@ -1057,7 +1083,7 @@ test04ValidCartCanAddItemsFromCatalogue
 	responseCreateCart := WebClient httpGet: createCartHttpRequest.
 	
 	aCartID := self extractCartIDFrom: responseCreateCart content.
-	addToCartHttpRequest := self addToCartHttpRequest: aCartID book: testFactory itemSellByTheStore quantity: 1.
+	addToCartHttpRequest := self createAddToCartHttpRequestFor: aCartID book: testFactory itemSellByTheStore quantity: 1.
 	responseAddToCart := WebClient httpGet: addToCartHttpRequest. 
 	
 	listCartHttpRequest := self listCartHttpRequestFor: aCartID.
@@ -1067,7 +1093,7 @@ test04ValidCartCanAddItemsFromCatalogue
 	self assert: responseListCart content equals: '0|', testFactory itemSellByTheStore, '|1'.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 14:40:26'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 7/7/2019 15:42:49'!
 test05CannotAddItemsToCartThatDoNotBelongToStore
 	| aCartID responseCreateCart responseListCart responseAddToCart createCartHttpRequest addToCartHttpRequest listCartHttpRequest |
 		
@@ -1075,7 +1101,7 @@ test05CannotAddItemsToCartThatDoNotBelongToStore
 	responseCreateCart := WebClient httpGet: createCartHttpRequest.
 	
 	aCartID := self extractCartIDFrom: responseCreateCart content.
-	addToCartHttpRequest := self addToCartHttpRequest: aCartID book: testFactory itemNotSellByTheStore quantity: 1. 
+	addToCartHttpRequest := self createAddToCartHttpRequestFor: aCartID book: testFactory itemNotSellByTheStore quantity: 1. 
 	responseAddToCart := WebClient httpGet: addToCartHttpRequest. 
 	
 	listCartHttpRequest := self listCartHttpRequestFor: aCartID.
@@ -1085,7 +1111,7 @@ test05CannotAddItemsToCartThatDoNotBelongToStore
 	self assert: responseListCart content equals: '0'.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 14:50:42'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 7/7/2019 15:42:49'!
 test06CannotAddToCartNonPositiveNumberOfItems
 	| aCartID responseCreateCart responseListCart responseAddToCart createCartHttpRequest addToCartHttpRequest listCartHttpRequest |
 		
@@ -1093,7 +1119,7 @@ test06CannotAddToCartNonPositiveNumberOfItems
 	responseCreateCart := WebClient httpGet: createCartHttpRequest.
 	
 	aCartID := self extractCartIDFrom: responseCreateCart content.
-	addToCartHttpRequest := self addToCartHttpRequest: aCartID book: testFactory itemSellByTheStore quantity: -1.
+	addToCartHttpRequest := self createAddToCartHttpRequestFor: aCartID book: testFactory itemSellByTheStore quantity: -1.
 	responseAddToCart := WebClient httpGet: addToCartHttpRequest. 
 	
 	listCartHttpRequest := self listCartHttpRequestFor: aCartID.
@@ -1103,12 +1129,12 @@ test06CannotAddToCartNonPositiveNumberOfItems
 	self assert: responseListCart content equals: '0'.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 14:52:22'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 7/7/2019 15:42:49'!
 test07CannotAddItemsToInvalidCart
 	| aCartID responseAddToCart addToCartHttpRequest |
 
 	aCartID := 'invalidCart'.
-	addToCartHttpRequest := self addToCartHttpRequest: aCartID book: testFactory itemSellByTheStore quantity: 2. 
+	addToCartHttpRequest := self createAddToCartHttpRequestFor: aCartID book: testFactory itemSellByTheStore quantity: 2. 
 	responseAddToCart := WebClient httpGet: addToCartHttpRequest.
 	
 	self assert: responseAddToCart content equals: '1|', TusLibrosRestSystem invalidCartIDErrorDescription.
@@ -1191,15 +1217,15 @@ extractCartIDFrom: aCartCreationResponse
 	^aCartCreationResponse copyFrom: 3 to: aCartCreationResponse size.! !
 
 
-!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 14:46:23'!
-addToCartHttpRequest: aCartID book: anItem quantity: anAmount
-	^ 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', anItem ,'&bookQuantity=', anAmount asString! !
-
 !TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 15:24:41'!
 checkoutCartHttpRequestFor: aCartID card: aCreditCardNumber expDate: anExpirationDate owner: anOwner
 	^'http://localhost:8080/checkOutCart?cartId=', aCartID, '&cnn=',  aCreditCardNumber, '&cced=', anExpirationDate, '&cco=', anOwner
 	
 	! !
+
+!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'Nico 7/7/2019 15:42:48'!
+createAddToCartHttpRequestFor: aCartID book: anItem quantity: anAmount
+	^ 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', anItem ,'&bookQuantity=', anAmount asString! !
 
 !TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 14:16:19'!
 createCartHttpRequestFor: anUserID authenticatingWith: aPassword
@@ -1784,10 +1810,36 @@ unknownUserErrorDescription
 
 !classDefinition: #TusLibrosClientWindowModel category: #TusLibros!
 Object subclass: #TusLibrosClientWindowModel
-	instanceVariableNames: 'listOfWords selectedIndex webClient idCart username password'
+	instanceVariableNames: 'listOfWords selectedIndex webClient idCart username password catalogueSelectedIndex catalogueList cartList cartListSelectedIndex'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'Nico 7/7/2019 15:39:40'!
+cartListItems
+	cartList := webClient sendListCartRequest: idCart.
+	^cartList.! !
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'Nico 7/7/2019 15:38:16'!
+cartListItemsIndex
+	^cartListSelectedIndex! !
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'Nico 7/7/2019 15:38:37'!
+cartListItemsIndex: anIndex
+	cartListSelectedIndex := anIndex.! !
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'Nico 7/7/2019 13:04:39'!
+catalogue
+	catalogueList := webClient sendListCatalogueRequest.
+	^catalogueList! !
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'Nico 7/7/2019 12:21:23'!
+catalogueListIndex
+	^catalogueSelectedIndex! !
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'Nico 7/7/2019 12:21:36'!
+catalogueListIndex: anIndex
+	catalogueSelectedIndex := anIndex! !
 
 !TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'NR 6/24/2019 06:26:32'!
 substringList
@@ -1806,7 +1858,7 @@ substringsListIndex: anIndex
 	selectedIndex := anIndex.! !
 
 
-!TusLibrosClientWindowModel methodsFor: 'initialization' stamp: 'JIG 7/6/2019 16:21:51'!
+!TusLibrosClientWindowModel methodsFor: 'initialization' stamp: 'Nico 7/7/2019 15:38:25'!
 initialize
 
 	listOfWords := OrderedCollection new.
@@ -1814,7 +1866,9 @@ initialize
 	password := ''.
 	idCart := 0.
 	selectedIndex:=0.
-	webClient := TusLibrosWebClient new.! !
+	webClient := TusLibrosWebClient new.
+	catalogueSelectedIndex := 0.
+	cartListSelectedIndex := 0.! !
 
 
 !TusLibrosClientWindowModel methodsFor: 'TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:22'!
@@ -1840,7 +1894,17 @@ usernameText: aUsername
 	^true.! !
 
 
-!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'JIG 7/6/2019 16:10:27'!
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'Nico 7/7/2019 15:25:50'!
+sendCartAddingItemRequest
+	
+	catalogueSelectedIndex = 0 ifFalse: [ | itemSelected |
+		itemSelected := catalogueList at: catalogueSelectedIndex.
+		webClient sendCartAddingRequestToCart: idCart WithItem: itemSelected.
+		self triggerEvent: #addingItemSuccessfull with: self
+	].
+	! !
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'Nico 7/7/2019 15:24:17'!
 sendCreateCartRequest
 		
 	idCart := webClient sendCreateCartRequestWithUser: username authenticatedWith: password.
@@ -2384,21 +2448,100 @@ Object subclass: #TusLibrosWebClient
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'NR 6/25/2019 22:25:36'!
-correctlyEncodeSpacesForUrlRequestParameter: aParameter
-	
-	^ aParameter copyReplaceAll: ' ' with: '%20'. ! !
+!TusLibrosWebClient methodsFor: 'http request' stamp: 'Nico 7/7/2019 15:42:49'!
+createAddToCartHttpRequestFor: aCartID book: anItem quantity: anAmount
+	^ 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', anItem ,'&bookQuantity=', anAmount asString! !
 
-!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'JIG 7/6/2019 16:02:14'!
+!TusLibrosWebClient methodsFor: 'http request' stamp: 'JIG 7/6/2019 16:02:14'!
 createCartHttpRequestFor: anUserID authenticatingWith: aPassword
 	^ 'http://localhost:8080/createCart?clientId=', anUserID ,'&password=', aPassword.
 	! !
 
-!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'JIG 7/6/2019 16:39:33'!
-isSuccess: responseContent
-	^((responseContent at: 1) = $1) not.! !
+!TusLibrosWebClient methodsFor: 'http request' stamp: 'Nico 7/7/2019 15:42:42'!
+listCartHttpRequestFor: aCartID
+	^ 'http://localhost:8080/listCart?cartId=', aCartID! !
 
-!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'JIG 7/6/2019 16:39:40'!
+!TusLibrosWebClient methodsFor: 'http request' stamp: 'Nico 7/7/2019 12:27:45'!
+listCatalogueHttpRequest
+	^ 'http://localhost:8080/listCatalogue'! !
+
+
+!TusLibrosWebClient methodsFor: 'initialization' stamp: 'NR 6/25/2019 22:15:16'!
+port
+	
+	^port ifNil: [port:=8080].! !
+
+!TusLibrosWebClient methodsFor: 'initialization' stamp: 'NR 6/24/2019 06:52:37'!
+url
+	
+	^'http://localhost:', self port asString! !
+
+
+!TusLibrosWebClient methodsFor: 'parsing' stamp: 'NR 6/25/2019 22:25:36'!
+correctlyEncodeSpacesForUrlRequestParameter: aParameter
+	
+	^ aParameter copyReplaceAll: ' ' with: '%20'. ! !
+
+!TusLibrosWebClient methodsFor: 'parsing' stamp: 'Nico 7/7/2019 15:14:18'!
+getCartIdOfResponse: aCreateCartResponse
+	| responseAsString |
+	
+	responseAsString := aCreateCartResponse asString.
+	^ responseAsString copyFrom: 3 to: responseAsString size.! !
+
+!TusLibrosWebClient methodsFor: 'parsing' stamp: 'Nico 7/7/2019 15:56:07'!
+parseCartListingToOrderedCollection: aListCartResponse
+	| collection |
+	
+	collection := self removeBarsAndConvertToOrderedCollection: aListCartResponse. 
+	
+	^ collection select: [:anElement | anElement first digitValue = -1]! !
+
+!TusLibrosWebClient methodsFor: 'parsing' stamp: 'Nico 7/7/2019 15:55:16'!
+parseCatalogueToOrderedCollection: aCatalogueResponse
+	| collection |
+	
+	collection := self removeBarsAndConvertToOrderedCollection: aCatalogueResponse.
+	
+	collection removeFirst.
+	
+	^collection.! !
+
+
+!TusLibrosWebClient methodsFor: 'parsing - private' stamp: 'Nico 7/7/2019 15:54:58'!
+removeBarsAndConvertToOrderedCollection: aCatalogueResponse
+	| collection catalogueResponseString firstBar |
+	
+	"If response doesn't end with |, then it doesn't return the last sentence/ammount in the final OC"
+	
+	collection := OrderedCollection new.
+	catalogueResponseString := aCatalogueResponse asString.
+	
+	firstBar := catalogueResponseString findFirst: [:aChar | aChar = $|].
+	[firstBar > 0] whileTrue: 
+	[ | wordToAdd |
+		wordToAdd := (catalogueResponseString copyFrom: 1 to: firstBar - 1).
+		collection add: wordToAdd.
+		catalogueResponseString := catalogueResponseString withoutPrefix: (catalogueResponseString copyFrom: 1 to: firstBar).
+		firstBar := catalogueResponseString findFirst: [:aChar | aChar = $|].	
+	].
+	
+	^collection.! !
+
+
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/7/2019 15:42:49'!
+sendCartAddingRequestToCart: aCartID WithItem: anItem
+	| responseAddItem addItemRequest |
+	
+	addItemRequest := self createAddToCartHttpRequestFor: aCartID book: anItem quantity: 1.
+	
+	responseAddItem := WebClient httpGet: addItemRequest.
+
+	(self isSuccess: responseAddItem content)
+		ifTrue:[^responseAddItem content] 
+		ifFalse:[^self error: responseAddItem content].! !
+
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/7/2019 15:13:05'!
 sendCreateCartRequestWithUser: username authenticatedWith: password
 	| usernameEncodedString passwordEncodedString createCartRequest responseCreateCart |
 	
@@ -2410,8 +2553,32 @@ sendCreateCartRequestWithUser: username authenticatedWith: password
 	responseCreateCart := WebClient httpGet: createCartRequest.
 
 	(self isSuccess: responseCreateCart content)
-		ifTrue:[^responseCreateCart content] 
+		ifTrue:[^self getCartIdOfResponse: responseCreateCart content] 
 		ifFalse:[^self error: responseCreateCart content].! !
+
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/7/2019 15:42:42'!
+sendListCartRequest: aCartID
+	| responseListCart listCartRequest |
+	
+	listCartRequest := self listCartHttpRequestFor: aCartID.
+	
+	responseListCart := WebClient httpGet: listCartRequest.
+
+	(self isSuccess: responseListCart content)
+		ifTrue:[^self parseCartListingToOrderedCollection: responseListCart content] 
+		ifFalse:[^self error: responseListCart content].! !
+
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/7/2019 12:59:02'!
+sendListCatalogueRequest
+	| listCatalogueRequest responseListCatalogue |
+	
+	listCatalogueRequest := self listCatalogueHttpRequest.
+	
+	responseListCatalogue := WebClient httpGet: listCatalogueRequest.
+
+	(self isSuccess: responseListCatalogue content)
+		ifTrue:[^self parseCatalogueToOrderedCollection: responseListCatalogue content] 
+		ifFalse:[^self error: responseListCatalogue content].! !
 
 !TusLibrosWebClient methodsFor: 'sending requests' stamp: 'NR 6/25/2019 22:25:21'!
 sendRequest: sentence
@@ -2428,12 +2595,6 @@ sendRequest: sentence
 		ifFalse:[^self error: resp content].! !
 
 
-!TusLibrosWebClient methodsFor: 'initialization' stamp: 'NR 6/25/2019 22:15:16'!
-port
-	
-	^port ifNil: [port:=8080].! !
-
-!TusLibrosWebClient methodsFor: 'initialization' stamp: 'NR 6/24/2019 06:52:37'!
-url
-	
-	^'http://localhost:', self port asString! !
+!TusLibrosWebClient methodsFor: 'testing responses' stamp: 'JIG 7/6/2019 16:39:33'!
+isSuccess: responseContent
+	^((responseContent at: 1) = $1) not.! !
