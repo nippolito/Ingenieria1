@@ -13,13 +13,13 @@ TusLibrosWindow subclass: #TusLibrosBuyWindow
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'JIG 7/6/2019 16:18:49'!
+!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'Nico 7/8/2019 12:10:34'!
 defaultExtent
 
-	^ 600@400
+	^ 800@600
 	! !
 
-!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'Nico 7/7/2019 15:23:06'!
+!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'Nico 7/8/2019 13:12:39'!
 initializeWith: aTitle andModel: aModel
 
 	self titleMorph showButtonsNamed: #( close collapse ).
@@ -30,7 +30,8 @@ initializeWith: aTitle andModel: aModel
 	self openInWorld.
 	self yourself.
 			
-	self model when: #addingItemSuccessfull send: #refreshCatalogueListIndex to: self.! !
+	self model when: #addingItemSuccessfull send: #refreshCatalogueListIndex to: self.
+	"self model when: #checkoutSuccessfull send: #openTranscriptWithClientPurchases to: self model."! !
 
 
 !TusLibrosBuyWindow methodsFor: 'access' stamp: 'Nico 7/7/2019 16:01:05'!
@@ -40,7 +41,7 @@ refreshCatalogueListIndex
 	cartList updateList.! !
 
 
-!TusLibrosBuyWindow methodsFor: 'GUI building' stamp: 'Nico 7/7/2019 15:07:43'!
+!TusLibrosBuyWindow methodsFor: 'GUI building' stamp: 'Nico 7/8/2019 12:19:23'!
 build1stRow
 	| addToCartButton firstRowLayout  |
 	
@@ -59,22 +60,60 @@ build1stRow
 	
 	^firstRowLayout.! !
 
-!TusLibrosBuyWindow methodsFor: 'GUI building' stamp: 'Nico 7/7/2019 15:36:14'!
+!TusLibrosBuyWindow methodsFor: 'GUI building' stamp: 'Nico 7/8/2019 12:20:08'!
+build2ndColumn2ndRow
+	| checkoutButton cardNumberTextBox cardCcedTextBox cardOwnerTextBox secondColumnLayoutOfSecondRow |
+	
+	checkoutButton := PluggableButtonMorph model: self model stateGetter: nil  action: #sendCheckoutRequest  label: 'Make Checkout'.
+	
+	cardNumberTextBox := TextModelMorph textProvider: self model textGetter: #cardNumberText textSetter: #cardNumberText:. 
+	cardNumberTextBox textMorph setProperty: #keyStroke: toValue: [ :key | cardNumberTextBox textMorph acceptContents ].
+	cardNumberTextBox	
+		borderWidth: 1; borderColor: Color skyBlue;
+	 	morphExtent: (200@30).
+		
+	cardCcedTextBox := TextModelMorph textProvider: self model textGetter: #cardCcedText textSetter: #cardCcedText:. 
+	cardCcedTextBox textMorph setProperty: #keyStroke: toValue: [ :key | cardCcedTextBox textMorph acceptContents ].
+	cardCcedTextBox	
+		borderWidth: 1; borderColor: Color skyBlue;
+	 	morphExtent: (200@30).
+		
+	cardOwnerTextBox := TextModelMorph textProvider: self model textGetter: #cardOwnerText textSetter: #cardOwnerText:. 
+	cardOwnerTextBox textMorph setProperty: #keyStroke: toValue: [ :key | cardOwnerTextBox textMorph acceptContents ].
+	cardOwnerTextBox	
+		borderWidth: 1; borderColor: Color skyBlue;
+	 	morphExtent: (200@30).	
+		
+	secondColumnLayoutOfSecondRow := LayoutMorph newColumn.
+	secondColumnLayoutOfSecondRow separation: 5;
+	padding: #left;
+	addMorph: (StringMorph contents: 'Card Number');
+	addMorph: cardNumberTextBox;
+	addMorph: (StringMorph contents: 'Card Cced');
+	addMorph: cardCcedTextBox;
+	addMorph: (StringMorph contents: 'Card Owner');
+	addMorph: cardOwnerTextBox;
+	addMorph: checkoutButton.
+	
+	^secondColumnLayoutOfSecondRow! !
+
+!TusLibrosBuyWindow methodsFor: 'GUI building' stamp: 'Nico 7/8/2019 12:16:23'!
 build2ndRow
 	| secondRowLayout  |
 	
 	cartList := PluggableListMorph model: self model listGetter: #cartListItems indexGetter: #cartListItemsIndex indexSetter: #cartListItemsIndex:.
 	cartList  borderColor: Color skyBlue.
 	cartList  borderWidth: 1.
+	"cartList morphPosition: (81@90)."
 	
-	"addToCartButton := PluggableButtonMorph model: self model stateGetter: nil  action: #sendCartAddingItemRequest  label: 'Add product to cart'."
+	"checkoutButton := PluggableButtonMorph model: self model stateGetter: nil  action: #sendCheckoutRequest  label: 'Make Checkout'."
 		
 	secondRowLayout := LayoutMorph newRow.
 	secondRowLayout separation: 5;
 	padding: #left;
 	addMorph: (StringMorph contents:'Carrito');
-	addMorph: cartList.
- 	"addMorph: addToCartButton."
+	addMorph: cartList;
+ 	addMorph: self build2ndColumn2ndRow.
 	
 	^secondRowLayout.! !
 
@@ -613,7 +652,7 @@ TestCase subclass: #TusLibrosRestSystemTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosRestSystemTest methodsFor: 'setup' stamp: 'Nipo 6/24/2019 14:59:32'!
+!TusLibrosRestSystemTest methodsFor: 'setup' stamp: 'Nico 7/8/2019 11:18:00'!
 setUp
 	clock := Clock on: DateAndTime now.
 	testFactory := StoreTestObjectsFactory new.
@@ -621,7 +660,7 @@ setUp
 	tusLibrosController := TusLibrosRestSystem 
 								throught: self
 								authenticatingWith: anAuthenticator
-								acceptingItemsOf: (testFactory defaultCatalog)
+								acceptingItemsOf: (testFactory fullCatalog)
 								withClock: clock.
 	debitBehavior := [ :anAmount :aCreditCard | ].
 	
@@ -1021,12 +1060,62 @@ test25CartSessionTimeRenovatesAfterListing
 
 !classDefinition: #TusLibrosServerControllerTest category: #TusLibros!
 TestCase subclass: #TusLibrosServerControllerTest
-	instanceVariableNames: 'testFactory tusLibrosController anAuthenticator clock server'
+	instanceVariableNames: 'testFactory tusLibrosController anAuthenticator clock server debitBehavior'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosServerControllerTest methodsFor: 'setup' stamp: 'JIG 7/6/2019 15:10:39'!
+!TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'Nico 6/28/2019 20:14:52'!
+createServer
+	^TusLibrosServerController new initializeWith: tusLibrosController.! !
+
+!TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'nico 6/30/2019 20:04:43'!
+stopListeningAndDestroyServer
+	TusLibrosServerController allInstances do: [:aServer | aServer stopListening. aServer destroy].! !
+
+
+!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 15:24:41'!
+checkoutCartHttpRequestFor: aCartID card: aCreditCardNumber expDate: anExpirationDate owner: anOwner
+	^'http://localhost:8080/checkOutCart?cartId=', aCartID, '&cnn=',  aCreditCardNumber, '&cced=', anExpirationDate, '&cco=', anOwner
+	
+	! !
+
+!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'Nico 7/7/2019 15:42:48'!
+createAddToCartHttpRequestFor: aCartID book: anItem quantity: anAmount
+	^ 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', anItem ,'&bookQuantity=', anAmount asString! !
+
+!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 14:16:19'!
+createCartHttpRequestFor: anUserID authenticatingWith: aPassword
+
+	^ 'http://localhost:8080/createCart?clientId=', anUserID ,'&password=', aPassword.
+	! !
+
+!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 14:21:20'!
+listCartHttpRequestFor: aCartID
+
+	^ 'http://localhost:8080/listCart?cartId=', aCartID
+! !
+
+!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 14:55:50'!
+listPurchasesHttpRequestFor: anUserID authenticatingWith: aPassword
+	^'http://localhost:8080/listPurchases?clientId=', anUserID, '&password=', aPassword
+	
+	! !
+
+
+!TusLibrosServerControllerTest methodsFor: 'merchant processor protocol' stamp: 'Nico 7/8/2019 13:05:38'!
+debit: anAmount from: aCreditCard 
+
+	^debitBehavior value: anAmount value: aCreditCard 
+	! !
+
+
+!TusLibrosServerControllerTest methodsFor: 'parsing' stamp: 'JIG 6/30/2019 16:14:44'!
+extractCartIDFrom: aCartCreationResponse
+	^aCartCreationResponse copyFrom: 3 to: aCartCreationResponse size.! !
+
+
+!TusLibrosServerControllerTest methodsFor: 'setup' stamp: 'Nico 7/8/2019 13:04:31'!
 setUp
 	testFactory := StoreTestObjectsFactory new.
 	
@@ -1038,7 +1127,15 @@ setUp
 								acceptingItemsOf: (testFactory fullCatalog)
 								withClock: clock.
 								
-	server := self createServer.! !
+	server := self createServer.
+	
+	debitBehavior := [ :anAmount :aCreditCard | ].! !
+
+
+!TusLibrosServerControllerTest methodsFor: 'tear down' stamp: 'JIG 6/30/2019 13:35:42'!
+tearDown
+	self stopListeningAndDestroyServer.
+! !
 
 
 !TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 7/6/2019 16:31:06'!
@@ -1075,7 +1172,7 @@ test03CannotListAnInvalidCart
 	self assert: responseListCart content equals: '1|', TusLibrosRestSystem invalidCartIDErrorDescription.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 7/7/2019 15:42:49'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 7/8/2019 11:50:12'!
 test04ValidCartCanAddItemsFromCatalogue
 	| aCartID responseCreateCart responseListCart responseAddToCart createCartHttpRequest addToCartHttpRequest listCartHttpRequest |
 	
@@ -1084,16 +1181,16 @@ test04ValidCartCanAddItemsFromCatalogue
 	
 	aCartID := self extractCartIDFrom: responseCreateCart content.
 	addToCartHttpRequest := self createAddToCartHttpRequestFor: aCartID book: testFactory itemSellByTheStore quantity: 1.
-	responseAddToCart := WebClient httpGet: addToCartHttpRequest. 
+	responseAddToCart := WebClient httpGet: addToCartHttpRequest.	
 	
 	listCartHttpRequest := self listCartHttpRequestFor: aCartID.
 	responseListCart := WebClient httpGet: listCartHttpRequest.
 	
 	self assert: responseAddToCart content equals: '0|OK'.
-	self assert: responseListCart content equals: '0|', testFactory itemSellByTheStore, '|1'.
+	self assert: responseListCart content equals: '0|', testFactory itemSellByTheStore, '|1|'.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 7/7/2019 15:42:49'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 7/8/2019 11:50:34'!
 test05CannotAddItemsToCartThatDoNotBelongToStore
 	| aCartID responseCreateCart responseListCart responseAddToCart createCartHttpRequest addToCartHttpRequest listCartHttpRequest |
 		
@@ -1108,10 +1205,10 @@ test05CannotAddItemsToCartThatDoNotBelongToStore
 	responseListCart := WebClient httpGet: listCartHttpRequest.
 	
 	self assert: responseAddToCart content equals: '1|', Cart invalidItemErrorDescription.
-	self assert: responseListCart content equals: '0'.
+	self assert: responseListCart content equals: '0|'.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 7/7/2019 15:42:49'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 7/8/2019 11:50:37'!
 test06CannotAddToCartNonPositiveNumberOfItems
 	| aCartID responseCreateCart responseListCart responseAddToCart createCartHttpRequest addToCartHttpRequest listCartHttpRequest |
 		
@@ -1126,7 +1223,7 @@ test06CannotAddToCartNonPositiveNumberOfItems
 	responseListCart := WebClient httpGet: listCartHttpRequest.
 	
 	self assert: responseAddToCart content equals: '1|', Cart invalidQuantityErrorDescription.
-	self assert: responseListCart content equals: '0'.
+	self assert: responseListCart content equals: '0|'.
 ! !
 
 !TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'Nico 7/7/2019 15:42:49'!
@@ -1193,55 +1290,6 @@ test11CannotCheckoutAnInvalidCart
 	responseCheckout := WebClient httpGet: checkoutHttpRequest.
 	
 	self assert: responseCheckout content equals: '1|', TusLibrosRestSystem invalidCartIDErrorDescription.
-	
-	! !
-
-
-!TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'Nico 6/28/2019 20:14:52'!
-createServer
-	^TusLibrosServerController new initializeWith: tusLibrosController.! !
-
-!TusLibrosServerControllerTest methodsFor: 'aux' stamp: 'nico 6/30/2019 20:04:43'!
-stopListeningAndDestroyServer
-	TusLibrosServerController allInstances do: [:aServer | aServer stopListening. aServer destroy].! !
-
-
-!TusLibrosServerControllerTest methodsFor: 'tear down' stamp: 'JIG 6/30/2019 13:35:42'!
-tearDown
-	self stopListeningAndDestroyServer.
-! !
-
-
-!TusLibrosServerControllerTest methodsFor: 'parsing' stamp: 'JIG 6/30/2019 16:14:44'!
-extractCartIDFrom: aCartCreationResponse
-	^aCartCreationResponse copyFrom: 3 to: aCartCreationResponse size.! !
-
-
-!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 15:24:41'!
-checkoutCartHttpRequestFor: aCartID card: aCreditCardNumber expDate: anExpirationDate owner: anOwner
-	^'http://localhost:8080/checkOutCart?cartId=', aCartID, '&cnn=',  aCreditCardNumber, '&cced=', anExpirationDate, '&cco=', anOwner
-	
-	! !
-
-!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'Nico 7/7/2019 15:42:48'!
-createAddToCartHttpRequestFor: aCartID book: anItem quantity: anAmount
-	^ 'http://localhost:8080/addToCart?cartId=', aCartID, '&bookIsbn=', anItem ,'&bookQuantity=', anAmount asString! !
-
-!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 14:16:19'!
-createCartHttpRequestFor: anUserID authenticatingWith: aPassword
-
-	^ 'http://localhost:8080/createCart?clientId=', anUserID ,'&password=', aPassword.
-	! !
-
-!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 14:21:20'!
-listCartHttpRequestFor: aCartID
-
-	^ 'http://localhost:8080/listCart?cartId=', aCartID
-! !
-
-!TusLibrosServerControllerTest methodsFor: 'http requests' stamp: 'asd 7/3/2019 14:55:50'!
-listPurchasesHttpRequestFor: anUserID authenticatingWith: aPassword
-	^'http://localhost:8080/listPurchases?clientId=', anUserID, '&password=', aPassword
 	
 	! !
 
@@ -1810,7 +1858,7 @@ unknownUserErrorDescription
 
 !classDefinition: #TusLibrosClientWindowModel category: #TusLibros!
 Object subclass: #TusLibrosClientWindowModel
-	instanceVariableNames: 'listOfWords selectedIndex webClient idCart username password catalogueSelectedIndex catalogueList cartList cartListSelectedIndex'
+	instanceVariableNames: 'listOfWords selectedIndex webClient idCart username password catalogueSelectedIndex catalogueList cartList cartListSelectedIndex cardNumber cardCced cardOwner'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -1858,7 +1906,7 @@ substringsListIndex: anIndex
 	selectedIndex := anIndex.! !
 
 
-!TusLibrosClientWindowModel methodsFor: 'initialization' stamp: 'Nico 7/7/2019 15:38:25'!
+!TusLibrosClientWindowModel methodsFor: 'initialization' stamp: 'Nico 7/8/2019 12:05:07'!
 initialize
 
 	listOfWords := OrderedCollection new.
@@ -1868,31 +1916,44 @@ initialize
 	selectedIndex:=0.
 	webClient := TusLibrosWebClient new.
 	catalogueSelectedIndex := 0.
-	cartListSelectedIndex := 0.! !
+	cartListSelectedIndex := 0.
+	
+	cardNumber := ''.
+	cardCced := ''.
+	cardOwner := ''.! !
 
 
-!TusLibrosClientWindowModel methodsFor: 'TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:22'!
+!TusLibrosClientWindowModel methodsFor: 'First Window - TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:22'!
 passwordText
 	
 	^password.! !
 
-!TusLibrosClientWindowModel methodsFor: 'TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:18'!
+!TusLibrosClientWindowModel methodsFor: 'First Window - TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:18'!
 passwordText: aPassword
 
 	password :=aPassword.
 	^true.! !
 
-!TusLibrosClientWindowModel methodsFor: 'TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:57:56'!
+!TusLibrosClientWindowModel methodsFor: 'First Window - TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:57:56'!
 usernameText
 	
 	^username.! !
 
-!TusLibrosClientWindowModel methodsFor: 'TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:07'!
+!TusLibrosClientWindowModel methodsFor: 'First Window - TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:07'!
 usernameText: aUsername
 
 	username:=aUsername.
 	^true.! !
 
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'Nico 7/8/2019 13:28:26'!
+openTranscriptWithClientPurchases
+	TranscriptWindow openTranscript.
+	Transcript clear.
+	Transcript show: 'La compra se realizó correctamente'; newLine.
+	Transcript show: ('    ' , (cartList at: 1) asString).
+	"Transcript show: (listOfWords at: selectedIndex).
+	Transcript show: ' '."! !
 
 !TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'Nico 7/7/2019 15:25:50'!
 sendCartAddingItemRequest
@@ -1903,6 +1964,14 @@ sendCartAddingItemRequest
 		self triggerEvent: #addingItemSuccessfull with: self
 	].
 	! !
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'Nico 7/8/2019 13:17:25'!
+sendCheckoutRequest
+
+	webClient sendCheckoutCartRequest: idCart withCardNumber: cardNumber cced: cardCced andOwner: cardOwner.
+	
+	[self openTranscriptWithClientPurchases] fork.
+! !
 
 !TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'Nico 7/7/2019 15:24:17'!
 sendCreateCartRequest
@@ -1930,6 +1999,42 @@ showWordInTranscript
 		Transcript show: (listOfWords at: selectedIndex).
 		Transcript show: ' '.].
 ! !
+
+
+!TusLibrosClientWindowModel methodsFor: 'Second Window - TextModelMorphSelectors' stamp: 'Nico 7/8/2019 12:04:09'!
+cardCcedText
+	
+	^cardCced
+! !
+
+!TusLibrosClientWindowModel methodsFor: 'Second Window - TextModelMorphSelectors' stamp: 'Nico 7/8/2019 12:04:01'!
+cardCcedText: aCardCced
+	
+	cardCced := aCardCced.
+	^true! !
+
+!TusLibrosClientWindowModel methodsFor: 'Second Window - TextModelMorphSelectors' stamp: 'Nico 7/8/2019 12:03:09'!
+cardNumberText
+	
+	^cardNumber.! !
+
+!TusLibrosClientWindowModel methodsFor: 'Second Window - TextModelMorphSelectors' stamp: 'Nico 7/8/2019 12:03:47'!
+cardNumberText: aCardNumber
+	
+	cardNumber := aCardNumber.
+	^true! !
+
+!TusLibrosClientWindowModel methodsFor: 'Second Window - TextModelMorphSelectors' stamp: 'Nico 7/8/2019 12:04:38'!
+cardOwnerText
+	
+	^ cardOwner
+	! !
+
+!TusLibrosClientWindowModel methodsFor: 'Second Window - TextModelMorphSelectors' stamp: 'Nico 7/8/2019 12:04:44'!
+cardOwnerText: aCardOwner
+	
+	cardOwner := aCardOwner.
+	^true! !
 
 
 !classDefinition: #TusLibrosRestSystem category: #TusLibros!
@@ -2139,7 +2244,7 @@ Object subclass: #TusLibrosServerController
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosServerController methodsFor: 'adding services' stamp: 'nico 6/30/2019 19:57:31'!
+!TusLibrosServerController methodsFor: 'adding services' stamp: 'Nico 7/8/2019 13:14:35'!
 addCartCheckOutService
 
 	webServer addService: '/checkOutCart' action:[:request | |cartID transactionID creditExpiration creditNumber creditOwner|
@@ -2194,7 +2299,7 @@ addCartCreationService
 	
 ! !
 
-!TusLibrosServerController methodsFor: 'adding services' stamp: 'nico 6/30/2019 20:02:52'!
+!TusLibrosServerController methodsFor: 'adding services' stamp: 'Nico 7/8/2019 11:21:03'!
 addCartItemAddingService
 
 	webServer addService: '/addToCart' action:[:request | |cartID bookISBN items bookQuantity|
@@ -2209,10 +2314,6 @@ addCartItemAddingService
 		on: Error
 		do: [:anError |
 			self from: request sendErrorResponse: anError messageText.
-			"anError messageText = Cart invalidItemErrorDescription ifTrue: [ request send200Response: '1|', Cart invalidItemErrorDescription ].
-			anError messageText = Cart invalidQuantityErrorDescription ifTrue: [request send200Response: '1|', Cart invalidQuantityErrorDescription ].
-			anError messageText = TusLibrosRestSystem invalidCartIDErrorDescription ifTrue: [request send200Response: '1|',  TusLibrosRestSystem invalidCartIDErrorDescription ]
-			ifFalse: [request send200Response: '1| Hubo un error no contemplado']."
 		]
 	] 
 	on: Error 
@@ -2409,14 +2510,14 @@ parseExpirationDate: aCreditExpiration
 	yearOfCreditExpiration := (aCreditExpiration copyFrom: 3 to: 6) asNumber.
 	^ Month month: monthOfCreditExpiration year: yearOfCreditExpiration.! !
 
-!TusLibrosServerController methodsFor: 'private - parsing' stamp: 'nico 6/30/2019 20:01:31'!
+!TusLibrosServerController methodsFor: 'private - parsing' stamp: 'Nico 7/8/2019 11:40:26'!
 parseItemsListed: items
 	| parsedItemsResult |
 	
 	parsedItemsResult := '0'.
-	items do: [:item | parsedItemsResult := parsedItemsResult, '|', item, '|', (items occurrencesOf: item) asString ].
+	items contents keysDo: [:item | parsedItemsResult := parsedItemsResult, '|', item, '|', (items occurrencesOf: item) asString ].
 	
-	^parsedItemsResult
+	^ parsedItemsResult,'|'.
 
 ! !
 
@@ -2447,6 +2548,10 @@ Object subclass: #TusLibrosWebClient
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
+
+!TusLibrosWebClient methodsFor: 'http request' stamp: 'Nico 7/8/2019 12:35:33'!
+checkoutCartHttpRequestFor: aCartID card: aCreditCardNumber expDate: anExpirationDate owner: anOwner
+	^'http://localhost:8080/checkOutCart?cartId=', aCartID, '&cnn=',  aCreditCardNumber, '&cced=', anExpirationDate, '&cco=', anOwner! !
 
 !TusLibrosWebClient methodsFor: 'http request' stamp: 'Nico 7/7/2019 15:42:49'!
 createAddToCartHttpRequestFor: aCartID book: anItem quantity: anAmount
@@ -2489,11 +2594,11 @@ getCartIdOfResponse: aCreateCartResponse
 	responseAsString := aCreateCartResponse asString.
 	^ responseAsString copyFrom: 3 to: responseAsString size.! !
 
-!TusLibrosWebClient methodsFor: 'parsing' stamp: 'Nico 7/7/2019 15:56:07'!
+!TusLibrosWebClient methodsFor: 'parsing' stamp: 'Nico 7/8/2019 11:36:25'!
 parseCartListingToOrderedCollection: aListCartResponse
 	| collection |
 	
-	collection := self removeBarsAndConvertToOrderedCollection: aListCartResponse. 
+	collection := self convertCartResponseToOrderedCollection: aListCartResponse. 
 	
 	^ collection select: [:anElement | anElement first digitValue = -1]! !
 
@@ -2508,7 +2613,34 @@ parseCatalogueToOrderedCollection: aCatalogueResponse
 	^collection.! !
 
 
-!TusLibrosWebClient methodsFor: 'parsing - private' stamp: 'Nico 7/7/2019 15:54:58'!
+!TusLibrosWebClient methodsFor: 'parsing - private' stamp: 'Nico 7/8/2019 11:45:36'!
+convertCartResponseToOrderedCollection: aListCartResponse
+	| collection catalogueResponseString firstBar |
+	
+	"If response doesn't end with |, then it doesn't return the last sentence/ammount in the final OC"
+	
+	collection := OrderedCollection new.
+	catalogueResponseString := aListCartResponse asString.
+	
+	catalogueResponseString := catalogueResponseString withoutPrefix: '0|'.
+	
+	firstBar := catalogueResponseString findFirst: [:aChar | aChar = $|].
+	[firstBar > 0] whileTrue: 
+	[ | wordToAdd amountToAdd nextBar |
+		wordToAdd := (catalogueResponseString copyFrom: 1 to: firstBar - 1).
+		catalogueResponseString := catalogueResponseString withoutPrefix: (catalogueResponseString copyFrom: 1 to: firstBar).
+		nextBar := catalogueResponseString findFirst: [:aChar | aChar = $|].
+		amountToAdd := (catalogueResponseString copyFrom: 1 to: nextBar - 1) asNumber.
+		amountToAdd timesRepeat: [
+			collection add: wordToAdd.	
+		].
+		catalogueResponseString := catalogueResponseString withoutPrefix: (catalogueResponseString copyFrom: 1 to: nextBar).
+		firstBar := catalogueResponseString findFirst: [:aChar | aChar = $|].	
+	].
+	
+	^collection.! !
+
+!TusLibrosWebClient methodsFor: 'parsing - private' stamp: 'Nico 7/8/2019 11:34:52'!
 removeBarsAndConvertToOrderedCollection: aCatalogueResponse
 	| collection catalogueResponseString firstBar |
 	
@@ -2541,6 +2673,23 @@ sendCartAddingRequestToCart: aCartID WithItem: anItem
 		ifTrue:[^responseAddItem content] 
 		ifFalse:[^self error: responseAddItem content].! !
 
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/8/2019 12:36:59'!
+sendCheckoutCartRequest: aCartID withCardNumber: cardNumber cced: cardCced andOwner: cardOwner
+	| cartIDEncodedString cardNumberEncodedString checkoutCartRequest responseCheckoutCart cardCcedEncodedString cardOwnerEncodedString |
+	
+	cartIDEncodedString := (self correctlyEncodeSpacesForUrlRequestParameter: aCartID) asString.
+	cardNumberEncodedString := (self correctlyEncodeSpacesForUrlRequestParameter: cardNumber) asString .
+	cardCcedEncodedString := (self correctlyEncodeSpacesForUrlRequestParameter: cardCced) asString.
+	cardOwnerEncodedString := (self correctlyEncodeSpacesForUrlRequestParameter: cardOwner) asString.
+	
+	checkoutCartRequest := self checkoutCartHttpRequestFor: cartIDEncodedString card: cardNumberEncodedString expDate: cardCcedEncodedString owner: cardOwnerEncodedString.
+	
+	responseCheckoutCart := WebClient httpGet: checkoutCartRequest.
+
+	(self isSuccess: responseCheckoutCart content)
+		ifTrue:[^responseCheckoutCart content] 
+		ifFalse:[^self error: responseCheckoutCart content].! !
+
 !TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/7/2019 15:13:05'!
 sendCreateCartRequestWithUser: username authenticatedWith: password
 	| usernameEncodedString passwordEncodedString createCartRequest responseCreateCart |
@@ -2556,7 +2705,7 @@ sendCreateCartRequestWithUser: username authenticatedWith: password
 		ifTrue:[^self getCartIdOfResponse: responseCreateCart content] 
 		ifFalse:[^self error: responseCreateCart content].! !
 
-!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/7/2019 15:42:42'!
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/8/2019 12:06:38'!
 sendListCartRequest: aCartID
 	| responseListCart listCartRequest |
 	
