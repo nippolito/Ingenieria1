@@ -19,7 +19,7 @@ defaultExtent
 	^ 800@600
 	! !
 
-!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'Nico 7/8/2019 13:12:39'!
+!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'Nico 7/8/2019 15:57:42'!
 initializeWith: aTitle andModel: aModel
 
 	self titleMorph showButtonsNamed: #( close collapse ).
@@ -31,8 +31,14 @@ initializeWith: aTitle andModel: aModel
 	self yourself.
 			
 	self model when: #addingItemSuccessfull send: #refreshCatalogueListIndex to: self.
-	"self model when: #checkoutSuccessfull send: #openTranscriptWithClientPurchases to: self model."! !
+	self model when: #checkoutSuccessful send: #deleteAndOpenCartCreationWindow to: self.! !
 
+
+!TusLibrosBuyWindow methodsFor: 'access' stamp: 'Nico 7/8/2019 16:01:54'!
+deleteAndOpenCartCreationWindow
+	TusLibrosClientWindow open.
+	self delete.
+! !
 
 !TusLibrosBuyWindow methodsFor: 'access' stamp: 'Nico 7/7/2019 16:01:05'!
 refreshCatalogueListIndex
@@ -117,7 +123,7 @@ build2ndRow
 	
 	^secondRowLayout.! !
 
-!TusLibrosBuyWindow methodsFor: 'GUI building' stamp: 'Nico 7/7/2019 15:34:53'!
+!TusLibrosBuyWindow methodsFor: 'GUI building' stamp: 'Nico 7/8/2019 16:12:16'!
 buildMorphicWindow
 		
 	self layoutMorph beColumn;
@@ -125,7 +131,6 @@ buildMorphicWindow
 	padding: #left;
 	addMorph: self build1stRow;
 	addMorph: self build2ndRow.
-	"addMorph: self build3rdRow."
 	! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
@@ -250,10 +255,10 @@ initializeWith: aTitle
 	self model when: #cartCreationSuccessful send: #createSecondWindow to: self.! !
 
 
-!TusLibrosClientWindow methodsFor: 'panels-add/remove' stamp: 'Nico 7/7/2019 15:20:24'!
+!TusLibrosClientWindow methodsFor: 'panels-add/remove' stamp: 'Nico 7/8/2019 15:55:14'!
 createSecondWindow
 	TusLibrosBuyWindow openWith: model.
-	"self delete."! !
+	self delete.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1858,10 +1863,73 @@ unknownUserErrorDescription
 
 !classDefinition: #TusLibrosClientWindowModel category: #TusLibros!
 Object subclass: #TusLibrosClientWindowModel
-	instanceVariableNames: 'listOfWords selectedIndex webClient idCart username password catalogueSelectedIndex catalogueList cartList cartListSelectedIndex cardNumber cardCced cardOwner'
+	instanceVariableNames: 'webClient idCart username password catalogueSelectedIndex catalogueList cartList cartListSelectedIndex cardNumber cardCced cardOwner'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
+
+!TusLibrosClientWindowModel methodsFor: 'First Window - TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:22'!
+passwordText
+	
+	^password.! !
+
+!TusLibrosClientWindowModel methodsFor: 'First Window - TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:18'!
+passwordText: aPassword
+
+	password :=aPassword.
+	^true.! !
+
+!TusLibrosClientWindowModel methodsFor: 'First Window - TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:57:56'!
+usernameText
+	
+	^username.! !
+
+!TusLibrosClientWindowModel methodsFor: 'First Window - TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:07'!
+usernameText: aUsername
+
+	username:=aUsername.
+	^true.! !
+
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'Nico 7/7/2019 15:25:50'!
+sendCartAddingItemRequest
+	
+	catalogueSelectedIndex = 0 ifFalse: [ | itemSelected |
+		itemSelected := catalogueList at: catalogueSelectedIndex.
+		webClient sendCartAddingRequestToCart: idCart WithItem: itemSelected.
+		self triggerEvent: #addingItemSuccessfull with: self
+	].
+	! !
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'Nico 7/8/2019 16:06:57'!
+sendCheckoutRequest
+
+	webClient sendCheckoutCartRequest: idCart withCardNumber: cardNumber cced: cardCced andOwner: cardOwner.
+	
+	[self openTranscriptWithClientPurchases] fork.
+	
+	self triggerEvent: #checkoutSuccessful with: self.
+! !
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'Nico 7/7/2019 15:24:17'!
+sendCreateCartRequest
+		
+	idCart := webClient sendCreateCartRequestWithUser: username authenticatedWith: password.
+	
+	self triggerEvent: #cartCreationSuccessful with: self.
+	! !
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'NR 6/25/2019 22:13:32'!
+showWordInTranscript
+	
+	(selectedIndex = 0) ifFalse: 
+		[TranscriptWindow openTranscript.
+		Transcript clear.
+		Transcript show: 'The word selected is: '.
+		Transcript show: (listOfWords at: selectedIndex).
+		Transcript show: ' '.].
+! !
+
 
 !TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'Nico 7/7/2019 15:39:40'!
 cartListItems
@@ -1888,130 +1956,6 @@ catalogueListIndex
 !TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'Nico 7/7/2019 12:21:36'!
 catalogueListIndex: anIndex
 	catalogueSelectedIndex := anIndex! !
-
-!TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'NR 6/24/2019 06:26:32'!
-substringList
-	
-	^listOfWords.
-! !
-
-!TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'NR 6/25/2019 21:44:28'!
-substringsListIndex
-	
-	^selectedIndex.! !
-
-!TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'NR 6/25/2019 21:45:21'!
-substringsListIndex: anIndex
-	
-	selectedIndex := anIndex.! !
-
-
-!TusLibrosClientWindowModel methodsFor: 'initialization' stamp: 'Nico 7/8/2019 12:05:07'!
-initialize
-
-	listOfWords := OrderedCollection new.
-	username:=''.
-	password := ''.
-	idCart := 0.
-	selectedIndex:=0.
-	webClient := TusLibrosWebClient new.
-	catalogueSelectedIndex := 0.
-	cartListSelectedIndex := 0.
-	
-	cardNumber := ''.
-	cardCced := ''.
-	cardOwner := ''.! !
-
-
-!TusLibrosClientWindowModel methodsFor: 'First Window - TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:22'!
-passwordText
-	
-	^password.! !
-
-!TusLibrosClientWindowModel methodsFor: 'First Window - TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:18'!
-passwordText: aPassword
-
-	password :=aPassword.
-	^true.! !
-
-!TusLibrosClientWindowModel methodsFor: 'First Window - TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:57:56'!
-usernameText
-	
-	^username.! !
-
-!TusLibrosClientWindowModel methodsFor: 'First Window - TextModelMorphSelectors' stamp: 'JIG 7/6/2019 15:58:07'!
-usernameText: aUsername
-
-	username:=aUsername.
-	^true.! !
-
-
-!TusLibrosClientWindowModel methodsFor: 'private - transcript' stamp: 'JIG 7/8/2019 15:23:27'!
-showClientHistoricalPurchases
-	| listPurchasesHttpRequest responseListPurchases parsedPurchasesCollection |
-
-	listPurchasesHttpRequest := webClient listPurchasesHttpRequestFor: username authenticatingWith: password.
-	responseListPurchases := WebClient httpGet: listPurchasesHttpRequest asString.
-	
-	parsedPurchasesCollection := webClient parseCartListingToOrderedCollection: responseListPurchases content.
-	
-	self halt.! !
-
-
-!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'JIG 7/8/2019 14:29:24'!
-openTranscriptWithClientPurchases
-	TranscriptWindow openTranscript.
-	Transcript clear.
-	Transcript show: 'La compra se realizó correctamente'; newLine.
-	Transcript show: ('    ' , (cartList at: 1) asString).
-	self showClientHistoricalPurchases.
-	"Transcript show: (listOfWords at: selectedIndex).
-	Transcript show: ' '."! !
-
-!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'Nico 7/7/2019 15:25:50'!
-sendCartAddingItemRequest
-	
-	catalogueSelectedIndex = 0 ifFalse: [ | itemSelected |
-		itemSelected := catalogueList at: catalogueSelectedIndex.
-		webClient sendCartAddingRequestToCart: idCart WithItem: itemSelected.
-		self triggerEvent: #addingItemSuccessfull with: self
-	].
-	! !
-
-!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'Nico 7/8/2019 13:17:25'!
-sendCheckoutRequest
-
-	webClient sendCheckoutCartRequest: idCart withCardNumber: cardNumber cced: cardCced andOwner: cardOwner.
-	
-	[self openTranscriptWithClientPurchases] fork.
-! !
-
-!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'Nico 7/7/2019 15:24:17'!
-sendCreateCartRequest
-		
-	idCart := webClient sendCreateCartRequestWithUser: username authenticatedWith: password.
-	
-	self triggerEvent: #cartCreationSuccessful with: self.
-	! !
-
-!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'JIG 7/6/2019 15:57:56'!
-sendSubtringsRequest
-		
-	listOfWords := webClient sendRequest: username.
-	
-	self triggerEvent: #newSubstringsArrived with: self.
-	! !
-
-!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'NR 6/25/2019 22:13:32'!
-showWordInTranscript
-	
-	(selectedIndex = 0) ifFalse: 
-		[TranscriptWindow openTranscript.
-		Transcript clear.
-		Transcript show: 'The word selected is: '.
-		Transcript show: (listOfWords at: selectedIndex).
-		Transcript show: ' '.].
-! !
 
 
 !TusLibrosClientWindowModel methodsFor: 'Second Window - TextModelMorphSelectors' stamp: 'Nico 7/8/2019 12:04:09'!
@@ -2048,6 +1992,44 @@ cardOwnerText: aCardOwner
 	
 	cardOwner := aCardOwner.
 	^true! !
+
+
+!TusLibrosClientWindowModel methodsFor: 'initialization' stamp: 'Nico 7/8/2019 16:13:22'!
+initialize
+
+	username:=''.
+	password := ''.
+	idCart := 0.
+	webClient := TusLibrosWebClient new.
+	catalogueSelectedIndex := 0.
+	cartListSelectedIndex := 0.
+	
+	cardNumber := ''.
+	cardCced := ''.
+	cardOwner := ''.! !
+
+
+!TusLibrosClientWindowModel methodsFor: 'transcript' stamp: 'Nico 7/8/2019 16:14:23'!
+openTranscriptWithClientPurchases
+	TranscriptWindow openTranscript.
+	Transcript clear.
+	Transcript show: 'La compra se realizó correctamente'; newLine.
+	Transcript newLine.
+	Transcript show: 'La lista de compras es: '; newLine.
+	Transcript show: '    '.
+	self showClientHistoricalPurchases.! !
+
+
+!TusLibrosClientWindowModel methodsFor: 'transcript - private' stamp: 'Nico 7/8/2019 16:07:52'!
+showClientHistoricalPurchases
+	| listPurchasesHttpRequest responseListPurchases |
+
+	listPurchasesHttpRequest := webClient listPurchasesHttpRequestFor: username authenticatingWith: password.
+	responseListPurchases := WebClient httpGet: listPurchasesHttpRequest asString.
+	
+	Transcript show: (responseListPurchases content asString withoutPrefix: '0|').
+	
+	! !
 
 
 !classDefinition: #TusLibrosRestSystem category: #TusLibros!
@@ -2381,7 +2363,7 @@ addListCatalogue
 		request send404Response: (anError messageText) ]].
 ! !
 
-!TusLibrosServerController methodsFor: 'adding services' stamp: 'JIG 7/8/2019 15:20:20'!
+!TusLibrosServerController methodsFor: 'adding services' stamp: 'Nico 7/8/2019 15:41:58'!
 addPurchasesListingService
 
 	webServer addService: '/listPurchases' action:[:request | |clientId password |
@@ -2535,9 +2517,9 @@ parseItemsListed: items
 
 ! !
 
-!TusLibrosServerController methodsFor: 'private - parsing' stamp: 'JIG 7/8/2019 15:19:25'!
+!TusLibrosServerController methodsFor: 'private - parsing' stamp: 'Nico 7/8/2019 15:37:51'!
 parsePurchases: allPurchases
-	| finalParsedPurchases superBag |
+	| finalParsedPurchases superBag totalAmount |
 	
 	finalParsedPurchases := ''.
 	superBag := Bag new.
@@ -2551,7 +2533,9 @@ parsePurchases: allPurchases
 		finalParsedPurchases := finalParsedPurchases , anItemAssociation asString , '|' , (superBag contents at: anItemAssociation) asString , '|'.
 	].
 
-	^finalParsedPurchases.
+	totalAmount := allPurchases inject: 0 into: [:acum :aSale | acum + aSale total]. 
+
+	^finalParsedPurchases,totalAmount asString.
 
 ! !
 
@@ -2768,20 +2752,6 @@ sendListCatalogueRequest
 	(self isSuccess: responseListCatalogue content)
 		ifTrue:[^self parseCatalogueToOrderedCollection: responseListCatalogue content] 
 		ifFalse:[^self error: responseListCatalogue content].! !
-
-!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'NR 6/25/2019 22:25:21'!
-sendRequest: sentence
-
-	| fieldDict resp urlEncodedSentence |
-	
-	urlEncodedSentence := self correctlyEncodeSpacesForUrlRequestParameter: sentence.	
-	fieldDict := Dictionary newFromPairs: {'sentence'. urlEncodedSentence.}.		
-	
-	resp:= WebClient htmlSubmit: (self url,'/substrings') fields: fieldDict.
-	
-	resp isSuccess 
-		ifTrue:[^(WebUtils jsonDecode: ((resp content) readStream)) asOrderedCollection .] 
-		ifFalse:[^self error: resp content].! !
 
 
 !TusLibrosWebClient methodsFor: 'testing responses' stamp: 'JIG 7/6/2019 16:39:33'!
