@@ -1237,14 +1237,14 @@ test07CannotAddItemsToInvalidCart
 	self assert: responseAddToCart content equals: '1|', TusLibrosRestSystem invalidCartIDErrorDescription.
 ! !
 
-!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'asd 7/3/2019 14:53:42'!
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 7/8/2019 14:45:32'!
 test08ClientWithoutTransactionsHasNoPurchases
 	| responseListPurchases listPurchasesHttpRequest |
 	
 	listPurchasesHttpRequest := self listPurchasesHttpRequestFor: testFactory aFirstClientValidUserID authenticatingWith: testFactory aFirstClientValidPassword.
 	responseListPurchases := WebClient httpGet: listPurchasesHttpRequest.
 	
-	self assert: responseListPurchases content equals: '0'.
+	self assert: responseListPurchases content equals: '0|'.
 	
 	! !
 
@@ -1946,12 +1946,25 @@ usernameText: aUsername
 	^true.! !
 
 
-!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'Nico 7/8/2019 13:28:26'!
+!TusLibrosClientWindowModel methodsFor: 'private - transcript' stamp: 'JIG 7/8/2019 15:23:27'!
+showClientHistoricalPurchases
+	| listPurchasesHttpRequest responseListPurchases parsedPurchasesCollection |
+
+	listPurchasesHttpRequest := webClient listPurchasesHttpRequestFor: username authenticatingWith: password.
+	responseListPurchases := WebClient httpGet: listPurchasesHttpRequest asString.
+	
+	parsedPurchasesCollection := webClient parseCartListingToOrderedCollection: responseListPurchases content.
+	
+	self halt.! !
+
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'JIG 7/8/2019 14:29:24'!
 openTranscriptWithClientPurchases
 	TranscriptWindow openTranscript.
 	Transcript clear.
 	Transcript show: 'La compra se realizó correctamente'; newLine.
 	Transcript show: ('    ' , (cartList at: 1) asString).
+	self showClientHistoricalPurchases.
 	"Transcript show: (listOfWords at: selectedIndex).
 	Transcript show: ' '."! !
 
@@ -2368,7 +2381,7 @@ addListCatalogue
 		request send404Response: (anError messageText) ]].
 ! !
 
-!TusLibrosServerController methodsFor: 'adding services' stamp: 'nico 6/30/2019 19:58:36'!
+!TusLibrosServerController methodsFor: 'adding services' stamp: 'JIG 7/8/2019 15:20:20'!
 addPurchasesListingService
 
 	webServer addService: '/listPurchases' action:[:request | |clientId password |
@@ -2377,9 +2390,10 @@ addPurchasesListingService
 		password := request fields at: self passwordField.
 		clientId := request fields at: self clientIdField.
 
-		[
-			internalSystem listPurchasesOf: clientId authenticatedWith: password.
-			request send200Response: '0'.
+		[ | allPurchases parsedPurchases |
+			allPurchases := internalSystem listPurchasesOf: clientId authenticatedWith: password.
+			parsedPurchases := self parsePurchases: allPurchases.
+			request send200Response: '0|', parsedPurchases.
 		]
 		on: Error
 		do: [:anError | 
@@ -2521,6 +2535,26 @@ parseItemsListed: items
 
 ! !
 
+!TusLibrosServerController methodsFor: 'private - parsing' stamp: 'JIG 7/8/2019 15:19:25'!
+parsePurchases: allPurchases
+	| finalParsedPurchases superBag |
+	
+	finalParsedPurchases := ''.
+	superBag := Bag new.
+	allPurchases do: [:aSale |
+		aSale items contents keysDo: [:anItemAssociation |
+			superBag add: anItemAssociation withOccurrences: (aSale items contents at: anItemAssociation).
+		]
+	].
+
+	superBag contents keysDo: [ :anItemAssociation |
+		finalParsedPurchases := finalParsedPurchases , anItemAssociation asString , '|' , (superBag contents at: anItemAssociation) asString , '|'.
+	].
+
+	^finalParsedPurchases.
+
+! !
+
 
 !TusLibrosServerController methodsFor: 'private - error response' stamp: 'JIG 7/6/2019 16:37:38'!
 from: request sendErrorResponse: anErrorResponse
@@ -2570,6 +2604,12 @@ listCartHttpRequestFor: aCartID
 listCatalogueHttpRequest
 	^ 'http://localhost:8080/listCatalogue'! !
 
+!TusLibrosWebClient methodsFor: 'http request' stamp: 'JIG 7/8/2019 14:30:35'!
+listPurchasesHttpRequestFor: anUserID authenticatingWith: aPassword
+	^'http://localhost:8080/listPurchases?clientId=', anUserID, '&password=', aPassword
+	
+	! !
+
 
 !TusLibrosWebClient methodsFor: 'initialization' stamp: 'NR 6/25/2019 22:15:16'!
 port
@@ -2613,7 +2653,7 @@ parseCatalogueToOrderedCollection: aCatalogueResponse
 	^collection.! !
 
 
-!TusLibrosWebClient methodsFor: 'parsing - private' stamp: 'Nico 7/8/2019 11:45:36'!
+!TusLibrosWebClient methodsFor: 'parsing - private' stamp: 'JIG 7/8/2019 14:48:06'!
 convertCartResponseToOrderedCollection: aListCartResponse
 	| collection catalogueResponseString firstBar |
 	
@@ -2624,7 +2664,7 @@ convertCartResponseToOrderedCollection: aListCartResponse
 	
 	catalogueResponseString := catalogueResponseString withoutPrefix: '0|'.
 	
-	firstBar := catalogueResponseString findFirst: [:aChar | aChar = $|].
+	firstBar := catalogueResponseString ifNotNil: [catalogueResponseString findFirst: [:aChar | aChar = $|]].
 	[firstBar > 0] whileTrue: 
 	[ | wordToAdd amountToAdd nextBar |
 		wordToAdd := (catalogueResponseString copyFrom: 1 to: firstBar - 1).
