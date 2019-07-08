@@ -19,7 +19,7 @@ defaultExtent
 	^ 800@600
 	! !
 
-!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'Nico 7/8/2019 15:57:42'!
+!TusLibrosBuyWindow methodsFor: 'initialization' stamp: 'JIG 7/8/2019 16:50:07'!
 initializeWith: aTitle andModel: aModel
 
 	self titleMorph showButtonsNamed: #( close collapse ).
@@ -31,8 +31,13 @@ initializeWith: aTitle andModel: aModel
 	self yourself.
 			
 	self model when: #addingItemSuccessfull send: #refreshCatalogueListIndex to: self.
-	self model when: #checkoutSuccessful send: #deleteAndOpenCartCreationWindow to: self.! !
+	self model when: #checkoutSuccessful send: #deleteAndOpenCartCreationWindow to: self.
+	self model when: #checkoutError send: #createCheckoutErrorWindow to: self.! !
 
+
+!TusLibrosBuyWindow methodsFor: 'access' stamp: 'JIG 7/8/2019 16:51:28'!
+createCheckoutErrorWindow
+	TusLibrosInvalidCheckoutWindow openWith: model.! !
 
 !TusLibrosBuyWindow methodsFor: 'access' stamp: 'Nico 7/8/2019 16:01:54'!
 deleteAndOpenCartCreationWindow
@@ -241,7 +246,7 @@ defaultExtent
 	^ 500@330
 	! !
 
-!TusLibrosClientWindow methodsFor: 'initialization' stamp: 'JIG 7/6/2019 16:13:12'!
+!TusLibrosClientWindow methodsFor: 'initialization' stamp: 'JIG 7/8/2019 16:31:27'!
 initializeWith: aTitle
 
 	self titleMorph showButtonsNamed: #( close collapse ).
@@ -252,8 +257,13 @@ initializeWith: aTitle
 	self openInWorld.
 	self yourself.
 			
-	self model when: #cartCreationSuccessful send: #createSecondWindow to: self.! !
+	self model when: #cartCreationSuccessful send: #createSecondWindow to: self.
+	self model when: #invalidAuthentication send: #createInvalidAuthenticationWindow to: self.! !
 
+
+!TusLibrosClientWindow methodsFor: 'panels-add/remove' stamp: 'JIG 7/8/2019 16:51:55'!
+createInvalidAuthenticationWindow
+	TusLibrosInvalidAuthenticationWindow open.! !
 
 !TusLibrosClientWindow methodsFor: 'panels-add/remove' stamp: 'Nico 7/8/2019 15:55:14'!
 createSecondWindow
@@ -270,6 +280,120 @@ TusLibrosClientWindow class
 open
 	
 	^self new initializeWith: 'TusLibros - Creacion de carrito'.! !
+
+
+!classDefinition: #TusLibrosInvalidAuthenticationWindow category: #TusLibros!
+TusLibrosWindow subclass: #TusLibrosInvalidAuthenticationWindow
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!TusLibrosInvalidAuthenticationWindow methodsFor: 'initialization' stamp: 'JIG 7/8/2019 16:40:39'!
+defaultExtent
+
+	^400@300
+	! !
+
+!TusLibrosInvalidAuthenticationWindow methodsFor: 'initialization' stamp: 'JIG 7/8/2019 16:33:37'!
+initializeWith: aTitle
+
+	self titleMorph showButtonsNamed: #( close collapse ).
+	self setLabel: aTitle.
+	self model: nil.
+	self morphExtent: (self defaultExtent).
+	self buildMorphicWindow.
+	self openInWorld.
+	self yourself.! !
+
+
+!TusLibrosInvalidAuthenticationWindow methodsFor: 'GUI building' stamp: 'JIG 7/8/2019 16:36:22'!
+build1stRow
+	| firstRowLayout |
+	
+	firstRowLayout := LayoutMorph newRow.
+	firstRowLayout separation: 15;
+	padding: #left;
+	addMorph: (StringMorph contents:' Usuario y/o contraseña incorrectos.').
+	
+	^firstRowLayout.! !
+
+!TusLibrosInvalidAuthenticationWindow methodsFor: 'GUI building' stamp: 'JIG 7/8/2019 16:35:26'!
+buildMorphicWindow
+		
+	self layoutMorph beColumn;
+	separation: 5;
+	addMorph: self build1stRow.
+	
+	! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TusLibrosInvalidAuthenticationWindow class' category: #TusLibros!
+TusLibrosInvalidAuthenticationWindow class
+	instanceVariableNames: ''!
+
+!TusLibrosInvalidAuthenticationWindow class methodsFor: 'instance creation' stamp: 'JIG 7/8/2019 16:34:22'!
+open
+	
+	^self new initializeWith: 'Autentificacion invalida'.! !
+
+
+!classDefinition: #TusLibrosInvalidCheckoutWindow category: #TusLibros!
+TusLibrosWindow subclass: #TusLibrosInvalidCheckoutWindow
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!TusLibrosInvalidCheckoutWindow methodsFor: 'initialization' stamp: 'JIG 7/8/2019 17:01:24'!
+defaultExtent
+
+	^ 450@300
+	! !
+
+!TusLibrosInvalidCheckoutWindow methodsFor: 'initialization' stamp: 'JIG 7/8/2019 16:52:49'!
+initializeWith: aTitle andModel: aModel
+
+	self titleMorph showButtonsNamed: #( close collapse ).
+	self setLabel: aTitle.
+	self model: aModel.
+	self morphExtent: (self defaultExtent).
+	self buildMorphicWindow.
+	self openInWorld.
+	self yourself.! !
+
+
+!TusLibrosInvalidCheckoutWindow methodsFor: 'GUI building' stamp: 'JIG 7/8/2019 16:53:52'!
+build1stRow
+	| firstRowLayout |
+	
+	firstRowLayout := LayoutMorph newRow.
+	firstRowLayout separation: 15;
+	padding: #left;
+	addMorph: (StringMorph contents: model checkOutErrorContent ).
+	
+	^firstRowLayout.! !
+
+!TusLibrosInvalidCheckoutWindow methodsFor: 'GUI building' stamp: 'JIG 7/8/2019 16:53:06'!
+buildMorphicWindow
+		
+	self layoutMorph beColumn;
+	separation: 5;
+	padding: #left;
+	addMorph: self build1stRow.
+	! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TusLibrosInvalidCheckoutWindow class' category: #TusLibros!
+TusLibrosInvalidCheckoutWindow class
+	instanceVariableNames: ''!
+
+!TusLibrosInvalidCheckoutWindow class methodsFor: 'instance creation' stamp: 'JIG 7/8/2019 16:52:21'!
+openWith: aModel
+	
+	^self new initializeWith: 'Checkout invalido' andModel: aModel.! !
 
 
 !classDefinition: #CartTest category: #TusLibros!
@@ -1298,6 +1422,29 @@ test11CannotCheckoutAnInvalidCart
 	
 	! !
 
+!TusLibrosServerControllerTest methodsFor: 'tests' stamp: 'JIG 7/8/2019 16:23:56'!
+test12ValidCheckoutAddsANewSale
+	| responseCheckout aCartID checkoutHttpRequest createCartHttpRequest responseCreateCart listPurchasesHttpRequest responseListPurchases addToCartHttpRequest |
+
+	createCartHttpRequest := self createCartHttpRequestFor: testFactory aFirstClientValidUserID authenticatingWith: testFactory aFirstClientValidPassword.		
+	responseCreateCart := WebClient httpGet: createCartHttpRequest.
+	
+	aCartID := self extractCartIDFrom: responseCreateCart content.
+
+	addToCartHttpRequest := self createAddToCartHttpRequestFor: aCartID book: testFactory itemSellByTheStore quantity: 1.
+	WebClient httpGet: addToCartHttpRequest.	
+
+	checkoutHttpRequest :=  self checkoutCartHttpRequestFor: aCartID card: testFactory anIDForValidCreditCard expDate: testFactory aValidExpirationDate owner: testFactory ownerOfValidCreditCard.	
+	responseCheckout := WebClient httpGet: checkoutHttpRequest.
+	
+	listPurchasesHttpRequest := self listPurchasesHttpRequestFor: testFactory aFirstClientValidUserID authenticatingWith: testFactory aFirstClientValidPassword.
+	responseListPurchases := WebClient httpGet: listPurchasesHttpRequest.
+	
+	self assert: responseCheckout content equals: '0|'.
+	self assert: responseListPurchases content equals: '0|', testFactory itemSellByTheStore , '|1|', testFactory itemSellByTheStorePrice asString.
+	
+	! !
+
 
 !classDefinition: #Cart category: #TusLibros!
 Object subclass: #Cart
@@ -1863,7 +2010,7 @@ unknownUserErrorDescription
 
 !classDefinition: #TusLibrosClientWindowModel category: #TusLibros!
 Object subclass: #TusLibrosClientWindowModel
-	instanceVariableNames: 'webClient idCart username password catalogueSelectedIndex catalogueList cartList cartListSelectedIndex cardNumber cardCced cardOwner'
+	instanceVariableNames: 'webClient idCart username password catalogueSelectedIndex catalogueList cartList cartListSelectedIndex cardNumber cardCced cardOwner checkoutErrorContent'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -1901,34 +2048,38 @@ sendCartAddingItemRequest
 	].
 	! !
 
-!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'Nico 7/8/2019 16:06:57'!
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'JIG 7/8/2019 16:56:38'!
 sendCheckoutRequest
-
-	webClient sendCheckoutCartRequest: idCart withCardNumber: cardNumber cced: cardCced andOwner: cardOwner.
+	| transactionID |
+	transactionID := webClient sendCheckoutCartRequest: idCart withCardNumber: cardNumber cced: cardCced andOwner: cardOwner ifErrorTo: self.
 	
-	[self openTranscriptWithClientPurchases] fork.
+	(self checkIfValidCheckout: transactionID) ifTrue: [
+		[self openTranscriptWithClientPurchases] fork.
+		self triggerEvent: #checkoutSuccessful with: self.
+	].
 	
-	self triggerEvent: #checkoutSuccessful with: self.
+	
 ! !
 
-!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'Nico 7/7/2019 15:24:17'!
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'JIG 7/8/2019 16:39:03'!
 sendCreateCartRequest
 		
-	idCart := webClient sendCreateCartRequestWithUser: username authenticatedWith: password.
+	idCart := webClient sendCreateCartRequestWithUser: username authenticatedWith: password to: self.
 	
-	self triggerEvent: #cartCreationSuccessful with: self.
+	(self wasValidID: idCart) ifTrue: [ self triggerEvent: #cartCreationSuccessful with: self ].
 	! !
 
-!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'NR 6/25/2019 22:13:32'!
-showWordInTranscript
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'JIG 7/8/2019 16:58:18'!
+sendErrorCheckout: aResponseCheckoutError
 	
-	(selectedIndex = 0) ifFalse: 
-		[TranscriptWindow openTranscript.
-		Transcript clear.
-		Transcript show: 'The word selected is: '.
-		Transcript show: (listOfWords at: selectedIndex).
-		Transcript show: ' '.].
-! !
+	checkoutErrorContent := aResponseCheckoutError asString.
+	checkoutErrorContent := checkoutErrorContent withoutPrefix: '1|'.
+	
+	self triggerEvent: #checkoutError with: self.! !
+
+!TusLibrosClientWindowModel methodsFor: 'PluggableButtonSelectors' stamp: 'JIG 7/8/2019 16:30:37'!
+sendEventForIncorrectAuthentication
+	self triggerEvent: #invalidAuthentication with: self.! !
 
 
 !TusLibrosClientWindowModel methodsFor: 'PluggableListSelectors' stamp: 'Nico 7/7/2019 15:39:40'!
@@ -2030,6 +2181,19 @@ showClientHistoricalPurchases
 	Transcript show: (responseListPurchases content asString withoutPrefix: '0|').
 	
 	! !
+
+
+!TusLibrosClientWindowModel methodsFor: 'private' stamp: 'JIG 7/8/2019 16:56:56'!
+checkIfValidCheckout: transactionID
+	^(transactionID = -1) not. ! !
+
+!TusLibrosClientWindowModel methodsFor: 'private' stamp: 'JIG 7/8/2019 16:49:21'!
+checkOutErrorContent
+	^checkoutErrorContent.! !
+
+!TusLibrosClientWindowModel methodsFor: 'private' stamp: 'JIG 7/8/2019 16:39:23'!
+wasValidID: aCartID
+	^(aCartID = -1) not! !
 
 
 !classDefinition: #TusLibrosRestSystem category: #TusLibros!
@@ -2239,7 +2403,7 @@ Object subclass: #TusLibrosServerController
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosServerController methodsFor: 'adding services' stamp: 'Nico 7/8/2019 13:14:35'!
+!TusLibrosServerController methodsFor: 'adding services' stamp: 'JIG 7/8/2019 16:23:32'!
 addCartCheckOutService
 
 	webServer addService: '/checkOutCart' action:[:request | |cartID transactionID creditExpiration creditNumber creditOwner|
@@ -2255,7 +2419,7 @@ addCartCheckOutService
 			
 			transactionID := internalSystem checkoutFor: cartID payingWith: parsedCreditCard.
 			
-			request send200Response: '0'.
+			request send200Response: '0|'.
 		]
 		on: Error
 		do: [:anError | 
@@ -2517,7 +2681,7 @@ parseItemsListed: items
 
 ! !
 
-!TusLibrosServerController methodsFor: 'private - parsing' stamp: 'Nico 7/8/2019 15:37:51'!
+!TusLibrosServerController methodsFor: 'private - parsing' stamp: 'JIG 7/8/2019 16:25:58'!
 parsePurchases: allPurchases
 	| finalParsedPurchases superBag totalAmount |
 	
@@ -2533,9 +2697,12 @@ parsePurchases: allPurchases
 		finalParsedPurchases := finalParsedPurchases , anItemAssociation asString , '|' , (superBag contents at: anItemAssociation) asString , '|'.
 	].
 
-	totalAmount := allPurchases inject: 0 into: [:acum :aSale | acum + aSale total]. 
+	allPurchases isEmpty ifFalse: [ 
+		totalAmount := allPurchases inject: 0 into: [:acum :aSale | acum + aSale total].
+		^finalParsedPurchases,totalAmount asString.
+	].
 
-	^finalParsedPurchases,totalAmount asString.
+	^finalParsedPurchases.
 
 ! !
 
@@ -2697,8 +2864,9 @@ sendCartAddingRequestToCart: aCartID WithItem: anItem
 		ifTrue:[^responseAddItem content] 
 		ifFalse:[^self error: responseAddItem content].! !
 
-!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/8/2019 12:36:59'!
-sendCheckoutCartRequest: aCartID withCardNumber: cardNumber cced: cardCced andOwner: cardOwner
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'JIG 7/8/2019 16:45:19'!
+sendCheckoutCartRequest: aCartID withCardNumber: cardNumber cced: cardCced andOwner: cardOwner 
+	ifErrorTo: aWindowModel
 	| cartIDEncodedString cardNumberEncodedString checkoutCartRequest responseCheckoutCart cardCcedEncodedString cardOwnerEncodedString |
 	
 	cartIDEncodedString := (self correctlyEncodeSpacesForUrlRequestParameter: aCartID) asString.
@@ -2712,10 +2880,10 @@ sendCheckoutCartRequest: aCartID withCardNumber: cardNumber cced: cardCced andOw
 
 	(self isSuccess: responseCheckoutCart content)
 		ifTrue:[^responseCheckoutCart content] 
-		ifFalse:[^self error: responseCheckoutCart content].! !
+		ifFalse:[aWindowModel sendErrorCheckout: (responseCheckoutCart content) .^-1].! !
 
-!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/7/2019 15:13:05'!
-sendCreateCartRequestWithUser: username authenticatedWith: password
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'JIG 7/8/2019 16:38:15'!
+sendCreateCartRequestWithUser: username authenticatedWith: password to: aWindowModel
 	| usernameEncodedString passwordEncodedString createCartRequest responseCreateCart |
 	
 	usernameEncodedString := (self correctlyEncodeSpacesForUrlRequestParameter: username) asString.
@@ -2727,7 +2895,7 @@ sendCreateCartRequestWithUser: username authenticatedWith: password
 
 	(self isSuccess: responseCreateCart content)
 		ifTrue:[^self getCartIdOfResponse: responseCreateCart content] 
-		ifFalse:[^self error: responseCreateCart content].! !
+		ifFalse:[aWindowModel sendEventForIncorrectAuthentication. ^-1].! !
 
 !TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/8/2019 12:06:38'!
 sendListCartRequest: aCartID
