@@ -276,13 +276,13 @@ TusLibrosWindow subclass: #TusLibrosInvalidAuthenticationWindow
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosInvalidAuthenticationWindow methodsFor: 'GUI building' stamp: 'JIG 7/8/2019 16:36:22'!
+!TusLibrosInvalidAuthenticationWindow methodsFor: 'GUI building' stamp: 'asd 7/9/2019 18:49:53'!
 build1stRow
 	| firstRowLayout |
 	
 	firstRowLayout := LayoutMorph newRow.
 	firstRowLayout separation: 15;
-	padding: #left;
+	padding: #center;
 	addMorph: (StringMorph contents:' Usuario y/o contraseña incorrectos.').
 	
 	^firstRowLayout.! !
@@ -322,13 +322,13 @@ TusLibrosWindow subclass: #TusLibrosInvalidCheckoutWindow
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosInvalidCheckoutWindow methodsFor: 'GUI building' stamp: 'JIG 7/8/2019 16:53:52'!
+!TusLibrosInvalidCheckoutWindow methodsFor: 'GUI building' stamp: 'asd 7/9/2019 18:50:10'!
 build1stRow
 	| firstRowLayout |
 	
 	firstRowLayout := LayoutMorph newRow.
 	firstRowLayout separation: 15;
-	padding: #left;
+	padding: #center;
 	addMorph: (StringMorph contents: model checkOutErrorContent ).
 	
 	^firstRowLayout.! !
@@ -1638,6 +1638,12 @@ Object subclass: #Clock
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
+
+!Clock methodsFor: 'time' stamp: 'HernanWilkinson 6/22/2013 14:23'!
+today
+
+	self subclassResponsibility ! !
+
 
 !Clock methodsFor: 'initialization' stamp: 'JIG 6/21/2019 16:51:43'!
 initializeOn: aTime
