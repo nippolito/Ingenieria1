@@ -117,9 +117,9 @@ buildMorphicWindow
 createCheckoutErrorWindow
 	TusLibrosInvalidCheckoutWindow openWith: model.! !
 
-!TusLibrosBuyWindow methodsFor: 'access' stamp: 'Nico 7/9/2019 12:51:27'!
+!TusLibrosBuyWindow methodsFor: 'access' stamp: 'Nico 7/10/2019 15:52:20'!
 deleteAndOpenCartCreationWindow
-	TusLibrosCartCreationWindow open.
+	TusLibrosClientWindow open.
 	self delete.
 ! !
 
@@ -157,14 +157,14 @@ openWith: aModel
 	^self new initializeWith: 'TusLibros - Ventana de compra' andModel: aModel.! !
 
 
-!classDefinition: #TusLibrosCartCreationWindow category: #TusLibros!
-TusLibrosWindow subclass: #TusLibrosCartCreationWindow
+!classDefinition: #TusLibrosClientWindow category: #TusLibros!
+TusLibrosWindow subclass: #TusLibrosClientWindow
 	instanceVariableNames: 'substringsList usernameTextBox passwordTextBox'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosCartCreationWindow methodsFor: 'GUI building' stamp: 'Nico 7/9/2019 12:31:56'!
+!TusLibrosClientWindow methodsFor: 'GUI building' stamp: 'Nico 7/9/2019 12:31:56'!
 build1stRow
 	| firstRowLayout |
 	
@@ -180,7 +180,7 @@ build1stRow
 	
 	^firstRowLayout.! !
 
-!TusLibrosCartCreationWindow methodsFor: 'GUI building' stamp: 'Nico 7/9/2019 12:32:25'!
+!TusLibrosClientWindow methodsFor: 'GUI building' stamp: 'Nico 7/9/2019 12:32:25'!
 build2ndRow
 	| secondRowLayout |
 	
@@ -198,7 +198,7 @@ build2ndRow
 	
 	! !
 
-!TusLibrosCartCreationWindow methodsFor: 'GUI building' stamp: 'JIG 7/6/2019 15:56:06'!
+!TusLibrosClientWindow methodsFor: 'GUI building' stamp: 'JIG 7/6/2019 15:56:06'!
 build3rdRow
 	| thirdRowLayout createCartRequest |
 	
@@ -221,7 +221,7 @@ build3rdRow
 	
 	! !
 
-!TusLibrosCartCreationWindow methodsFor: 'GUI building' stamp: 'JIG 7/6/2019 15:53:20'!
+!TusLibrosClientWindow methodsFor: 'GUI building' stamp: 'JIG 7/6/2019 15:53:20'!
 buildMorphicWindow
 		
 	self layoutMorph beColumn;
@@ -233,13 +233,13 @@ buildMorphicWindow
 	! !
 
 
-!TusLibrosCartCreationWindow methodsFor: 'initialization' stamp: 'JIG 7/6/2019 15:54:47'!
+!TusLibrosClientWindow methodsFor: 'initialization' stamp: 'JIG 7/6/2019 15:54:47'!
 defaultExtent
 
 	^ 500@330
 	! !
 
-!TusLibrosCartCreationWindow methodsFor: 'initialization' stamp: 'Nico 7/9/2019 12:49:17'!
+!TusLibrosClientWindow methodsFor: 'initialization' stamp: 'Nico 7/9/2019 12:49:17'!
 initializeWith: aTitle andModel: aModel
 	
 	super initializeWith: aTitle andModel: aModel. 
@@ -248,22 +248,22 @@ initializeWith: aTitle andModel: aModel
 	self model when: #invalidAuthentication send: #createInvalidAuthenticationWindow to: self.! !
 
 
-!TusLibrosCartCreationWindow methodsFor: 'panels-add/remove' stamp: 'JIG 7/8/2019 16:51:55'!
+!TusLibrosClientWindow methodsFor: 'panels-add/remove' stamp: 'JIG 7/8/2019 16:51:55'!
 createInvalidAuthenticationWindow
 	TusLibrosInvalidAuthenticationWindow open.! !
 
-!TusLibrosCartCreationWindow methodsFor: 'panels-add/remove' stamp: 'Nico 7/8/2019 15:55:14'!
+!TusLibrosClientWindow methodsFor: 'panels-add/remove' stamp: 'Nico 7/8/2019 15:55:14'!
 createSecondWindow
 	TusLibrosBuyWindow openWith: model.
 	self delete.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'TusLibrosCartCreationWindow class' category: #TusLibros!
-TusLibrosCartCreationWindow class
+!classDefinition: 'TusLibrosClientWindow class' category: #TusLibros!
+TusLibrosClientWindow class
 	instanceVariableNames: ''!
 
-!TusLibrosCartCreationWindow class methodsFor: 'instance creation' stamp: 'Nico 7/9/2019 12:40:07'!
+!TusLibrosClientWindow class methodsFor: 'instance creation' stamp: 'Nico 7/9/2019 12:40:07'!
 open
 	
 	^self new initializeWith: 'TusLibros - Creacion de carrito' andModel: TusLibrosClientWindowModel new.! !
@@ -2868,19 +2868,19 @@ removeBarsAndConvertToOrderedCollection: aCatalogueResponseContent
 	^collection.! !
 
 
-!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/7/2019 15:42:49'!
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/10/2019 15:55:41'!
 sendCartAddingRequestToCart: aCartID WithItem: anItem
 	| responseAddItem addItemRequest |
 	
 	addItemRequest := self createAddToCartHttpRequestFor: aCartID book: anItem quantity: 1.
 	
-	responseAddItem := WebClient httpGet: addItemRequest.
+	responseAddItem := PolymorphicFuture of: [WebClient httpGet: addItemRequest].
 
 	(self isSuccess: responseAddItem content)
 		ifTrue:[^responseAddItem content] 
 		ifFalse:[^self error: responseAddItem content].! !
 
-!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'JIG 7/8/2019 16:45:19'!
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/10/2019 15:55:59'!
 sendCheckoutCartRequest: aCartID withCardNumber: cardNumber cced: cardCced andOwner: cardOwner 
 	ifErrorTo: aWindowModel
 	| cartIDEncodedString cardNumberEncodedString checkoutCartRequest responseCheckoutCart cardCcedEncodedString cardOwnerEncodedString |
@@ -2892,13 +2892,13 @@ sendCheckoutCartRequest: aCartID withCardNumber: cardNumber cced: cardCced andOw
 	
 	checkoutCartRequest := self checkoutCartHttpRequestFor: cartIDEncodedString card: cardNumberEncodedString expDate: cardCcedEncodedString owner: cardOwnerEncodedString.
 	
-	responseCheckoutCart := WebClient httpGet: checkoutCartRequest.
+	responseCheckoutCart := PolymorphicFuture of: [WebClient httpGet: checkoutCartRequest].
 
 	(self isSuccess: responseCheckoutCart content)
 		ifTrue:[^responseCheckoutCart content] 
 		ifFalse:[aWindowModel sendErrorCheckout: (responseCheckoutCart content) .^-1].! !
 
-!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'JIG 7/8/2019 16:38:15'!
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/10/2019 15:56:14'!
 sendCreateCartRequestWithUser: username authenticatedWith: password to: aWindowModel
 	| usernameEncodedString passwordEncodedString createCartRequest responseCreateCart |
 	
@@ -2907,31 +2907,31 @@ sendCreateCartRequestWithUser: username authenticatedWith: password to: aWindowM
 	
 	createCartRequest := self createCartHttpRequestFor: usernameEncodedString authenticatingWith: passwordEncodedString.
 	
-	responseCreateCart := WebClient httpGet: createCartRequest.
+	responseCreateCart := PolymorphicFuture of: [WebClient httpGet: createCartRequest].
 
 	(self isSuccess: responseCreateCart content)
 		ifTrue:[^self getCartIdOfResponse: responseCreateCart content] 
 		ifFalse:[aWindowModel sendEventForIncorrectAuthentication. ^-1].! !
 
-!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/9/2019 12:01:17'!
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/10/2019 15:56:22'!
 sendListCartRequest: aCartID
 	| responseListCart listCartRequest |
 	
 	listCartRequest := self listCartHttpRequestFor: aCartID.
 	
-	responseListCart := WebClient httpGet: listCartRequest.
+	responseListCart := PolymorphicFuture of: [WebClient httpGet: listCartRequest].
 	
 	(self isSuccess: responseListCart content)
 		ifTrue:[^self parseCartListingToOrderedCollection: responseListCart content] 
 		ifFalse:[^self error: responseListCart content].! !
 
-!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/7/2019 12:59:02'!
+!TusLibrosWebClient methodsFor: 'sending requests' stamp: 'Nico 7/10/2019 15:56:33'!
 sendListCatalogueRequest
 	| listCatalogueRequest responseListCatalogue |
 	
 	listCatalogueRequest := self listCatalogueHttpRequest.
 	
-	responseListCatalogue := WebClient httpGet: listCatalogueRequest.
+	responseListCatalogue := PolymorphicFuture of: [WebClient httpGet: listCatalogueRequest].
 
 	(self isSuccess: responseListCatalogue content)
 		ifTrue:[^self parseCatalogueToOrderedCollection: responseListCatalogue content] 
@@ -2941,3 +2941,79 @@ sendListCatalogueRequest
 !TusLibrosWebClient methodsFor: 'testing responses' stamp: 'JIG 7/6/2019 16:39:33'!
 isSuccess: responseContent
 	^((responseContent at: 1) = $1) not.! !
+
+
+!classDefinition: #PolymorphicFuture category: #TusLibros!
+ProtoObject subclass: #PolymorphicFuture
+	instanceVariableNames: 'readySemaphore value ready'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!PolymorphicFuture methodsFor: 'initialization' stamp: 'HAW 7/10/2019 15:25:37'!
+initializeOf: aBlock
+
+	readySemaphore := Semaphore new.
+	ready := false.
+	
+	[ value := aBlock value.
+	ready := true.
+	readySemaphore signal ] fork.
+	! !
+
+
+!PolymorphicFuture methodsFor: 'evaluating' stamp: 'HAW 7/10/2019 15:25:49'!
+value
+
+	ready ifFalse: [ readySemaphore wait ].
+	^value! !
+
+
+!PolymorphicFuture methodsFor: 'message forwarding' stamp: 'HernanWilkinson 9/13/2016 19:03'!
+doesNotUnderstand: aMessage
+
+	^aMessage sendTo: self value ! !
+
+
+!PolymorphicFuture methodsFor: 'object protocol' stamp: 'HAW 8/13/2017 18:12:56'!
+inspectorClass
+	"Answer the class of the inspector to be used on the receiver.  Called by inspect; 
+	use basicInspect to get a normal (less useful) type of inspector."
+
+	^ Inspector! !
+
+!PolymorphicFuture methodsFor: 'object protocol' stamp: 'HAW 5/12/2019 19:41:48'!
+instVarAt: index
+	"Primitive. Answer a fixed variable in an object. The numbering of the variables
+	 corresponds to the named instance variables, followed by the indexed instance
+	 variables. Fail if the index is not an Integer or is not the index of a fixed variable.
+	 Essential. See Object documentation whatIsAPrimitive."
+
+	<primitive: 173 error: ec>
+	"The classic InterpreterVMs don't support primitives 173 and 174.
+	See http://forum.world.st/Some-test-where-Spur-more-slow-than-Cog-td4867810.html#a4867888
+	Use primitives 73 and 74 in such case."
+	Smalltalk isRunningCog ifFalse: [
+		^ self instVarAtPrim73: index ].
+	self primitiveFailed! !
+
+!PolymorphicFuture methodsFor: 'object protocol' stamp: 'HAW 8/13/2017 18:12:37'!
+instVarAt: index put: anObject
+	"Primitive. Store a value into a fixed variable in an object. The numbering of the
+	 variables corresponds to the named instance variables, followed by the indexed
+	 instance variables. Fail if the index is not an Integer or is not the index of a fixed
+	 variable. Essential. See Object documentation whatIsAPrimitive."
+
+	<primitive: 174 error: ec>
+	self primitiveFailed! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'PolymorphicFuture class' category: #TusLibros!
+PolymorphicFuture class
+	instanceVariableNames: ''!
+
+!PolymorphicFuture class methodsFor: 'instance creation' stamp: 'HAW 5/12/2019 19:37:15'!
+of: aBlock
+
+	 ^self new initializeOf: aBlock! !
