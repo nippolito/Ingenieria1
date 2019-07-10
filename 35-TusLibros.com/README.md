@@ -23,7 +23,7 @@ TusLibrosClientWindow open
 
 **ALGUNAS COSAS ÚTILES PARA TESTEAR LA GUI**
 
-> Usuario y password válidos en nuestro sistema
+Usuario y password válidos en nuestro sistema
 User: Wilkinson
 Password: Sr.Smalltalk
 
